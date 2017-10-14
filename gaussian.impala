@@ -1,19 +1,8 @@
-struct image {
-    image : &mut[f64],
-    data : &mut[f64],
-    width : i32,
-    height: i32
-};
-
-
-/* Sets image pixel at (x, y) coordinates */
-fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
-  img.data(y * img.width + x) = value;
-}
-
-/* Gets image pixel at (x, y) coordinates */
-fn get_pixel(img : image, x : i32, y : i32) -> (f64) {
-  img.data(y * img.width + x)
+fn range(mut min : i32, max : i32, body : fn(i32) -> ()) {
+  while min < max {
+    body(min);
+    min++;
+  }
 }
 
 /* Apply 2D filter convolution with separable kernels (tiling) */
@@ -26,8 +15,8 @@ fn apply_2d_row_convolution(input_image : image, output_image : image, mask : fi
 
     /* Checks image boundaries */
     if x >= anchor && x < img.width - anchor {
-      for i in range(-anchor, anchor) {
-        sum += mask.data(i + anchor) * get_pixel(input_image, x + i, y);
+      for i in range(-anchor, anchor + 1) {
+        sum += get_1d_filter_coeff(mask, i + anchor) * get_pixel(input_image, x + i, y);
       }
 
       set_pixel(output_image, x, y, sum);
@@ -47,8 +36,8 @@ fn apply_2d_column_convolution(input_image : image, output_image : image, mask :
 
     /* Checks image boundaries */
     if y >= anchor && y < img.height - anchor {
-      for i in range(-anchor, anchor) {
-        sum += mask.data(i + anchor) * get_pixel(input_image, x, y + i);
+      for i in range(-anchor, anchor + 1) {
+        sum += get_1d_filter_coeff(mask, i + anchor) * get_pixel(input_image, x, y + i);
       }
 
       set_pixel(output_image, x, y, sum);
@@ -68,9 +57,9 @@ fn apply_2d_block_convolution(input_image : image, output_image : image, mask : 
 
     /* Checks image boundaries */
     if x >= anchor && x < img.width - anchor && y >= anchor && y < img.height - anchor {
-      for i in range(-anchor, anchor) {
-        for j in range(-anchor, anchor) {
-          sum += mask.data(((i + anchor) * mask.size) + j + anchor) * get_pixel(input_image, x + i, y + j);
+      for i in range(-anchor, anchor + 1) {
+        for j in range(-anchor, anchor + 1) {
+          sum += get_2d_filter_coeff(mask, i + anchor, j + anchor) * get_pixel(input_image, x + i, y + j);
         }
       }
 
@@ -95,12 +84,12 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
   let sigma = 1.1;
   let prod = 1.0 / (2.0 * pi * sigma * sigma);
   let denom = 2.0 * sigma * sigma;
-  let use_tiled = false;
+  let use_tiled = true;
 
-  for i in range(0, 4) {
+  for i in range(0, 5) {
     let x = (i as f64) - anchor;
 
-    for j in range(0, 4) {
+    for j in range(0, 5) {
       let y = (j as f64) - anchor;
 
       mask_xy(i)(j) = prod * exp(-((x * x + y * y) / denom));
@@ -115,7 +104,7 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
   sum_x = 1.0 / sum_x;
   sum_y = 1.0 / sum_y;
 
-  for i in range(0, 4) {
+  for i in range(0, 5) {
     mask_x(i) *= sum_x;
     mask_y(i) *= sum_y;
   }
