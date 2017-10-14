@@ -1,0 +1,131 @@
+struct image {
+    image : &mut[f64],
+    data : &mut[f64],
+    width : i32,
+    height: i32
+};
+
+
+/* Sets image pixel at (x, y) coordinates */
+fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
+  img.data(y * img.width + x) = value;
+}
+
+/* Gets image pixel at (x, y) coordinates */
+fn get_pixel(img : image, x : i32, y : i32) -> (f64) {
+  img.data(y * img.width + x)
+}
+
+/* Apply 2D filter convolution with separable kernels (tiling) */
+fn apply_2d_row_convolution(input_image : image, output_image : image, mask : filter_struct) -> () {
+  let anchor = mask.size / 2;
+
+  /* Applies the filter in columns */
+  for x, y in iterate(input_image, output_image) {
+    let mut sum = 0.0;
+
+    /* Checks image boundaries */
+    if x >= anchor && x < img.width - anchor {
+      for i in range(-anchor, anchor) {
+        sum += mask.data(i + anchor) * get_pixel(input_image, x + i, y);
+      }
+
+      set_pixel(output_image, x, y, sum);
+    } else {
+      set_pixel(output_image, x, y, get_pixel(input_image, x, y));
+    }
+  }
+}
+
+/* Apply 2D filter convolution with separable kernels (tiling) */
+fn apply_2d_column_convolution(input_image : image, output_image : image, mask : filter_struct) -> () {
+  let anchor = mask.size / 2;
+
+  /* Applies the filter in rows */
+  for x, y in iterate(input_image, output_image) {
+    let mut sum = 0.0;
+
+    /* Checks image boundaries */
+    if y >= anchor && y < img.height - anchor {
+      for i in range(-anchor, anchor) {
+        sum += mask.data(i + anchor) * get_pixel(input_image, x, y + i);
+      }
+
+      set_pixel(output_image, x, y, sum);
+    } else {
+      set_pixel(output_image, x, y, get_pixel(input_image, x, y));
+    }
+  }
+}
+
+/* Apply 2D filter convolution with non-separable kernels (blocks) */
+fn apply_2d_block_convolution(input_image : image, output_image : image, mask : filter_struct) -> () {
+  let anchor = mask.size / 2;
+
+  /* Applies the filter in blocks */
+  for x, y in @iterate(input_image, output_image) {
+    let mut sum = 0.0;
+
+    /* Checks image boundaries */
+    if x >= anchor && x < img.width - anchor && y >= anchor && y < img.height - anchor {
+      for i in range(-anchor, anchor) {
+        for j in range(-anchor, anchor) {
+          sum += mask.data(((i + anchor) * mask.size) + j + anchor) * get_pixel(input_image, x + i, y + j);
+        }
+      }
+
+      set_pixel(output_image, x, y, sum);
+    } else {
+      set_pixel(output_image, x, y, get_pixel(input_image, x, y));
+    }
+  }
+}
+
+/* Gaussian filter */
+fn gaussian_blur(input_image : image, output_image : image) -> () {
+  /* Generates the separable Gaussian kernel based on the
+     OpenCV source code */
+  let mut mask_xy : [[f64 * 5] * 5];
+  let mut mask_x : [f64 * 5];
+  let mut mask_y : [f64 * 5];
+  let mut sum_x = 0.0;
+  let mut sum_y = 0.0;
+  let anchor = 2.0;
+  let pi = 3.14159;
+  let sigma = 1.1;
+  let prod = 1.0 / (2.0 * pi * sigma * sigma);
+  let denom = 2.0 * sigma * sigma;
+  let use_tiled = false;
+
+  for i in range(0, 4) {
+    let x = (i as f64) - anchor;
+
+    for j in range(0, 4) {
+      let y = (j as f64) - anchor;
+
+      mask_xy(i)(j) = prod * exp(-((x * x + y * y) / denom));
+    }
+
+    mask_x(i) = exp(-((x * x) / denom));
+    mask_y(i) = exp(-((x * x) / denom));
+    sum_x += mask_x(i);
+    sum_y += mask_y(i);
+  }
+
+  sum_x = 1.0 / sum_x;
+  sum_y = 1.0 / sum_y;
+
+  for i in range(0, 4) {
+    mask_x(i) *= sum_x;
+    mask_y(i) *= sum_y;
+  }
+
+  /* Applies the separable kernel in rows and columns */
+  if use_tiled {
+    apply_2d_row_convolution(input_image, output_image, filter_5x1(mask_x));
+    apply_2d_column_convolution(input_image, output_image, filter_5x1(mask_y));
+  /* Applies the not separable kernel in blocks */
+  } else {
+    apply_2d_block_convolution(input_image, output_image, filter_5x5(mask_xy));
+  }
+}

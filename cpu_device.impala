@@ -1,0 +1,24 @@
+/* Sets image pixel at (x, y) coordinates */
+fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
+  img.data(y * img.width + x) = value;
+}
+
+/* Gets image pixel at (x, y) coordinates */
+fn get_pixel(img : image, x : i32, y : i32) -> (f64) {
+  img.data(y * img.width + x)
+}
+
+fn range(mut min : i32, max : i32, body : fn(i32) -> ()) {
+  while min < max {
+    body(min);
+    min++;
+  }
+}
+
+fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ()) -> () {
+  for y in range(0, image.height) {
+    for x in range(0, image.width) {
+      body(x, y);
+    }
+  }
+}
