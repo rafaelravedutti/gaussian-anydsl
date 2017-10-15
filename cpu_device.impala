@@ -45,9 +45,9 @@ fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ())
 }
 
 /* Generates a 5x1 filter data structure given its coefficients */
-fn filter_5x1(mask : [f64 * 5]) -> filter_struct {
+fn filter_5x1(mask : [f64 * 5]) -> filter {
   /* Allocates the filter data structure for a 5x1 filter */
-  let result = filter_struct {
+  let result = filter {
     data: alloc_cpu(5 * sizeof[f64]()),
     size: 5
   };
@@ -61,9 +61,9 @@ fn filter_5x1(mask : [f64 * 5]) -> filter_struct {
 }
 
 /* Generates a 5x5 filter data structure given its coefficients */
-fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter_struct {
+fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
   /* Allocates the filter data structure for a 5x1 filter */
-  let result = filter_struct {
+  let result = filter {
     data: alloc_cpu(5 * 5 * sizeof[f64]()),
     size: 5 * 5
   };

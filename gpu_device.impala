@@ -1,13 +1,17 @@
 struct image {
-  host_data : &mut[f64],
-  device_data : &mut[f64],
+  data : &mut[f64],
+  device_data : Buffer,
   width : i32,
   height : i32
 }
 
 struct filter {
-  data : &mut[f64],
+  data : Buffer,
   size: i32
+}
+
+fn exp(a : f64) -> f64 {
+  cuda_intrinsics.exp(a)
 }
 
 /* Sets image pixel at (x, y) coordinates */
@@ -30,14 +34,14 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
   bitcast[&[1][f64]](filt.data)(j * filt.size + i)
 }
 
-fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) {
+fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) -> () {
   let accelerator = cuda_accelerator(0);
   let grid = (image.width, image.height, 1);
   let block = (128, 1, 1);
 
   with accelerator.exec(grid, block) @{
-    let gid_x = acc.bidx() * acc.bdimx() + acc.tidx();
-    let gid_y = acc.bidy() * acc.bdimy() + acc.tidy();
+    let gid_x = accelerator.bidx() * accelerator.bdimx() + accelerator.tidx();
+    let gid_y = accelerator.bidy() * accelerator.bdimy() + accelerator.tidy();
 
     if gid_x < image.width && gid_y < image.height {
       body(gid_x, gid_y);
@@ -46,11 +50,11 @@ fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) 
 }
 
 /* Generates a 5x1 filter data structure given its coefficients */
-fn filter_5x1(mask : [f64 * 5]) -> filter_struct {
+fn filter_5x1(mask : [f64 * 5]) -> filter {
   let accelerator = cuda_accelerator(0);
 
   /* Allocates the filter data structure for a 5x1 filter */
-  let result = filter_struct {
+  let result = filter {
     data: accelerator.alloc(5 * sizeof[f64]()),
     size: 5
   };
@@ -64,11 +68,11 @@ fn filter_5x1(mask : [f64 * 5]) -> filter_struct {
 }
 
 /* Generates a 5x5 filter data structure given its coefficients */
-fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter_struct {
+fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
   let accelerator = cuda_accelerator(0);
 
   /* Allocates the filter data structure for a 5x1 filter */
-  let result = filter_struct {
+  let result = filter {
     data: accelerator.alloc(5 * 5 * sizeof[f64]()),
     size: 5 * 5
   };

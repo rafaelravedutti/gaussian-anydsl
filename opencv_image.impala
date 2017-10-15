@@ -4,26 +4,26 @@ extern "C" {
   fn opencv_write_image(img : &mut[f64], filename : &[u8]) -> ();
 }
 
-fn create_image(width : i32, height : i32) {
-  let mut image : image_struct;
+fn create_image(width : i32, height : i32) -> image {
+  let mut img : image;
 
-  image.data = opencv_create_image(width, height);
-  image.width = width;
-  image.height = height;
+  img.data = opencv_create_image(width, height);
+  img.width = width;
+  img.height = height;
 
-  image
+  img
 }
 
-fn load_image(filename : &[u8]) -> image_struct {
-  let mut image : image_struct;
-  let pwidth = &mut image.width;
-  let pheight = &mut image.height;
+fn load_image(filename : &[u8]) -> image {
+  let mut img : image;
+  let pwidth = &mut img.width;
+  let pheight = &mut img.height;
 
-  image.data = opencv_load_image(filename, pwidth, pheight);
+  img.data = opencv_load_image(filename, pwidth, pheight);
 
-  image
+  img
 }
 
-fn write_image(image : image_struct, filename : &[u8]) -> () {
-  opencv_write_image(image.data, filename);
+fn write_image(img : image, filename : &[u8]) -> () {
+  opencv_write_image(img.data, filename);
 }
