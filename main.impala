@@ -1,0 +1,12 @@
+fn main(argc : i32, argv : &[&mut [u8]]) -> () {
+  if argc < 2 {
+    print_string("You must specify the input image filename!");
+    return
+  }
+
+  let input_image = load_image(argv(1));
+  let output_image = create_image(image.width, image.height);
+
+  gaussian_blur(input_image, output_image);
+  write_image(output_image, "result.png");
+}
