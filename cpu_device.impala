@@ -1,22 +1,22 @@
 struct image {
-  data : &mut[f64],
+  buffer : Buffer,
   width : i32,
   height : i32
 }
 
 struct filter {
-  data : &mut[f64],
+  buffer : Buffer,
   size : i32
 }
 
 /* Sets image pixel at (x, y) coordinates */
 fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
-  img.data(y * img.width + x) = value;
+  img.buffer.data(y * img.width + x) = value;
 }
 
 /* Gets image pixel at (x, y) coordinates */
 fn get_pixel(img : image, x : i32, y : i32) -> f64 {
-  img.data(y * img.width + x)
+  img.buffer.data(y * img.width + x)
 }
 
 /* Gets 1D filter coefficient at i index */
@@ -54,7 +54,7 @@ fn filter_5x1(mask : [f64 * 5]) -> filter {
 
   /* Stores the coefficients in the filter data */
   for i in range(0, 5) {
-    result.data(i) = mask(i);
+    result.buffer.data(i) = mask(i);
   }
 
   result
@@ -71,7 +71,7 @@ fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
   /* Stores the coefficients in the filter data */
   for j in range(0, 5) {
     for i in range(0, 5) {
-      result.data(j * 5 + i) = mask(i)(j);
+      result.buffer.data(j * 5 + i) = mask(i)(j);
     }
   }
 

@@ -1,12 +1,12 @@
 struct image {
-  data : &mut[f64],
+  buffer : Buffer,
   device_data : Buffer,
   width : i32,
   height : i32
 }
 
 struct filter {
-  data : Buffer,
+  buffer : Buffer,
   size: i32
 }
 
@@ -16,22 +16,22 @@ fn exp(a : f64) -> f64 {
 
 /* Sets image pixel at (x, y) coordinates */
 fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
-  bitcast[&mut[1][f64]](img.device_data)(y * img.width + x) = value
+  bitcast[&mut[1][f64]](img.device_data.data)(y * img.width + x) = value
 }
 
 /* Gets image pixel at (x, y) coordinates */
 fn get_pixel(img : image, x : i32, y : i32) -> f64 {
-  bitcast[&[1][f64]](img.device_data)(y * img.width + x)
+  bitcast[&[1][f64]](img.device_data.data)(y * img.width + x)
 }
 
 /* Gets 1D filter coefficient at i index */
 fn get_1d_filter_coeff(filt : filter, i : i32) -> f64 {
-  bitcast[&[1][f64]](filt.data)(i)
+  bitcast[&[1][f64]](filt.buffer.data)(i)
 }
 
 /* Gets 2D filter coefficient at (i, j) index */
 fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
-  bitcast[&[1][f64]](filt.data)(j * filt.size + i)
+  bitcast[&[1][f64]](filt.buffer.data)(j * filt.size + i)
 }
 
 fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) -> () {
@@ -55,13 +55,13 @@ fn filter_5x1(mask : [f64 * 5]) -> filter {
 
   /* Allocates the filter data structure for a 5x1 filter */
   let result = filter {
-    data: accelerator.alloc(5 * sizeof[f64]()),
+    buffer: accelerator.alloc(5 * sizeof[f64]()),
     size: 5
   };
 
   /* Stores the coefficients in the filter data */
   for i in range(0, 5) {
-    bitcast[&mut[1]][f64](result.data)(i) = mask(i);
+    bitcast[&mut[1][f64]](result.buffer.data)(i) = mask(i);
   }
 
   result
@@ -73,14 +73,14 @@ fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
 
   /* Allocates the filter data structure for a 5x1 filter */
   let result = filter {
-    data: accelerator.alloc(5 * 5 * sizeof[f64]()),
+    buffer: accelerator.alloc(5 * 5 * sizeof[f64]()),
     size: 5 * 5
   };
 
   /* Stores the coefficients in the filter data */
   for j in range(0, 5) {
     for i in range(0, 5) {
-      bitcast[&mut[1]][f64](result.data)(j * 5 + i) = mask(i)(j);
+      bitcast[&mut[1][f64]](result.buffer.data)(j * 5 + i) = mask(i)(j);
     }
   }
 

@@ -1,13 +1,17 @@
 extern "C" {
   fn opencv_create_image(width : i32, height : i32) -> &mut[f64];
   fn opencv_load_image(path : &[u8], width : &i32, height : &i32) -> &mut[f64];
-  fn opencv_write_image(img : &mut[f64], filename : &[u8]) -> ();
+  fn opencv_write_image(img : &[f64], filename : &[u8]) -> ();
 }
 
 fn create_image(width : i32, height : i32) -> image {
   let mut img : image;
 
-  img.data = opencv_create_image(width, height);
+  img.buffer = Buffer {
+    device: 0,
+    data: opencv_create_image(width, height) as &[i8]
+  };
+
   img.width = width;
   img.height = height;
 
@@ -19,11 +23,14 @@ fn load_image(filename : &[u8]) -> image {
   let pwidth = &mut img.width;
   let pheight = &mut img.height;
 
-  img.data = opencv_load_image(filename, pwidth, pheight);
+  img.buffer = Buffer {
+    device: 0,
+    data: opencv_load_image(filename, pwidth, pheight) as &[i8]
+  };
 
   img
 }
 
 fn write_image(img : image, filename : &[u8]) -> () {
-  opencv_write_image(img.data, filename);
+  opencv_write_image(img.buffer.data as &[f64], filename);
 }
