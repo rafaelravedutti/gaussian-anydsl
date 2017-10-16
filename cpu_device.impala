@@ -2,38 +2,39 @@ struct image {
   buffer : Buffer,
   width : i32,
   height : i32
-}
+};
 
 struct filter {
   buffer : Buffer,
   size : i32
+};
+
+fn exp(a : f64) -> f64 {
+  cpu_intrinsics.exp(a)
 }
 
 /* Sets image pixel at (x, y) coordinates */
 fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
-  img.buffer.data(y * img.width + x) = value;
+  let converted_data = img.buffer.data as &mut[f64];
+  converted_data(y * img.width + x) = value;
 }
 
 /* Gets image pixel at (x, y) coordinates */
 fn get_pixel(img : image, x : i32, y : i32) -> f64 {
-  img.buffer.data(y * img.width + x)
+  let converted_data = img.buffer.data as &[f64];
+  converted_data(y * img.width + x)
 }
 
 /* Gets 1D filter coefficient at i index */
 fn get_1d_filter_coeff(filt : filter, i : i32) -> f64 {
-  filt.data(i)
+  let converted_data = filt.buffer.data as &[f64];
+  converted_data(i)
 }
 
 /* Gets 2D filter coefficient at (i, j) index */
 fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
-  filt.data(j * filt.size + i)
-}
-
-fn range(mut min : i32, max : i32, body : fn(i32) -> ()) {
-  while min < max {
-    body(min);
-    min++;
-  }
+  let converted_data = filt.buffer.data as &[f64];
+  converted_data(j * filt.size + i) 
 }
 
 fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ()) -> () {
@@ -48,13 +49,15 @@ fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ())
 fn filter_5x1(mask : [f64 * 5]) -> filter {
   /* Allocates the filter data structure for a 5x1 filter */
   let result = filter {
-    data: alloc_cpu(5 * sizeof[f64]()),
+    buffer: alloc_cpu(5 * sizeof[f64]()),
     size: 5
   };
 
+  let converted_data = result.buffer.data as &mut[f64];
+
   /* Stores the coefficients in the filter data */
   for i in range(0, 5) {
-    result.buffer.data(i) = mask(i);
+    converted_data(i) = mask(i);
   }
 
   result
@@ -64,14 +67,16 @@ fn filter_5x1(mask : [f64 * 5]) -> filter {
 fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
   /* Allocates the filter data structure for a 5x1 filter */
   let result = filter {
-    data: alloc_cpu(5 * 5 * sizeof[f64]()),
+    buffer: alloc_cpu(5 * 5 * sizeof[f64]()),
     size: 5 * 5
   };
+
+  let converted_data = result.buffer.data as &mut[f64];
 
   /* Stores the coefficients in the filter data */
   for j in range(0, 5) {
     for i in range(0, 5) {
-      result.buffer.data(j * 5 + i) = mask(i)(j);
+      converted_data(j * 5 + i) = mask(i)(j);
     }
   }
 
