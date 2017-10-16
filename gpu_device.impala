@@ -43,14 +43,14 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
 
 fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) -> () {
   let accelerator = cuda_accelerator(0);
-  let grid = (image.width, image.height, 1);
+  let grid = (input_image.width, input_image.height, 1);
   let block = (128, 1, 1);
 
   with accelerator.exec(grid, block) @{
     let gid_x = accelerator.bidx() * accelerator.bdimx() + accelerator.tidx();
     let gid_y = accelerator.bidy() * accelerator.bdimy() + accelerator.tidy();
 
-    if gid_x < image.width && gid_y < image.height {
+    if gid_x < input_image.width && gid_y < input_image.height {
       body(gid_x, gid_y);
     }
   }

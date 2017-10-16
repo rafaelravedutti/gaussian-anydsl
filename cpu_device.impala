@@ -45,8 +45,8 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
 }
 
 fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ()) -> () {
-  for y in range(0, image.height) {
-    for x in range(0, image.width) {
+  for y in range(0, input_image.height) {
+    for x in range(0, input_image.width) {
       body(x, y);
     }
   }
