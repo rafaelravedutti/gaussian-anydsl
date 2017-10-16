@@ -9,6 +9,13 @@ struct filter {
   size : i32
 };
 
+fn range(mut min : i32, max : i32, body : fn(i32) -> ()) -> () {
+  while min < max {
+    body(min);
+    min++;
+  }
+}
+
 fn exp(a : f64) -> f64 {
   cpu_intrinsics.exp(a)
 }
