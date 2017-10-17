@@ -35,8 +35,8 @@ gaussian.ll: ${PLATFORM_TYPE}_device.impala gaussian.impala opencv_image.impala 
 opencv_runtime.ll: opencv_runtime.cpp
 	${LLVM_BIN}/clang++ -S -emit-llvm ${OPENCV_RUNTIME_FLAGS} $^
 
-gaussian: main.ll opencv_runtime.ll
+gaussian: main.ll opencv_runtime.ll ${ANYDSL_PATH}/runtime/build/lib/libruntime.so
 	${LLVM_BIN}/clang++ -lm ${OPENCV_LIBS} -lpthread $^ -o $@
 
 clean:
-	rm -f gaussian.ll opencv_runtime.ll gaussian
+	rm -f main.ll opencv_runtime.ll gaussian
