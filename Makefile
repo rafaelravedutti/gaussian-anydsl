@@ -29,7 +29,7 @@ IMPALA_LINK_FILES = \
 
 all: gaussian
 
-gaussian.ll: ${PLATFORM_TYPE}_device.impala gaussian.impala opencv_image.impala main.impala
+main.ll: ${PLATFORM_TYPE}_device.impala gaussian.impala opencv_image.impala main.impala
 	${IMPALA_BIN}/impala -emit-llvm -g -O3 ${IMPALA_LINK_FILES} $^
 
 opencv_runtime.ll: opencv_runtime.cpp
