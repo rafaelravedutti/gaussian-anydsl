@@ -5,8 +5,11 @@ ANYDSL_PATH=/home/rafael/repositories/anydsl
 IMPALA_PATH=${ANYDSL_PATH}/impala
 IMPALA_BIN=${IMPALA_PATH}/build/bin
 
+# LLVM bin
+LLVM_BIN=${ANYDSL_PATH}/llvm_build/bin
+
 # OpenCV
-OPENCV_LIBS=-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+OPENCV_LIBS=-lopencv_core -lopencv_highgui -lopencv_imgproc 
 
 # Device type (gpu or cpu)
 PLATFORM_TYPE=gpu
@@ -30,10 +33,10 @@ gaussian.ll: ${PLATFORM_TYPE}_device.impala gaussian.impala opencv_image.impala 
 	${IMPALA_BIN}/impala -emit-llvm -g -O3 ${IMPALA_LINK_FILES} $^
 
 opencv_runtime.ll: opencv_runtime.cpp
-	clang++ -S -emit-llvm ${OPENCV_RUNTIME_FLAGS} $^
+	${LLVM_BIN}/clang++ -S -emit-llvm ${OPENCV_RUNTIME_FLAGS} $^
 
-gaussian: gaussian.ll opencv_runtime.ll
-	clang++ -lm ${OPENCV_LIBS} -lpthread $^ -o $@
+gaussian: main.ll opencv_runtime.ll
+	${LLVM_BIN}/clang++ -lm ${OPENCV_LIBS} -lpthread $^ -o $@
 
 clean:
 	rm -f gaussian.ll opencv_runtime.ll gaussian
