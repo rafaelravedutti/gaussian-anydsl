@@ -7,5 +7,8 @@ fn main(argc : i32, argv : &[&mut [u8]]) -> () {
 
     gaussian_blur(input_image, output_image);
     write_image(output_image, "result.png");
+
+    release_image(input_image);
+    release_image(output_image);
   }
 }

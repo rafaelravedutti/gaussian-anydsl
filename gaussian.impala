@@ -67,9 +67,13 @@ fn apply_2d_block_convolution(input_image : image, output_image : image, mask : 
 fn gaussian_blur(input_image : image, output_image : image) -> () {
   /* Generates the separable Gaussian kernel based on the
      OpenCV source code */
-  let mut mask_xy : [[f64 * 5] * 5];
-  let mut mask_x : [f64 * 5];
-  let mut mask_y : [f64 * 5];
+  let bmask_xy = alloc_cpu(5 * 5 * sizeof[f64]());
+  let bmask_x = alloc_cpu(5 * sizeof[f64]());
+  let bmask_y = alloc_cpu(5 * sizeof[f64]());
+
+  let mask_xy = bmask_xy.data as &mut[f64];
+  let mask_x = bmask_x.data as &mut[f64];
+  let mask_y = bmask_y.data as &mut[f64];
   let mut sum_x = 0.0;
   let mut sum_y = 0.0;
   let anchor = 2.0;
@@ -85,7 +89,7 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
     for j in range(0, 5) {
       let y = (j as f64) - anchor;
 
-      mask_xy(i)(j) = prod * exp(-((x * x + y * y) / denom));
+      mask_xy(j * 5 + i) = prod * exp(-((x * x + y * y) / denom));
     }
 
     mask_x(i) = exp(-((x * x) / denom));
@@ -104,10 +108,22 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
 
   /* Applies the separable kernel in rows and columns */
   if use_tiled {
-    apply_2d_row_convolution(input_image, output_image, filter_5x1(mask_x));
-    apply_2d_column_convolution(input_image, output_image, filter_5x1(mask_y));
+    let row_filter = filter_5x1(bmask_x);
+    let column_filter = filter_5x1(bmask_y);
+
+    apply_2d_row_convolution(input_image, output_image, row_filter);
+    apply_2d_column_convolution(input_image, output_image, column_filter);
+
+    release_filter(row_filter);
+    release_filter(column_filter);
   /* Applies the not separable kernel in blocks */
   } else {
-    apply_2d_block_convolution(input_image, output_image, filter_5x5(mask_xy));
+    let block_filter = filter_5x5(bmask_xy);
+    apply_2d_block_convolution(input_image, output_image, block_filter);
+    release_filter(block_filter);
   }
+
+  release(bmask_xy);
+  release(bmask_x);
+  release(bmask_y);
 }

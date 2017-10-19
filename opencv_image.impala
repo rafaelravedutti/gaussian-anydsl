@@ -14,6 +14,7 @@ fn create_image(width : i32, height : i32) -> image {
 
   img.width = width;
   img.height = height;
+  img.device_data = get_image_device_data(img);
 
   img
 }
@@ -27,6 +28,8 @@ fn load_image(filename : &[u8]) -> image {
     device: 0,
     data: opencv_load_image(filename, pwidth, pheight) as &[i8]
   };
+
+  img.device_data = get_image_device_data(img);
 
   img
 }

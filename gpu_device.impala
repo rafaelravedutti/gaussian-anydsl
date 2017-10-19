@@ -41,10 +41,26 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
   bitcast[&[1][f64]](filt.buffer.data)(j * filt.size + i)
 }
 
+fn get_image_device_data(img : image) -> Buffer {
+  let accelerator = cuda_accelerator(0);
+  accelerator.alloc(img.width * img.height * sizeof[f64]())
+}
+
+fn release_image(img : image) -> () {
+  release(img.device_data);
+}
+
+fn release_filter(filt : filter) -> () {
+  release(filt.buffer);
+}
+
 fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) -> () {
   let accelerator = cuda_accelerator(0);
   let grid = (input_image.width, input_image.height, 1);
   let block = (128, 1, 1);
+  let image_size = input_image.width * input_image.height * sizeof[f64]();
+
+  copy(input_image.buffer, input_image.device_data, image_size);
 
   with accelerator.exec(grid, block) @{
     let gid_x = accelerator.bidx() * accelerator.bdimx() + accelerator.tidx();
@@ -54,10 +70,12 @@ fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) 
       body(gid_x, gid_y);
     }
   }
+
+  copy(output_image.device_data, output_image.buffer, image_size);
 }
 
 /* Generates a 5x1 filter data structure given its coefficients */
-fn filter_5x1(mask : [f64 * 5]) -> filter {
+fn filter_5x1(mask : Buffer) -> filter {
   let accelerator = cuda_accelerator(0);
 
   /* Allocates the filter data structure for a 5x1 filter */
@@ -66,16 +84,13 @@ fn filter_5x1(mask : [f64 * 5]) -> filter {
     size: 5
   };
 
-  /* Stores the coefficients in the filter data */
-  for i in range(0, 5) {
-    bitcast[&mut[1][f64]](result.buffer.data)(i) = mask(i);
-  }
+  copy(mask, result.buffer, result.size * sizeof[f64]());
 
   result
 }
 
 /* Generates a 5x5 filter data structure given its coefficients */
-fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
+fn filter_5x5(mask : Buffer) -> filter {
   let accelerator = cuda_accelerator(0);
 
   /* Allocates the filter data structure for a 5x1 filter */
@@ -84,12 +99,7 @@ fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
     size: 5 * 5
   };
 
-  /* Stores the coefficients in the filter data */
-  for j in range(0, 5) {
-    for i in range(0, 5) {
-      bitcast[&mut[1][f64]](result.buffer.data)(j * 5 + i) = mask(i)(j);
-    }
-  }
+  copy(mask, result.buffer, result.size * sizeof[f64]());
 
   result
 }

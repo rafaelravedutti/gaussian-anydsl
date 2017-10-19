@@ -44,6 +44,18 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
   converted_data(j * filt.size + i) 
 }
 
+fn prepare_image(mut img : image) -> () {
+
+}
+
+fn release_image(img : image) -> () {
+
+}
+
+fn release_filter(filt : filter) -> () {
+
+}
+
 fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ()) -> () {
   for y in range(0, input_image.height) {
     for x in range(0, input_image.width) {
@@ -53,39 +65,23 @@ fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ())
 }
 
 /* Generates a 5x1 filter data structure given its coefficients */
-fn filter_5x1(mask : [f64 * 5]) -> filter {
+fn filter_5x1(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 5x1 filter */
   let result = filter {
-    buffer: alloc_cpu(5 * sizeof[f64]()),
+    buffer: mask,
     size: 5
   };
-
-  let converted_data = result.buffer.data as &mut[f64];
-
-  /* Stores the coefficients in the filter data */
-  for i in range(0, 5) {
-    converted_data(i) = mask(i);
-  }
 
   result
 }
 
 /* Generates a 5x5 filter data structure given its coefficients */
-fn filter_5x5(mask : [[f64 * 5] * 5]) -> filter {
+fn filter_5x5(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 5x1 filter */
   let result = filter {
-    buffer: alloc_cpu(5 * 5 * sizeof[f64]()),
+    buffer: mask,
     size: 5 * 5
   };
-
-  let converted_data = result.buffer.data as &mut[f64];
-
-  /* Stores the coefficients in the filter data */
-  for j in range(0, 5) {
-    for i in range(0, 5) {
-      converted_data(j * 5 + i) = mask(i)(j);
-    }
-  }
 
   result
 }
