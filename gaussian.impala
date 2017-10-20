@@ -64,7 +64,7 @@ fn apply_2d_block_convolution(input_image : image, output_image : image, mask : 
 }
 
 /* Gaussian filter */
-fn gaussian_blur(input_image : image, output_image : image) -> () {
+fn gaussian_blur(input_image : image, output_image : image, use_tiled : bool) -> () {
   /* Generates the separable Gaussian kernel based on the
      OpenCV source code */
   let filter_size = 7;
@@ -85,7 +85,6 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
   let sigma = 1.1;
   let prod = 1.0 / (2.0 * pi * sigma * sigma);
   let denom = 2.0 * sigma * sigma;
-  let use_tiled = true;
 
   for i in range(0, filter_size) {
     let x = (i as f64) - anchor;
