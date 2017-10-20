@@ -79,9 +79,27 @@ fn filter_5x1(mask : Buffer) -> filter {
 
 /* Generates a 5x5 filter data structure given its coefficients */
 fn filter_5x5(mask : Buffer) -> filter {
-  /* Allocates the filter data structure for a 5x1 filter */
+  /* Allocates the filter data structure for a 5x5 filter */
   filter {
     buffer: mask,
     size: 5 * 5
+  }
+}
+
+/* Generates a 7x1 filter data structure given its coefficients */
+fn filter_7x1(mask : Buffer) -> filter {
+  /* Allocates the filter data structure for a 7x1 filter */
+  filter {
+    buffer: mask,
+    size: 7
+  }
+}
+
+/* Generates a 7x7 filter data structure given its coefficients */
+fn filter_7x7(mask : Buffer) -> filter {
+  /* Allocates the filter data structure for a 7x7 filter */
+  filter {
+    buffer: mask,
+    size: 7 * 7
   }
 }

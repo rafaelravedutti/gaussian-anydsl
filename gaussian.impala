@@ -67,9 +67,13 @@ fn apply_2d_block_convolution(input_image : image, output_image : image, mask : 
 fn gaussian_blur(input_image : image, output_image : image) -> () {
   /* Generates the separable Gaussian kernel based on the
      OpenCV source code */
-  let bmask_xy = alloc_cpu(5 * 5 * sizeof[f64]());
-  let bmask_x = alloc_cpu(5 * sizeof[f64]());
-  let bmask_y = alloc_cpu(5 * sizeof[f64]());
+  let filter_size = 7;
+  let filter_Nx1 = filter_7x1;
+  let filter_NxN = filter_7x7;
+
+  let bmask_xy = alloc_cpu(filter_size * filter_size * sizeof[f64]());
+  let bmask_x = alloc_cpu(filter_size * sizeof[f64]());
+  let bmask_y = alloc_cpu(filter_size * sizeof[f64]());
 
   let mask_xy = bmask_xy.data as &mut[f64];
   let mask_x = bmask_x.data as &mut[f64];
@@ -83,13 +87,13 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
   let denom = 2.0 * sigma * sigma;
   let use_tiled = true;
 
-  for i in range(0, 5) {
+  for i in range(0, filter_size) {
     let x = (i as f64) - anchor;
 
-    for j in range(0, 5) {
+    for j in range(0, filter_size) {
       let y = (j as f64) - anchor;
 
-      mask_xy(j * 5 + i) = prod * exp(-((x * x + y * y) / denom));
+      mask_xy(j * filter_size + i) = prod * exp(-((x * x + y * y) / denom));
     }
 
     mask_x(i) = exp(-((x * x) / denom));
@@ -101,15 +105,15 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
   sum_x = 1.0 / sum_x;
   sum_y = 1.0 / sum_y;
 
-  for i in range(0, 5) {
+  for i in range(0, filter_size) {
     mask_x(i) *= sum_x;
     mask_y(i) *= sum_y;
   }
 
   /* Applies the separable kernel in rows and columns */
   if use_tiled {
-    let row_filter = filter_5x1(bmask_x);
-    let column_filter = filter_5x1(bmask_y);
+    let row_filter = filter_Nx1(bmask_x);
+    let column_filter = filter_Nx1(bmask_y);
 
     apply_2d_row_convolution(input_image, output_image, row_filter);
     apply_2d_column_convolution(input_image, output_image, column_filter);
@@ -118,7 +122,7 @@ fn gaussian_blur(input_image : image, output_image : image) -> () {
     release_filter(column_filter);
   /* Applies the not separable kernel in blocks */
   } else {
-    let block_filter = filter_5x5(bmask_xy);
+    let block_filter = filter_NxN(bmask_xy);
     apply_2d_block_convolution(input_image, output_image, block_filter);
     release_filter(block_filter);
   }

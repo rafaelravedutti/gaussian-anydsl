@@ -93,10 +93,40 @@ fn filter_5x1(mask : Buffer) -> filter {
 fn filter_5x5(mask : Buffer) -> filter {
   let accelerator = cuda_accelerator(0);
 
-  /* Allocates the filter data structure for a 5x1 filter */
+  /* Allocates the filter data structure for a 5x5 filter */
   let result = filter {
     buffer: accelerator.alloc(5 * 5 * sizeof[f64]()),
     size: 5 * 5
+  };
+
+  copy(mask, result.buffer, result.size * sizeof[f64]());
+
+  result
+}
+
+/* Generates a 7x1 filter data structure given its coefficients */
+fn filter_7x1(mask : Buffer) -> filter {
+  let accelerator = cuda_accelerator(0);
+
+  /* Allocates the filter data structure for a 7x1 filter */
+  let result = filter {
+    buffer: accelerator.alloc(7 * sizeof[f64]()),
+    size: 7
+  };
+
+  copy(mask, result.buffer, result.size * sizeof[f64]());
+
+  result
+}
+
+/* Generates a 7x7 filter data structure given its coefficients */
+fn filter_7x7(mask : Buffer) -> filter {
+  let accelerator = cuda_accelerator(0);
+
+  /* Allocates the filter data structure for a 7x7 filter */
+  let result = filter {
+    buffer: accelerator.alloc(7 * 7 * sizeof[f64]()),
+    size: 7 * 7
   };
 
   copy(mask, result.buffer, result.size * sizeof[f64]());
