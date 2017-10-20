@@ -82,7 +82,7 @@ fn filter_5x5(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 5x5 filter */
   filter {
     buffer: mask,
-    size: 5 * 5
+    size: 5
   }
 }
 
@@ -100,6 +100,6 @@ fn filter_7x7(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 7x7 filter */
   filter {
     buffer: mask,
-    size: 7 * 7
+    size: 7
   }
 }
