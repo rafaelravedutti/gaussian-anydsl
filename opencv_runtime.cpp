@@ -48,7 +48,7 @@ pixel_t *opencv_load_image(const char *path, int *width, int *height) {
 }
 
 pixel_t *opencv_create_image(int width, int height) {
-  cv::Mat img_mat(width, height, CV_64FC1);
+  cv::Mat img_mat(cv::Size(width, height), CV_64FC1);
 
   if(img_mat.data != NULL) {
     mat_list.push_back(img_mat);
