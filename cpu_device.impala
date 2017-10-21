@@ -21,6 +21,14 @@ fn exp(a : f64) -> f64 {
   cpu_intrinsics.exp(a)
 }
 
+fn write_f64(buffer : Buffer, index : i32, value : f64) -> () {
+  (buffer.data as &mut[f64])(index) = value;
+}
+
+fn read_f64(buffer : Buffer, index : i32) -> f64 {
+  (buffer.data as &[f64])(index)
+}
+
 /* Sets image pixel at (x, y) coordinates */
 fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
   let converted_data = img.buffer.data as &mut[f64];
@@ -45,6 +53,10 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
   converted_data(j * filt.size + i) 
 }
 
+fn alloc_target(size : i32) -> Buffer {
+  alloc_cpu(size)
+}
+
 fn get_image_device_data(img : image) -> Buffer {
   Buffer {
     device: 0,
@@ -57,6 +69,10 @@ fn release_image(img : image) -> () {
 }
 
 fn release_filter(filt : filter) -> () {
+
+}
+
+fn images(input_image : image, output_image : image, body: fn() -> ()) -> () {
 
 }
 

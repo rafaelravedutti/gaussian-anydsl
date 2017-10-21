@@ -21,6 +21,14 @@ fn exp(a : f64) -> f64 {
   cuda_intrinsics.exp(a)
 }
 
+fn write_f64(buffer : Buffer, index : i32, value : f64) -> () {
+  bitcast[&mut[1][f64]](buffer.data)(index) = value
+}
+
+fn read_f64(buffer : Buffer, index : i32) -> f64 {
+  bitcast[&[1][f64]](buffer.data)(index)
+}
+
 /* Sets image pixel at (x, y) coordinates */
 fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
   bitcast[&mut[1][f64]](img.device_data.data)(y * img.width + x) = value
@@ -41,6 +49,11 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
   bitcast[&[1][f64]](filt.buffer.data)(j * filt.size + i)
 }
 
+fn alloc_target(size : i32) -> Buffer {
+  let accelerator = cuda_accelerator(0);
+  accelerator.alloc(size)
+}
+
 fn get_image_device_data(img : image) -> Buffer {
   let accelerator = cuda_accelerator(0);
   accelerator.alloc(img.width * img.height * sizeof[f64]())
@@ -54,13 +67,21 @@ fn release_filter(filt : filter) -> () {
   release(filt.buffer);
 }
 
+fn images(input_image : image, output_image : image, body: fn() -> ()) -> () {
+  let accelerator = cuda_accelerator(0);
+  let image_size = input_image.width * input_image.height * sizeof[f64]();
+
+  copy(input_image.buffer, input_image.device_data, image_size);
+
+  body();
+
+  copy(output_image.device_data, output_image.buffer, image_size);
+}
+
 fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) -> () {
   let accelerator = cuda_accelerator(0);
   let grid = (input_image.width, input_image.height, 1);
   let block = (128, 1, 1);
-  let image_size = input_image.width * input_image.height * sizeof[f64]();
-
-  copy(input_image.buffer, input_image.device_data, image_size);
 
   with accelerator.exec(grid, block) @{
     let gid_x = accelerator.bidx() * accelerator.bdimx() + accelerator.tidx();
@@ -71,7 +92,6 @@ fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) 
     }
   }
 
-  copy(output_image.device_data, output_image.buffer, image_size);
 }
 
 /* Generates a 5x1 filter data structure given its coefficients */

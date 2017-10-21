@@ -1,43 +1,43 @@
 /* Apply 2D filter convolution with separable kernels (tiling) */
-fn apply_2d_row_convolution(input_image : image, output_image : image, mask : filter) -> () {
-  let anchor = mask.size / 2;
+fn apply_2d_tiled_convolution(input_image : image, output_image : image, h_mask : filter, v_mask : filter) -> () {
+  let h_anchor = h_mask.size / 2;
+  let v_anchor = v_mask.size / 2;
+
+  let tmp_data = alloc_target(input_image.width * input_image.height * sizeof[f64]());
 
   /* Applies the filter in columns */
-  for x, y in @iterate(input_image, output_image) {
+  for x, y in iterate(input_image, output_image) {
     let mut sum = 0.0;
 
     /* Checks image boundaries */
-    if x >= anchor && x < input_image.width - anchor {
-      for i in range(-anchor, anchor + 1) {
-        sum += get_1d_filter_coeff(mask, i + anchor) * get_pixel(input_image, x + i, y);
+    if x >= h_anchor && x < input_image.width - h_anchor {
+      for i in range(-h_anchor, h_anchor + 1) {
+        sum += get_1d_filter_coeff(h_mask, i + h_anchor) * get_pixel(input_image, x + i, y);
       }
 
-      set_pixel(output_image, x, y, sum);
+      write_f64(tmp_data, y * input_image.width + x, sum);
     } else {
-      set_pixel(output_image, x, y, get_pixel(input_image, x, y));
+      write_f64(tmp_data, y * input_image.width + x, get_pixel(input_image, x, y));
     }
   }
-}
-
-/* Apply 2D filter convolution with separable kernels (tiling) */
-fn apply_2d_column_convolution(input_image : image, output_image : image, mask : filter) -> () {
-  let anchor = mask.size / 2;
 
   /* Applies the filter in rows */
   for x, y in @iterate(input_image, output_image) {
     let mut sum = 0.0;
 
     /* Checks image boundaries */
-    if y >= anchor && y < input_image.height - anchor {
-      for i in range(-anchor, anchor + 1) {
-        sum += get_1d_filter_coeff(mask, i + anchor) * get_pixel(input_image, x, y + i);
+    if y >= v_anchor && y < input_image.height - v_anchor {
+      for i in range(-v_anchor, v_anchor + 1) {
+        sum += get_1d_filter_coeff(v_mask, i + v_anchor) * read_f64(tmp_data, (y + i) * input_image.width + x);
       }
 
       set_pixel(output_image, x, y, sum);
     } else {
-      set_pixel(output_image, x, y, get_pixel(input_image, x, y));
+      set_pixel(output_image, x, y, read_f64(tmp_data, y * input_image.width + x));
     }
   }
+
+  release(tmp_data);
 }
 
 /* Apply 2D filter convolution with non-separable kernels (blocks) */
@@ -114,8 +114,7 @@ fn gaussian_blur(input_image : image, output_image : image, use_tiled : bool) ->
     let row_filter = filter_Nx1(bmask_x);
     let column_filter = filter_Nx1(bmask_y);
 
-    apply_2d_row_convolution(input_image, output_image, row_filter);
-    apply_2d_column_convolution(input_image, output_image, column_filter);
+    apply_2d_tiled_convolution(input_image, output_image, row_filter, column_filter);
 
     release_filter(row_filter);
     release_filter(column_filter);
