@@ -73,7 +73,7 @@ fn release_filter(filt : filter) -> () {
 }
 
 fn images(input_image : image, output_image : image, body: fn() -> ()) -> () {
-
+  body();
 }
 
 fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ()) -> () {
