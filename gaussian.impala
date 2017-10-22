@@ -1,42 +1,58 @@
 /* Apply 2D filter convolution with separable kernels (tiling) */
 fn apply_2d_tiled_convolution(input_image : image, output_image : image, h_mask : filter, v_mask : filter) -> () {
+  /* Horizontal anchor based in the horizontal mask size */
   let h_anchor = h_mask.size / 2;
+  /* Vertical anchor based in the vertical mask size */
   let v_anchor = v_mask.size / 2;
 
+  /* Allocate temporary data in the target device for holding the row convolution result */
   let tmp_data = alloc_target(input_image.width * input_image.height * sizeof[f64]());
 
   /* Applies the filter in columns */
   for x, y in @iterate(input_image, output_image) {
+    /* Sum is 0.0 by default */
     let mut sum = 0.0;
 
-    /* Checks image boundaries */
+    /* Check image boundaries to avoid invalid memory region access */
     if x >= h_anchor && x < input_image.width - h_anchor {
+      /* Go through the horizontal mask coefficients using the specified anchor */
       for i in range(-h_anchor, h_anchor + 1) {
+        /* Increase the current coefficient and input product in the summation */
         sum += get_1d_filter_coeff(h_mask, i + h_anchor) * get_pixel(input_image, x + i, y);
       }
 
+      /* Write the summation result in the temporary buffer */
       write_f64(tmp_data, y * input_image.width + x, sum);
+    /* If this is an invalid region, just copy the input pixel value to the temporary buffer */
     } else {
+      /* Use original input value */
       write_f64(tmp_data, y * input_image.width + x, get_pixel(input_image, x, y));
     }
   }
 
   /* Applies the filter in rows */
   for x, y in @iterate(input_image, output_image) {
+    /* Sum is 0.0 by default */
     let mut sum = 0.0;
 
-    /* Checks image boundaries */
+    /* Check image boundaries to avoid invalid memory region access */
     if y >= v_anchor && y < input_image.height - v_anchor {
+      /* Go through the vertical mask coefficients using the specified anchor */
       for i in range(-v_anchor, v_anchor + 1) {
+        /* Increase the current coefficient and input product in the summation */
         sum += get_1d_filter_coeff(v_mask, i + v_anchor) * read_f64(tmp_data, (y + i) * input_image.width + x);
       }
 
+      /* Write the summation result in the output buffer */
       set_pixel(output_image, x, y, sum);
+    /* If this is an invalid region, just copy the temporary pixel value to the output buffer */
     } else {
+      /* Use original input value */
       set_pixel(output_image, x, y, read_f64(tmp_data, y * input_image.width + x));
     }
   }
 
+  /* Release memory for temporary buffer */
   release(tmp_data);
 }
 
@@ -48,16 +64,21 @@ fn apply_2d_block_convolution(input_image : image, output_image : image, mask : 
   for x, y in @iterate(input_image, output_image) {
     let mut sum = 0.0;
 
-    /* Checks image boundaries */
+    /* Check image boundaries to avoid invalid memory region access */
     if x >= anchor && x < input_image.width - anchor && y >= anchor && y < input_image.height - anchor {
+      /* Go through the block mask coefficients using the specified anchor */
       for i in range(-anchor, anchor + 1) {
         for j in range(-anchor, anchor + 1) {
+          /* Increase the current coefficient and input product in the summation */
           sum += get_2d_filter_coeff(mask, i + anchor, j + anchor) * get_pixel(input_image, x + i, y + j);
         }
       }
 
+      /* Write the summation result in the output buffer */
       set_pixel(output_image, x, y, sum);
+    /* If this is an invalid region, just copy the input pixel value to the output buffer */
     } else {
+      /* Use original input value */
       set_pixel(output_image, x, y, get_pixel(input_image, x, y));
     }
   }
@@ -65,19 +86,24 @@ fn apply_2d_block_convolution(input_image : image, output_image : image, mask : 
 
 /* Gaussian filter */
 fn gaussian_blur(input_image : image, output_image : image, use_tiled : bool) -> () {
-  /* Generates the separable Gaussian kernel based on the
+  /* Generates the separable or non-separable Gaussian kernel based on the
      OpenCV source code */
   let filter_size = 7;
   let filter_Nx1 = filter_7x1;
   let filter_NxN = filter_7x7;
 
+  /* Allocate CPU memory for the mask buffers (block, row and column) */
   let bmask_xy = alloc_cpu(filter_size * filter_size * sizeof[f64]());
   let bmask_x = alloc_cpu(filter_size * sizeof[f64]());
   let bmask_y = alloc_cpu(filter_size * sizeof[f64]());
 
+  /* Pointers to the buffers in f64 data type */
   let mask_xy = bmask_xy.data as &mut[f64];
   let mask_x = bmask_x.data as &mut[f64];
   let mask_y = bmask_y.data as &mut[f64];
+
+  /* The next steps generate the gaussian filter for both block as well as horizontal
+     and vertical kernels */
   let mut sum_x = 0.0;
   let mut sum_y = 0.0;
   let anchor = 2.0;
@@ -125,6 +151,7 @@ fn gaussian_blur(input_image : image, output_image : image, use_tiled : bool) ->
     release_filter(block_filter);
   }
 
+  /* Release memory for the mask buffers */
   release(bmask_xy);
   release(bmask_x);
   release(bmask_y);
