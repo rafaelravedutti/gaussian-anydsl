@@ -6,7 +6,7 @@ fn apply_2d_tiled_convolution(input_image : image, output_image : image, h_mask 
   let tmp_data = alloc_target(input_image.width * input_image.height * sizeof[f64]());
 
   /* Applies the filter in columns */
-  for x, y in iterate(input_image, output_image) {
+  for x, y in @iterate(input_image, output_image) {
     let mut sum = 0.0;
 
     /* Checks image boundaries */
