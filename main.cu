@@ -76,7 +76,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         p_22975 = _22975;
     l22973: ;
         _22975 = p_22975;
-        #line 6 "main.impala"
+        #line 11 "main.impala"
         int _22979;
         _22979 = _20601_22937.e2;
         #line 87 "gpu_device.impala"
@@ -97,7 +97,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         #line 88 "gpu_device.impala"
         int _22982;
         _22982 = _22963 * _22969;
-        #line 6 "main.impala"
+        #line 11 "main.impala"
         int _22985;
         _22985 = _20601_22937.e3;
         #line 88 "gpu_device.impala"
@@ -114,7 +114,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
     l23045: ;
         return ;
     l22987: ;
-        #line 18 "gaussian.impala"
+        #line 25 "gaussian.impala"
         int _23017;
         _23017 = gid_y_22983 * _22979;
         #line 39 "gpu_device.impala"
@@ -123,10 +123,10 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         #line 25 "gpu_device.impala"
         char* _23028;
         _23028 = _20603_22939.e1;
-        #line 3 "gaussian.impala"
+        #line 4 "gaussian.impala"
         int _22989;
         _22989 = _20602_22938.e1;
-        #line 18 "gaussian.impala"
+        #line 25 "gaussian.impala"
         int _23030;
         _23030 = _23017 + gid_x_22977;
         #line 39 "gpu_device.impala"
@@ -137,7 +137,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         union { double* dst; char* src; } u_23029;
         u_23029.src = _23028;
         _23029 = u_23029.dst;
-        #line 3 "gaussian.impala"
+        #line 4 "gaussian.impala"
         int h_anchor_22991;
         h_anchor_22991 = _22989 / 2;
         #line 24 "gpu_device.impala"
@@ -148,25 +148,25 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         union { double* dst; char* src; } u_23016;
         u_23016.src = _23015;
         _23016 = u_23016.dst;
-        #line 13 "gaussian.impala"
+        #line 17 "gaussian.impala"
         bool _22992;
         _22992 = h_anchor_22991 <= gid_x_22977;
-        #line 13 "gaussian.impala"
+        #line 17 "gaussian.impala"
         if (_22992) goto l22993; else goto l23043;
     l23043: ;
-        #line 19 "gaussian.impala"
+        #line 27 "gaussian.impala"
         goto l23037;
     l22993: ;
-        #line 13 "gaussian.impala"
+        #line 17 "gaussian.impala"
         int _22994;
         _22994 = _22979 - h_anchor_22991;
-        #line 13 "gaussian.impala"
+        #line 17 "gaussian.impala"
         bool _22995;
         _22995 = gid_x_22977 < _22994;
-        #line 13 "gaussian.impala"
+        #line 17 "gaussian.impala"
         if (_22995) goto l22996; else goto l23036;
     l23036: ;
-        #line 19 "gaussian.impala"
+        #line 27 "gaussian.impala"
         goto l23037;
     l23037: ;
         #line 39 "gpu_device.impala"
@@ -182,13 +182,13 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         *index_23031 = _23041;
         return ;
     l22996: ;
-        #line 14 "gaussian.impala"
+        #line 19 "gaussian.impala"
         int _23002;
         _23002 = 1 + h_anchor_22991;
         #line 44 "gpu_device.impala"
         struct_Buffer_5474 _23007;
         _23007 = _20602_22938.e0;
-        #line 14 "gaussian.impala"
+        #line 19 "gaussian.impala"
         int _23034;
         _23034 = 0 - h_anchor_22991;
         #line 44 "gpu_device.impala"
@@ -216,7 +216,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         *index_23031 = sum_23000;
         return ;
     l23004: ;
-        #line 15 "gaussian.impala"
+        #line 21 "gaussian.impala"
         int _23010;
         _23010 = _22998 + h_anchor_22991;
         #line 16 "gpu_device.impala"
@@ -225,7 +225,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         #line 43 "gpu_device.impala"
         double* i_23011;
         i_23011 = _23009 + _23010;
-        #line 15 "gaussian.impala"
+        #line 21 "gaussian.impala"
         int _23018;
         _23018 = gid_x_22977 + _22998;
         #line 44 "gpu_device.impala"
@@ -246,10 +246,10 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20598(struct_image_5473 _
         #line 39 "gpu_device.impala"
         double _23024;
         _23024 = _23021;
-        #line 15 "gaussian.impala"
+        #line 21 "gaussian.impala"
         double _23025;
         _23025 = _23023 * _23024;
-        #line 15 "gaussian.impala"
+        #line 21 "gaussian.impala"
         double _23026;
         _23026 = sum_23000 + _23025;
         #line 14 "gpu_device.impala"
@@ -311,7 +311,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20730(struct_image_5473 _
         #line 87 "gpu_device.impala"
         int gid_x_23074;
         gid_x_23074 = _23073 + _23063;
-        #line 6 "main.impala"
+        #line 11 "main.impala"
         int _23075;
         _23075 = _20733_23050.e2;
         #line 90 "gpu_device.impala"
@@ -323,7 +323,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20730(struct_image_5473 _
         #line 92 "gpu_device.impala"
         goto l23134;
     l23077: ;
-        #line 6 "main.impala"
+        #line 11 "main.impala"
         int _23080;
         _23080 = _20733_23050.e3;
         #line 88 "gpu_device.impala"
@@ -354,10 +354,10 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20730(struct_image_5473 _
         union { double* dst; char* src; } u_23119;
         u_23119.src = _23118;
         _23119 = u_23119.dst;
-        #line 4 "gaussian.impala"
+        #line 6 "gaussian.impala"
         int _23083;
         _23083 = _20735_23052.e1;
-        #line 36 "gaussian.impala"
+        #line 51 "gaussian.impala"
         int _23120;
         _23120 = gid_y_23079 * _23075;
         #line 29 "gpu_device.impala"
@@ -365,34 +365,34 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20730(struct_image_5473 _
         union { double* dst; char* src; } u_23106;
         u_23106.src = _23105;
         _23106 = u_23106.dst;
-        #line 4 "gaussian.impala"
+        #line 6 "gaussian.impala"
         int v_anchor_23084;
         v_anchor_23084 = _23083 / 2;
-        #line 36 "gaussian.impala"
+        #line 51 "gaussian.impala"
         int _23121;
         _23121 = _23120 + gid_x_23074;
-        #line 29 "gaussian.impala"
+        #line 39 "gaussian.impala"
         bool _23085;
         _23085 = v_anchor_23084 <= gid_y_23079;
         #line 34 "gpu_device.impala"
         double* _23122;
         _23122 = _23119 + _23121;
-        #line 29 "gaussian.impala"
+        #line 39 "gaussian.impala"
         if (_23085) goto l23086; else goto l23132;
     l23132: ;
-        #line 35 "gaussian.impala"
+        #line 49 "gaussian.impala"
         goto l23126;
     l23086: ;
-        #line 29 "gaussian.impala"
+        #line 39 "gaussian.impala"
         int _23087;
         _23087 = _23080 - v_anchor_23084;
-        #line 29 "gaussian.impala"
+        #line 39 "gaussian.impala"
         bool _23088;
         _23088 = gid_y_23079 < _23087;
-        #line 29 "gaussian.impala"
+        #line 39 "gaussian.impala"
         if (_23088) goto l23089; else goto l23125;
     l23125: ;
-        #line 35 "gaussian.impala"
+        #line 49 "gaussian.impala"
         goto l23126;
     l23126: ;
         #line 28 "gpu_device.impala"
@@ -408,10 +408,10 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20730(struct_image_5473 _
         *_23122 = _23130;
         return ;
     l23089: ;
-        #line 30 "gaussian.impala"
+        #line 41 "gaussian.impala"
         int _23094;
         _23094 = 1 + v_anchor_23084;
-        #line 30 "gaussian.impala"
+        #line 41 "gaussian.impala"
         int _23124;
         _23124 = 0 - v_anchor_23084;
         #line 44 "gpu_device.impala"
@@ -445,25 +445,25 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20730(struct_image_5473 _
         #line 16 "gpu_device.impala"
         int _23097;
         _23097 = 1 + _23091;
-        #line 31 "gaussian.impala"
+        #line 43 "gaussian.impala"
         int _23101;
         _23101 = _23091 + v_anchor_23084;
         #line 43 "gpu_device.impala"
         double* i_23102;
         i_23102 = _23100 + _23101;
-        #line 31 "gaussian.impala"
+        #line 43 "gaussian.impala"
         int _23107;
         _23107 = gid_y_23079 + _23091;
         #line 44 "gpu_device.impala"
         double _23103;
         _23103 = *i_23102;
-        #line 31 "gaussian.impala"
+        #line 43 "gaussian.impala"
         int _23108;
         _23108 = _23107 * _23075;
         #line 44 "gpu_device.impala"
         double _23113;
         _23113 = _23103;
-        #line 31 "gaussian.impala"
+        #line 43 "gaussian.impala"
         int _23109;
         _23109 = _23108 + gid_x_23074;
         #line 28 "gpu_device.impala"
@@ -475,10 +475,10 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20730(struct_image_5473 _
         #line 29 "gpu_device.impala"
         double _23114;
         _23114 = _23111;
-        #line 31 "gaussian.impala"
+        #line 43 "gaussian.impala"
         double _23115;
         _23115 = _23113 * _23114;
-        #line 31 "gaussian.impala"
+        #line 43 "gaussian.impala"
         double _23116;
         _23116 = sum_23093 + _23115;
         #line 14 "gpu_device.impala"
