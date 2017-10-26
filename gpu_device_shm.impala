@@ -159,13 +159,18 @@ fn iterate_stencil(input_image : image, output_image : image, stencil : filter, 
     /* Allocate shared memory for current block with size = (128 + 7 * 2) * (1 + 7 * 2) */
     let shared = reserve_shared[f64](2130);
 
-    /* Copy input image content to shared memory */
+    /* Go through each block step in the y axis (rows) */
     for j in offset_range(0, acc.bdimy() + stencil.height * 2, acc.bdimy()) {
+      /* Go through each block step in the x axis (columns) */
       for i in offset_range(0, acc.bdimx() + stencil.width * 2, acc.bdimx()) {
+        /* Image x axis */
         let img_index_x = gid_x - stencil.width + i;
+        /* Image y axis */
         let img_index_y = gid_y - stencil.height + j;
 
+        /* Check image boundaries to avoid invalid memory region access */
         if img_index_x >= 0 && img_index_x < input_image.width && img_index_y >= 0 && img_index_y < input_image.height {
+          /* Copy input image content to shared memory */
           shared((acc.tidy() + j) * (acc.bdimy() + stencil.height * 2) + acc.tidx() + i) =
             bitcast[&[1][f64]](input_image.buffer.data)(img_index_y * input_image.width + img_index_x);
         }
