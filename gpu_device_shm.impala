@@ -141,7 +141,7 @@ fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ())
   }
 }
 
-/* Iterates over an image in GPU */
+/* Iterates over an image in GPU based on a stencil */
 fn iterate_stencil(input_image : image, output_image : image, stencil : filter, body : fn(i32, i32) -> ()) -> () {
   /* Use first CUDA accelerator */
   let acc = cuda_accelerator(0);
@@ -156,8 +156,8 @@ fn iterate_stencil(input_image : image, output_image : image, stencil : filter, 
     let gid_x = acc.bidx() * acc.bdimx() + acc.tidx();
     /* Image y coordinate in the grid */
     let gid_y = acc.bidy() * acc.bdimy() + acc.tidy();
-    /* Allocate shared memory for current block */
-    let shared = reserve_shared[f64]((128 + 7 * 2) * (1 + 7 * 2));
+    /* Allocate shared memory for current block with size = (128 + 7 * 2) * (1 + 7 * 2) */
+    let shared = reserve_shared[f64](2130);
 
     /* Copy input image content to shared memory */
     for j in offset_range(0, acc.bdimy() + filter.height * 2, acc.bdimy()) {
