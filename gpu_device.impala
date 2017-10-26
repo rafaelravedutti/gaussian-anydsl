@@ -9,7 +9,8 @@ struct image {
 /* Filter structure */
 struct filter {
   buffer : Buffer,      /* Buffer that contains target device data */
-  size: i32             /* Filter size */
+  width: i32,           /* Filter width */
+  height: i32           /* Filter height */
 }
 
 /* Iterate from min to max executing a function */
@@ -56,7 +57,7 @@ fn get_1d_filter_coeff(filt : filter, i : i32) -> f64 {
 
 /* Gets 2D filter coefficient at (i, j) index */
 fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
-  bitcast[&[1][f64]](filt.buffer.data)(j * filt.size + i)
+  bitcast[&[1][f64]](filt.buffer.data)(j * filt.width + i)
 }
 
 /* Allocate memory in target device */
@@ -128,19 +129,55 @@ fn iterate(input_image : image, output_image : image, body: fn(i32, i32) -> ()) 
   }
 }
 
-/* Generates a 5x1 filter data structure given its coefficients */
-fn filter_5x1(mask : Buffer) -> filter {
+/* Iterates over an image in GPU based on a stencil */
+fn iterate_stencil(input_image : image, output_image : image, stencil : filter, body: fn(i32, i32) -> ()) -> () {
   /* Use first CUDA accelerator */
   let accelerator = cuda_accelerator(0);
+  /* CUDA kernel grid configuration */
+  let grid = (input_image.width, input_image.height, 1);
+  /* CUDA kernel block configuration */
+  let block = (128, 1, 1);
 
-  /* Allocates the filter data structure for a 5x1 filter */
-  let result = filter {
-    buffer: accelerator.alloc(5 * sizeof[f64]()),
-    size: 5
-  };
+  /* Execute the following code in the GPU */
+  with accelerator.exec(grid, block) @{
+    /* Image x coordinate in the grid */
+    let gid_x = accelerator.bidx() * accelerator.bdimx() + accelerator.tidx();
+    /* Image y coordinate in the grid */
+    let gid_y = accelerator.bidy() * accelerator.bdimy() + accelerator.tidy();
+
+    /* Check for image boundaries to avoid invalid memory region access */
+    if gid_x < input_image.width && gid_y < input_image.height {
+      /* Call the body function with the obtained indexes */
+      body(gid_x, gid_y);
+    }
+  }
+}
+
+/* Generates a 5x1 filter data structure given its coefficients */
+fn filter_5x1(mask : Buffer, is_row : bool) -> filter {
+  /* Use first CUDA accelerator */
+  let accelerator = cuda_accelerator(0);
+  /* Filter result */
+  let mut result : filter;
+
+  /* Allocates the filter data structure for a 5x1 column filter */
+  if !is_row {
+    result = filter {
+      buffer: accelerator.alloc(5 * sizeof[f64]()),
+      width: 5,
+      height: 1
+    };
+  /* Allocates the filter data structure for a 5x1 row filter */
+  } else {
+    result = filter {
+      buffer: accelerator.alloc(5 * sizeof[f64]()),
+      width: 1,
+      height: 5
+    };
+  }
 
   /* Copy filter data to GPU */
-  copy(mask, result.buffer, result.size * sizeof[f64]());
+  copy(mask, result.buffer, result.width * result.height * sizeof[f64]());
 
   result
 }
@@ -153,28 +190,41 @@ fn filter_5x5(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 5x5 filter */
   let result = filter {
     buffer: accelerator.alloc(5 * 5 * sizeof[f64]()),
-    size: 5
+    width: 5,
+    height: 5
   };
 
   /* Copy filter data to GPU */
-  copy(mask, result.buffer, result.size * result.size * sizeof[f64]());
+  copy(mask, result.buffer, result.width * result.height * sizeof[f64]());
 
   result
 }
 
 /* Generates a 7x1 filter data structure given its coefficients */
-fn filter_7x1(mask : Buffer) -> filter {
+fn filter_7x1(mask : Buffer, is_row : bool) -> filter {
   /* Use first CUDA accelerator */
   let accelerator = cuda_accelerator(0);
+  /* Filter result */
+  let mut result : filter;
 
-  /* Allocates the filter data structure for a 7x1 filter */
-  let result = filter {
-    buffer: accelerator.alloc(7 * sizeof[f64]()),
-    size: 7
-  };
+  /* Allocates the filter data structure for a 7x1 column filter */
+  if !is_row {
+    result = filter {
+      buffer: accelerator.alloc(7 * sizeof[f64]()),
+      width: 7,
+      height: 1
+    };
+  /* Allocates the filter data structure for a 7x1 row filter */
+  } else {
+    result = filter {
+      buffer: accelerator.alloc(7 * sizeof[f64]()),
+      width: 1,
+      height: 7
+    };
+  }
 
   /* Copy filter data to GPU */
-  copy(mask, result.buffer, result.size * sizeof[f64]());
+  copy(mask, result.buffer, result.width * result.height * sizeof[f64]());
 
   result
 }
@@ -187,11 +237,12 @@ fn filter_7x7(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 7x7 filter */
   let result = filter {
     buffer: accelerator.alloc(7 * 7 * sizeof[f64]()),
-    size: 7
+    width: 7,
+    height: 7
   };
 
   /* Copy filter data to GPU */
-  copy(mask, result.buffer, result.size * result.size * sizeof[f64]());
+  copy(mask, result.buffer, result.width * result.height * sizeof[f64]());
 
   result
 }
