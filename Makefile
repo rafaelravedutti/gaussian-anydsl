@@ -11,8 +11,8 @@ LLVM_BIN=${ANYDSL_PATH}/llvm_build/bin
 # OpenCV
 OPENCV_LIBS=-lopencv_core -lopencv_highgui -lopencv_imgproc 
 
-# Device type (gpu or cpu)
-PLATFORM_TYPE=gpu
+# Device file (gpu or cpu)
+PLATFORM_FILE=gpu_device_shm.impala
 
 # Impala files to link
 RUNTIME_PATH=${ANYDSL_PATH}/runtime
@@ -29,7 +29,7 @@ IMPALA_LINK_FILES = \
 
 all: gaussian
 
-main.ll: ${PLATFORM_TYPE}_device.impala gaussian.impala opencv_image.impala main.impala
+main.ll: ${PLATFORM_FILE} gaussian.impala opencv_image.impala main.impala
 	${IMPALA_BIN}/impala -emit-llvm -g -O3 ${IMPALA_LINK_FILES} $^
 
 opencv_runtime.ll: opencv_runtime.cpp
