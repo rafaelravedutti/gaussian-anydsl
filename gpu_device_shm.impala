@@ -166,7 +166,8 @@ fn iterate_stencil(input_image : image, output_image : image, stencil : filter, 
         let img_index_y = gid_y - stencil.height + j;
 
         if img_index_x >= 0 && img_index_x < input_image.width && img_index_y >= 0 && img_index_y < input_image.height {
-          shared((acc.tidy() + j) * (acc.bdimy() + stencil.height * 2) + acc.tidx() + i) = bitcast[&[1][f64]](input_image.buffer.data)(img_index_y * input_image.width + img_index_x);
+          shared((acc.tidy() + j) * (acc.bdimy() + stencil.height * 2) + acc.tidx() + i) =
+            bitcast[&[1][f64]](input_image.buffer.data)(img_index_y * input_image.width + img_index_x);
         }
       }
     }

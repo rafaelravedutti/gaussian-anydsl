@@ -161,7 +161,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 31 "gpu_device_shm.impala"
         if (_31401) goto l31402; else goto l31593;
     l31593: ;
-        #line 172 "gpu_device_shm.impala"
+        #line 173 "gpu_device_shm.impala"
         goto l31528;
     l31402: ;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
@@ -192,7 +192,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 164 "gpu_device_shm.impala"
         int _31415;
         _31415 = _31405 + _31414;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31449;
         _31449 = _31430 * _31425;
         #line 31 "gpu_device_shm.impala"
@@ -217,28 +217,28 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 31 "gpu_device_shm.impala"
         if (_31471) goto l31472; else goto l31527;
     l31527: ;
-        #line 172 "gpu_device_shm.impala"
+        #line 173 "gpu_device_shm.impala"
         goto l31528;
     l31528: ;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
         __syncthreads();
     l31533: ;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         bool _31535;
         _31535 = gid_x_31419 < _31425;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         if (_31535) goto l31536; else goto l31592;
     l31592: ;
-        #line 181 "gpu_device_shm.impala"
+        #line 182 "gpu_device_shm.impala"
         goto l31591;
     l31536: ;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         bool _31537;
         _31537 = gid_y_31429 < _31434;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         if (_31537) goto l31538; else goto l31590;
     l31590: ;
-        #line 181 "gpu_device_shm.impala"
+        #line 182 "gpu_device_shm.impala"
         goto l31591;
     l31591: ;
         return ;
@@ -399,7 +399,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 164 "gpu_device_shm.impala"
         int _31482;
         _31482 = _31475 + _31414;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31507;
         _31507 = img_index_y_31490 * _31425;
         #line 168 "gpu_device_shm.impala"
@@ -435,7 +435,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31486) goto l31487; else goto l31524;
     l31524: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31521;
     l31487: ;
         #line 168 "gpu_device_shm.impala"
@@ -444,19 +444,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31488) goto l31489; else goto l31523;
     l31523: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31521;
     l31489: ;
         #line 168 "gpu_device_shm.impala"
         if (_31491) goto l31492; else goto l31522;
     l31522: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31521;
     l31492: ;
         #line 168 "gpu_device_shm.impala"
         if (_31493) goto l31494; else goto l31520;
     l31520: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31521;
     l31521: ;
         #line 33 "gpu_device_shm.impala"
@@ -480,7 +480,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 169 "gpu_device_shm.impala"
         int _31513;
         _31513 = _31500 + _31399;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31508;
         _31508 = _31507 + img_index_x_31485;
         #line 169 "gpu_device_shm.impala"
@@ -489,19 +489,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 169 "gpu_device_shm.impala"
         int _31514;
         _31514 = _31512 * _31513;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double* _31509;
         _31509 = _26235_31342 + _31508;
         #line 169 "gpu_device_shm.impala"
         int _31515;
         _31515 = _31514 + _31503;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31510;
         _31510 = *_31509;
         #line 169 "gpu_device_shm.impala"
         int _31516;
         _31516 = _31515 + _31480;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31518;
         _31518 = _31510;
         #line 169 "gpu_device_shm.impala"
@@ -528,7 +528,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31422) goto l31423; else goto l31466;
     l31466: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31463;
     l31423: ;
         #line 168 "gpu_device_shm.impala"
@@ -537,19 +537,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31426) goto l31427; else goto l31465;
     l31465: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31463;
     l31427: ;
         #line 168 "gpu_device_shm.impala"
         if (_31431) goto l31432; else goto l31464;
     l31464: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31463;
     l31432: ;
         #line 168 "gpu_device_shm.impala"
         if (_31435) goto l31436; else goto l31462;
     l31462: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31463;
     l31463: ;
         #line 33 "gpu_device_shm.impala"
@@ -570,7 +570,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         p_31445 = _31445;
     l31443: ;
         _31445 = p_31445;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31450;
         _31450 = _31449 + img_index_x_31421;
         #line 169 "gpu_device_shm.impala"
@@ -579,19 +579,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26231(struct_image_6444 _
         #line 169 "gpu_device_shm.impala"
         int _31456;
         _31456 = _31439 * _31455;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double* _31451;
         _31451 = _26235_31342 + _31450;
         #line 169 "gpu_device_shm.impala"
         int _31457;
         _31457 = _31456 + _31445;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31452;
         _31452 = *_31451;
         #line 169 "gpu_device_shm.impala"
         int _31458;
         _31458 = _31457 + _31410;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31460;
         _31460 = _31452;
         #line 169 "gpu_device_shm.impala"
@@ -737,7 +737,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 31 "gpu_device_shm.impala"
         if (_31633) goto l31634; else goto l31816;
     l31816: ;
-        #line 172 "gpu_device_shm.impala"
+        #line 173 "gpu_device_shm.impala"
         goto l31756;
     l31634: ;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
@@ -762,7 +762,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 165 "gpu_device_shm.impala"
         int _31651;
         _31651 = gid_x_31650 - _31644;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31678;
         _31678 = _31660 * _31655;
         #line 164 "gpu_device_shm.impala"
@@ -796,28 +796,28 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 31 "gpu_device_shm.impala"
         if (_31699) goto l31700; else goto l31755;
     l31755: ;
-        #line 172 "gpu_device_shm.impala"
+        #line 173 "gpu_device_shm.impala"
         goto l31756;
     l31756: ;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
         __syncthreads();
     l31758: ;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         bool _31760;
         _31760 = gid_x_31650 < _31655;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         if (_31760) goto l31761; else goto l31815;
     l31815: ;
-        #line 181 "gpu_device_shm.impala"
+        #line 182 "gpu_device_shm.impala"
         goto l31814;
     l31761: ;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         bool _31762;
         _31762 = gid_y_31659 < _31663;
-        #line 178 "gpu_device_shm.impala"
+        #line 179 "gpu_device_shm.impala"
         if (_31762) goto l31763; else goto l31813;
     l31813: ;
-        #line 181 "gpu_device_shm.impala"
+        #line 182 "gpu_device_shm.impala"
         goto l31814;
     l31814: ;
         return ;
@@ -984,7 +984,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         bool _31719;
         _31719 = 0 <= img_index_y_31718;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31735;
         _31735 = img_index_y_31718 * _31655;
         #line 31 "gpu_device_shm.impala"
@@ -1014,7 +1014,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31714) goto l31715; else goto l31752;
     l31752: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31749;
     l31715: ;
         #line 168 "gpu_device_shm.impala"
@@ -1023,19 +1023,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31716) goto l31717; else goto l31751;
     l31751: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31749;
     l31717: ;
         #line 168 "gpu_device_shm.impala"
         if (_31719) goto l31720; else goto l31750;
     l31750: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31749;
     l31720: ;
         #line 168 "gpu_device_shm.impala"
         if (_31721) goto l31722; else goto l31748;
     l31748: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31749;
     l31749: ;
         #line 33 "gpu_device_shm.impala"
@@ -1056,7 +1056,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         p_31731 = _31731;
     l31729: ;
         _31731 = p_31731;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31736;
         _31736 = _31735 + img_index_x_31713;
         #line 169 "gpu_device_shm.impala"
@@ -1065,19 +1065,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 169 "gpu_device_shm.impala"
         int _31741;
         _31741 = _31728 + _31631;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double* _31737;
         _31737 = _26510_31598 + _31736;
         #line 169 "gpu_device_shm.impala"
         int _31742;
         _31742 = _31740 * _31741;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31738;
         _31738 = *_31737;
         #line 169 "gpu_device_shm.impala"
         int _31743;
         _31743 = _31742 + _31731;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31746;
         _31746 = _31738;
         #line 169 "gpu_device_shm.impala"
@@ -1107,7 +1107,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31653) goto l31654; else goto l31694;
     l31694: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31691;
     l31654: ;
         #line 168 "gpu_device_shm.impala"
@@ -1116,19 +1116,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         #line 168 "gpu_device_shm.impala"
         if (_31656) goto l31657; else goto l31693;
     l31693: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31691;
     l31657: ;
         #line 168 "gpu_device_shm.impala"
         if (_31661) goto l31662; else goto l31692;
     l31692: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31691;
     l31662: ;
         #line 168 "gpu_device_shm.impala"
         if (_31664) goto l31665; else goto l31690;
     l31690: ;
-        #line 170 "gpu_device_shm.impala"
+        #line 171 "gpu_device_shm.impala"
         goto l31691;
     l31691: ;
         #line 33 "gpu_device_shm.impala"
@@ -1149,22 +1149,22 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_26506(struct_image_6444 _
         p_31674 = _31674;
     l31672: ;
         _31674 = p_31674;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         int _31679;
         _31679 = _31678 + img_index_x_31652;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double* _31680;
         _31680 = _26510_31598 + _31679;
         #line 169 "gpu_device_shm.impala"
         int _31683;
         _31683 = _31671 + _31631;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31681;
         _31681 = *_31680;
         #line 169 "gpu_device_shm.impala"
         int _31684;
         _31684 = _31668 * _31683;
-        #line 169 "gpu_device_shm.impala"
+        #line 170 "gpu_device_shm.impala"
         double _31688;
         _31688 = _31681;
         #line 169 "gpu_device_shm.impala"
