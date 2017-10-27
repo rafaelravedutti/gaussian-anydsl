@@ -87,7 +87,7 @@ fn create_temporary_image(width : i32, height : i32) -> image {
   image {
     buffer: null_buffer,
     device_data: accelerator.alloc(width * height * sizeof[f64]()),
-    //shm_data: 0 as &[3][f64],
+    shm_data: 0 as &mut[3][f64],
     width: width,
     height: height
   }
@@ -130,7 +130,7 @@ fn images(input_image : image, output_image : image, body : fn() -> ()) -> () {
 }
 
 /* Iterates over an image in GPU */
-fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ()) -> () {
+fn iterate(input_image : image, body : fn(i32, i32) -> ()) -> () {
   /* Use first CUDA accelerator */
   let accelerator = cuda_accelerator(0);
   /* CUDA kernel grid configuration */
