@@ -1,10 +1,10 @@
 /* Image structure */
 struct image {
-  buffer : Buffer,      /* Buffer that contains host data */
-  device_data : Buffer, /* Data in the target device */
-  shm_data : Buffer,    /* Data in the target device shared memory */
-  width : i32,          /* Image width */
-  height : i32          /* Image height */
+  buffer : Buffer,          /* Buffer that contains host data */
+  device_data : Buffer,     /* Data in the target device */
+  shm_data : &mut[3][f64],  /* Data in the target device shared memory */
+  width : i32,              /* Image width */
+  height : i32              /* Image height */
 }
 
 /* Filter structure */
@@ -72,13 +72,25 @@ fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
   bitcast[&[1][f64]](filt.buffer.data)(j * filt.width + i)
 }
 
-/* Allocate memory in target device */
-fn alloc_target(size : i32) -> Buffer {
+/* Create temporary image */
+fn create_temporary_image(width : i32, height : i32) -> image {
   /* Use first CUDA accelerator */
   let accelerator = cuda_accelerator(0);
 
-  /* GPU allocation */
-  accelerator.alloc(size)
+  /* Null buffer that musn't be used */
+  let null_buffer = Buffer {
+    device: 0,
+    data: 0 as &[i8]
+  };
+
+  /* Create image object and return it */
+  image {
+    buffer: null_buffer,
+    device_data: accelerator.alloc(width * height * sizeof[f64]()),
+    //shm_data: 0 as &[3][f64],
+    width: width,
+    height: height
+  }
 }
 
 /* Get device data for image */
@@ -142,7 +154,7 @@ fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ())
 }
 
 /* Iterates over an image in GPU based on a stencil */
-fn iterate_stencil(input_image : image, output_image : image, stencil : filter, body : fn(i32, i32) -> ()) -> () {
+fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32) -> ()) -> () {
   /* Use first CUDA accelerator */
   let acc = cuda_accelerator(0);
   /* CUDA kernel grid configuration */

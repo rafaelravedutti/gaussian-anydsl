@@ -2,18 +2,18 @@ extern "C" {
 typedef struct {
     int e0;
     char* e1;
-} struct_Buffer_5540;
+} struct_Buffer_5426;
 typedef struct {
-    struct_Buffer_5540 e0;
+    struct_Buffer_5426 e0;
     int e1;
     int e2;
-} struct_filter_5543;
+} struct_filter_5425;
 typedef struct {
-    struct_Buffer_5540 e0;
-    struct_Buffer_5540 e1;
+    struct_Buffer_5426 e0;
+    struct_Buffer_5426 e1;
     int e2;
     int e3;
-} struct_image_5544;
+} struct_image_5429;
 
 __device__ inline int threadIdx_x() { return threadIdx.x; }
 __device__ inline int threadIdx_y() { return threadIdx.y; }
@@ -27,465 +27,465 @@ __device__ inline int blockDim_z() { return blockDim.z; }
 __device__ inline int gridDim_x() { return gridDim.x; }
 __device__ inline int gridDim_y() { return gridDim.y; }
 __device__ inline int gridDim_z() { return gridDim.z; }
-__global__ void lambda_21082(struct_Buffer_5540, struct_filter_5543, struct_image_5544);
-__global__ void lambda_21214(struct_Buffer_5540, struct_filter_5543, double*, struct_image_5544, struct_Buffer_5540);
+__global__ void lambda_20628(struct_filter_5425, struct_image_5429, struct_Buffer_5426);
+__global__ void lambda_20760(struct_image_5429, struct_filter_5425, double*, struct_Buffer_5426, struct_Buffer_5426);
 
-__global__ __launch_bounds__ (128 * 1 * 1) void lambda_21082(struct_Buffer_5540 _21085_23421, struct_filter_5543 _21086_23422, struct_image_5544 _21087_23423) {
-    int  _23429;
-    int p_23429;
-    int  _23435;
-    int p_23435;
-    int  _23441;
-    int p_23441;
-    int  _23447;
-    int p_23447;
-    int  _23453;
-    int p_23453;
-    int  _23459;
-    int p_23459;
-    int  _23482;
-    int p_23482;
-    double  sum_23484;
-    double psum_23484;
+__global__ __launch_bounds__ (128 * 1 * 1) void lambda_20628(struct_filter_5425 _20631_22967, struct_image_5429 _20632_22968, struct_Buffer_5426 _20633_22969) {
+    int  _22975;
+    int p_22975;
+    int  _22981;
+    int p_22981;
+    int  _22987;
+    int p_22987;
+    int  _22993;
+    int p_22993;
+    int  _22999;
+    int p_22999;
+    int  _23005;
+    int p_23005;
+    int  _23028;
+    int p_23028;
+    double  sum_23030;
+    double psum_23030;
     #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-    _23429 = blockIdx_x();
-    p_23429 = _23429;
-    l23427: ;
-        _23429 = p_23429;
+    _22975 = blockIdx_x();
+    p_22975 = _22975;
+    l22973: ;
+        _22975 = p_22975;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23435 = blockDim_x();
-        p_23435 = _23435;
-    l23433: ;
-        _23435 = p_23435;
+        _22981 = blockDim_x();
+        p_22981 = _22981;
+    l22979: ;
+        _22981 = p_22981;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23441 = threadIdx_x();
-        p_23441 = _23441;
-    l23439: ;
-        _23441 = p_23441;
+        _22987 = threadIdx_x();
+        p_22987 = _22987;
+    l22985: ;
+        _22987 = p_22987;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23447 = blockIdx_y();
-        p_23447 = _23447;
-    l23445: ;
-        _23447 = p_23447;
+        _22993 = blockIdx_y();
+        p_22993 = _22993;
+    l22991: ;
+        _22993 = p_22993;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23453 = blockDim_y();
-        p_23453 = _23453;
-    l23451: ;
-        _23453 = p_23453;
+        _22999 = blockDim_y();
+        p_22999 = _22999;
+    l22997: ;
+        _22999 = p_22999;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23459 = threadIdx_y();
-        p_23459 = _23459;
-    l23457: ;
-        _23459 = p_23459;
+        _23005 = threadIdx_y();
+        p_23005 = _23005;
+    l23003: ;
+        _23005 = p_23005;
         #line 11 "main.impala"
-        int _23463;
-        _23463 = _21087_23423.e2;
-        #line 144 "gpu_device.impala"
-        int _23460;
-        _23460 = _23429 * _23435;
-        #line 144 "gpu_device.impala"
-        int gid_x_23461;
-        gid_x_23461 = _23460 + _23441;
-        #line 149 "gpu_device.impala"
-        bool _23464;
-        _23464 = gid_x_23461 < _23463;
-        #line 149 "gpu_device.impala"
-        if (_23464) goto l23465; else goto l23530;
-    l23530: ;
-        #line 152 "gpu_device.impala"
-        goto l23529;
-    l23465: ;
-        #line 146 "gpu_device.impala"
-        int _23466;
-        _23466 = _23447 * _23453;
+        int _23009;
+        _23009 = _20632_22968.e2;
+        #line 155 "gpu_device.impala"
+        int _23006;
+        _23006 = _22975 * _22981;
+        #line 155 "gpu_device.impala"
+        int gid_x_23007;
+        gid_x_23007 = _23006 + _22987;
+        #line 160 "gpu_device.impala"
+        bool _23010;
+        _23010 = gid_x_23007 < _23009;
+        #line 160 "gpu_device.impala"
+        if (_23010) goto l23011; else goto l23076;
+    l23076: ;
+        #line 163 "gpu_device.impala"
+        goto l23075;
+    l23011: ;
         #line 11 "main.impala"
-        int _23469;
-        _23469 = _21087_23423.e3;
-        #line 146 "gpu_device.impala"
-        int gid_y_23467;
-        gid_y_23467 = _23466 + _23459;
-        #line 149 "gpu_device.impala"
-        bool _23470;
-        _23470 = gid_y_23467 < _23469;
-        #line 149 "gpu_device.impala"
-        if (_23470) goto l23471; else goto l23528;
-    l23528: ;
-        #line 152 "gpu_device.impala"
-        goto l23529;
-    l23529: ;
+        int _23015;
+        _23015 = _20632_22968.e3;
+        #line 157 "gpu_device.impala"
+        int _23012;
+        _23012 = _22993 * _22999;
+        #line 157 "gpu_device.impala"
+        int gid_y_23013;
+        gid_y_23013 = _23012 + _23005;
+        #line 160 "gpu_device.impala"
+        bool _23016;
+        _23016 = gid_y_23013 < _23015;
+        #line 160 "gpu_device.impala"
+        if (_23016) goto l23017; else goto l23074;
+    l23074: ;
+        #line 163 "gpu_device.impala"
+        goto l23075;
+    l23075: ;
         return ;
-    l23471: ;
-        #line 35 "gpu_device.impala"
-        char* _23512;
-        _23512 = _21085_23421.e1;
-        #line 25 "gaussian.impala"
-        int _23501;
-        _23501 = gid_y_23467 * _23463;
-        #line 35 "gpu_device.impala"
-        double* _23513;
-        union { double* dst; char* src; } u_23513;
-        u_23513.src = _23512;
-        _23513 = u_23513.dst;
+    l23017: ;
         #line 50 "gpu_device.impala"
-        struct_Buffer_5540 _23498;
-        _23498 = _21087_23423.e1;
-        #line 25 "gaussian.impala"
-        int _23514;
-        _23514 = _23501 + gid_x_23461;
+        int _23047;
+        _23047 = gid_y_23013 * _23009;
+        #line 45 "gpu_device.impala"
+        char* _23058;
+        _23058 = _20633_22969.e1;
         #line 4 "gaussian.impala"
-        int _23473;
-        _23473 = _21086_23422.e1;
+        int _23019;
+        _23019 = _20631_22967.e1;
+        #line 45 "gpu_device.impala"
+        double* _23059;
+        union { double* dst; char* src; } u_23059;
+        u_23059.src = _23058;
+        _23059 = u_23059.dst;
         #line 50 "gpu_device.impala"
-        char* _23499;
-        _23499 = _23498.e1;
-        #line 34 "gpu_device.impala"
-        double* index_23515;
-        index_23515 = _23513 + _23514;
+        struct_Buffer_5426 _23044;
+        _23044 = _20632_22968.e1;
         #line 4 "gaussian.impala"
-        int h_anchor_23475;
-        h_anchor_23475 = _23473 / 2;
+        int h_anchor_23021;
+        h_anchor_23021 = _23019 / 2;
+        #line 17 "gaussian.impala"
+        bool _23022;
+        _23022 = h_anchor_23021 <= gid_x_23007;
         #line 50 "gpu_device.impala"
-        double* _23500;
-        union { double* dst; char* src; } u_23500;
-        u_23500.src = _23499;
-        _23500 = u_23500.dst;
+        int _23060;
+        _23060 = _23047 + gid_x_23007;
+        #line 45 "gpu_device.impala"
+        double* _23061;
+        _23061 = _23059 + _23060;
+        #line 50 "gpu_device.impala"
+        char* _23045;
+        _23045 = _23044.e1;
+        #line 50 "gpu_device.impala"
+        double* _23046;
+        union { double* dst; char* src; } u_23046;
+        u_23046.src = _23045;
+        _23046 = u_23046.dst;
         #line 17 "gaussian.impala"
-        bool _23476;
-        _23476 = h_anchor_23475 <= gid_x_23461;
-        #line 17 "gaussian.impala"
-        if (_23476) goto l23477; else goto l23527;
-    l23527: ;
+        if (_23022) goto l23023; else goto l23073;
+    l23073: ;
         #line 27 "gaussian.impala"
-        goto l23521;
-    l23477: ;
+        goto l23067;
+    l23023: ;
         #line 17 "gaussian.impala"
-        int _23478;
-        _23478 = _23463 - h_anchor_23475;
+        int _23024;
+        _23024 = _23009 - h_anchor_23021;
         #line 17 "gaussian.impala"
-        bool _23479;
-        _23479 = gid_x_23461 < _23478;
+        bool _23025;
+        _23025 = gid_x_23007 < _23024;
         #line 17 "gaussian.impala"
-        if (_23479) goto l23480; else goto l23520;
-    l23520: ;
+        if (_23025) goto l23026; else goto l23066;
+    l23066: ;
         #line 27 "gaussian.impala"
-        goto l23521;
-    l23521: ;
+        goto l23067;
+    l23067: ;
         #line 50 "gpu_device.impala"
-        double* _23522;
-        _23522 = _23500 + _23514;
+        double* _23068;
+        _23068 = _23046 + _23060;
         #line 50 "gpu_device.impala"
-        double _23523;
-        _23523 = *_23522;
+        double _23069;
+        _23069 = *_23068;
         #line 50 "gpu_device.impala"
-        double _23525;
-        _23525 = _23523;
-        #line 35 "gpu_device.impala"
-        *index_23515 = _23525;
+        double _23071;
+        _23071 = _23069;
+        #line 45 "gpu_device.impala"
+        *_23061 = _23071;
         return ;
-    l23480: ;
+    l23026: ;
+        #line 55 "gpu_device.impala"
+        struct_Buffer_5426 _23037;
+        _23037 = _20631_22967.e0;
         #line 19 "gaussian.impala"
-        int _23486;
-        _23486 = 1 + h_anchor_23475;
+        int _23032;
+        _23032 = 1 + h_anchor_23021;
         #line 19 "gaussian.impala"
-        int _23518;
-        _23518 = 0 - h_anchor_23475;
+        int _23064;
+        _23064 = 0 - h_anchor_23021;
         #line 55 "gpu_device.impala"
-        struct_Buffer_5540 _23491;
-        _23491 = _21086_23422.e0;
+        char* _23038;
+        _23038 = _23037.e1;
         #line 55 "gpu_device.impala"
-        char* _23492;
-        _23492 = _23491.e1;
-        #line 55 "gpu_device.impala"
-        double* _23493;
-        union { double* dst; char* src; } u_23493;
-        u_23493.src = _23492;
-        _23493 = u_23493.dst;
+        double* _23039;
+        union { double* dst; char* src; } u_23039;
+        u_23039.src = _23038;
+        _23039 = u_23039.dst;
         #line 19 "gpu_device.impala"
-        p_23482 = _23518;
-        psum_23484 = 0.000000e+00;
-        goto l23481;
-    l23481: ;
-        _23482 = p_23482;
-        sum_23484 = psum_23484;
+        p_23028 = _23064;
+        psum_23030 = 0.000000e+00;
+        goto l23027;
+    l23027: ;
+        _23028 = p_23028;
+        sum_23030 = psum_23030;
         #line 19 "gpu_device.impala"
-        bool _23487;
-        _23487 = _23482 < _23486;
+        bool _23033;
+        _23033 = _23028 < _23032;
         #line 19 "gpu_device.impala"
-        if (_23487) goto l23488; else goto l23511;
-    l23511: ;
-        #line 35 "gpu_device.impala"
-        *index_23515 = sum_23484;
+        if (_23033) goto l23034; else goto l23057;
+    l23057: ;
+        #line 45 "gpu_device.impala"
+        *_23061 = sum_23030;
         return ;
-    l23488: ;
-        #line 21 "gaussian.impala"
-        int _23502;
-        _23502 = gid_x_23461 + _23482;
+    l23034: ;
         #line 23 "gpu_device.impala"
-        int _23489;
-        _23489 = 1 + _23482;
+        int _23035;
+        _23035 = 1 + _23028;
         #line 21 "gaussian.impala"
-        int _23494;
-        _23494 = _23482 + h_anchor_23475;
+        int _23048;
+        _23048 = gid_x_23007 + _23028;
+        #line 21 "gaussian.impala"
+        int _23040;
+        _23040 = _23028 + h_anchor_23021;
         #line 50 "gpu_device.impala"
-        int _23503;
-        _23503 = _23501 + _23502;
+        int _23049;
+        _23049 = _23047 + _23048;
         #line 54 "gpu_device.impala"
-        double* i_23495;
-        i_23495 = _23493 + _23494;
+        double* i_23041;
+        i_23041 = _23039 + _23040;
         #line 50 "gpu_device.impala"
-        double* _23504;
-        _23504 = _23500 + _23503;
+        double* _23050;
+        _23050 = _23046 + _23049;
         #line 55 "gpu_device.impala"
-        double _23496;
-        _23496 = *i_23495;
+        double _23042;
+        _23042 = *i_23041;
         #line 55 "gpu_device.impala"
-        double _23507;
-        _23507 = _23496;
+        double _23053;
+        _23053 = _23042;
         #line 50 "gpu_device.impala"
-        double _23505;
-        _23505 = *_23504;
+        double _23051;
+        _23051 = *_23050;
         #line 50 "gpu_device.impala"
-        double _23508;
-        _23508 = _23505;
+        double _23054;
+        _23054 = _23051;
         #line 21 "gaussian.impala"
-        double _23509;
-        _23509 = _23507 * _23508;
+        double _23055;
+        _23055 = _23053 * _23054;
         #line 21 "gaussian.impala"
-        double _23510;
-        _23510 = sum_23484 + _23509;
+        double _23056;
+        _23056 = sum_23030 + _23055;
         #line 19 "gpu_device.impala"
-        p_23482 = _23489;
-        psum_23484 = _23510;
-        goto l23481;
+        p_23028 = _23035;
+        psum_23030 = _23056;
+        goto l23027;
 }
 
-__global__ __launch_bounds__ (128 * 1 * 1) void lambda_21214(struct_Buffer_5540 _21217_23534, struct_filter_5543 _21218_23535, double* _21219_23536, struct_image_5544 _21220_23537, struct_Buffer_5540 _21221_23538) {
-    int  _23541;
-    int p_23541;
-    int  _23544;
-    int p_23544;
-    int  _23547;
-    int p_23547;
-    int  _23550;
-    int p_23550;
-    int  _23553;
-    int p_23553;
-    int  _23556;
-    int p_23556;
-    int  _23575;
-    int p_23575;
-    double  sum_23577;
-    double psum_23577;
+__global__ __launch_bounds__ (128 * 1 * 1) void lambda_20760(struct_image_5429 _20763_23080, struct_filter_5425 _20764_23081, double* _20765_23082, struct_Buffer_5426 _20766_23083, struct_Buffer_5426 _20767_23084) {
+    int  _23087;
+    int p_23087;
+    int  _23090;
+    int p_23090;
+    int  _23093;
+    int p_23093;
+    int  _23096;
+    int p_23096;
+    int  _23099;
+    int p_23099;
+    int  _23102;
+    int p_23102;
+    int  _23121;
+    int p_23121;
+    double  sum_23123;
+    double psum_23123;
     #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-    _23541 = blockIdx_x();
-    p_23541 = _23541;
-    l23539: ;
-        _23541 = p_23541;
+    _23087 = blockIdx_x();
+    p_23087 = _23087;
+    l23085: ;
+        _23087 = p_23087;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23544 = blockDim_x();
-        p_23544 = _23544;
-    l23542: ;
-        _23544 = p_23544;
+        _23090 = blockDim_x();
+        p_23090 = _23090;
+    l23088: ;
+        _23090 = p_23090;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23547 = threadIdx_x();
-        p_23547 = _23547;
-    l23545: ;
-        _23547 = p_23547;
+        _23093 = threadIdx_x();
+        p_23093 = _23093;
+    l23091: ;
+        _23093 = p_23093;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23550 = blockIdx_y();
-        p_23550 = _23550;
-    l23548: ;
-        _23550 = p_23550;
+        _23096 = blockIdx_y();
+        p_23096 = _23096;
+    l23094: ;
+        _23096 = p_23096;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23553 = blockDim_y();
-        p_23553 = _23553;
-    l23551: ;
-        _23553 = p_23553;
+        _23099 = blockDim_y();
+        p_23099 = _23099;
+    l23097: ;
+        _23099 = p_23099;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _23556 = threadIdx_y();
-        p_23556 = _23556;
-    l23554: ;
-        _23556 = p_23556;
+        _23102 = threadIdx_y();
+        p_23102 = _23102;
+    l23100: ;
+        _23102 = p_23102;
+        #line 155 "gpu_device.impala"
+        int _23103;
+        _23103 = _23087 * _23090;
         #line 11 "main.impala"
-        int _23559;
-        _23559 = _21220_23537.e2;
-        #line 144 "gpu_device.impala"
-        int _23557;
-        _23557 = _23541 * _23544;
-        #line 144 "gpu_device.impala"
-        int gid_x_23558;
-        gid_x_23558 = _23557 + _23547;
-        #line 149 "gpu_device.impala"
-        bool _23560;
-        _23560 = gid_x_23558 < _23559;
-        #line 149 "gpu_device.impala"
-        if (_23560) goto l23561; else goto l23619;
-    l23619: ;
-        #line 152 "gpu_device.impala"
-        goto l23618;
-    l23561: ;
+        int _23105;
+        _23105 = _20763_23080.e2;
+        #line 155 "gpu_device.impala"
+        int gid_x_23104;
+        gid_x_23104 = _23103 + _23093;
+        #line 160 "gpu_device.impala"
+        bool _23106;
+        _23106 = gid_x_23104 < _23105;
+        #line 160 "gpu_device.impala"
+        if (_23106) goto l23107; else goto l23165;
+    l23165: ;
+        #line 163 "gpu_device.impala"
+        goto l23164;
+    l23107: ;
         #line 11 "main.impala"
-        int _23564;
-        _23564 = _21220_23537.e3;
-        #line 146 "gpu_device.impala"
-        int _23562;
-        _23562 = _23550 * _23553;
-        #line 146 "gpu_device.impala"
-        int gid_y_23563;
-        gid_y_23563 = _23562 + _23556;
-        #line 149 "gpu_device.impala"
-        bool _23565;
-        _23565 = gid_y_23563 < _23564;
-        #line 149 "gpu_device.impala"
-        if (_23565) goto l23566; else goto l23617;
-    l23617: ;
-        #line 152 "gpu_device.impala"
-        goto l23618;
-    l23618: ;
+        int _23110;
+        _23110 = _20763_23080.e3;
+        #line 157 "gpu_device.impala"
+        int _23108;
+        _23108 = _23096 * _23099;
+        #line 157 "gpu_device.impala"
+        int gid_y_23109;
+        gid_y_23109 = _23108 + _23102;
+        #line 160 "gpu_device.impala"
+        bool _23111;
+        _23111 = gid_y_23109 < _23110;
+        #line 160 "gpu_device.impala"
+        if (_23111) goto l23112; else goto l23163;
+    l23163: ;
+        #line 163 "gpu_device.impala"
+        goto l23164;
+    l23164: ;
         return ;
-    l23566: ;
-        #line 45 "gpu_device.impala"
-        char* _23602;
-        _23602 = _21221_23538.e1;
+    l23112: ;
+        #line 50 "gpu_device.impala"
+        int _23150;
+        _23150 = gid_y_23109 * _23105;
         #line 6 "gaussian.impala"
-        int _23567;
-        _23567 = _21218_23535.e2;
-        #line 40 "gpu_device.impala"
-        char* _23589;
-        _23589 = _21217_23534.e1;
-        #line 51 "gaussian.impala"
-        int _23604;
-        _23604 = gid_y_23563 * _23559;
+        int _23113;
+        _23113 = _20764_23081.e2;
         #line 45 "gpu_device.impala"
-        double* _23603;
-        union { double* dst; char* src; } u_23603;
-        u_23603.src = _23602;
-        _23603 = u_23603.dst;
+        char* _23148;
+        _23148 = _20766_23083.e1;
         #line 6 "gaussian.impala"
-        int v_anchor_23568;
-        v_anchor_23568 = _23567 / 2;
-        #line 40 "gpu_device.impala"
-        double* _23590;
-        union { double* dst; char* src; } u_23590;
-        u_23590.src = _23589;
-        _23590 = u_23590.dst;
-        #line 51 "gaussian.impala"
-        int _23605;
-        _23605 = _23604 + gid_x_23558;
+        int v_anchor_23114;
+        v_anchor_23114 = _23113 / 2;
         #line 45 "gpu_device.impala"
-        double* _23606;
-        _23606 = _23603 + _23605;
+        double* _23149;
+        union { double* dst; char* src; } u_23149;
+        u_23149.src = _23148;
+        _23149 = u_23149.dst;
+        #line 50 "gpu_device.impala"
+        char* _23135;
+        _23135 = _20767_23084.e1;
+        #line 50 "gpu_device.impala"
+        int _23151;
+        _23151 = _23150 + gid_x_23104;
         #line 39 "gaussian.impala"
-        bool _23569;
-        _23569 = v_anchor_23568 <= gid_y_23563;
+        bool _23115;
+        _23115 = v_anchor_23114 <= gid_y_23109;
+        #line 45 "gpu_device.impala"
+        double* _23152;
+        _23152 = _23149 + _23151;
+        #line 50 "gpu_device.impala"
+        double* _23136;
+        union { double* dst; char* src; } u_23136;
+        u_23136.src = _23135;
+        _23136 = u_23136.dst;
         #line 39 "gaussian.impala"
-        if (_23569) goto l23570; else goto l23616;
-    l23616: ;
+        if (_23115) goto l23116; else goto l23162;
+    l23162: ;
         #line 49 "gaussian.impala"
-        goto l23610;
-    l23570: ;
+        goto l23156;
+    l23116: ;
         #line 39 "gaussian.impala"
-        int _23571;
-        _23571 = _23564 - v_anchor_23568;
+        int _23117;
+        _23117 = _23110 - v_anchor_23114;
         #line 39 "gaussian.impala"
-        bool _23572;
-        _23572 = gid_y_23563 < _23571;
+        bool _23118;
+        _23118 = gid_y_23109 < _23117;
         #line 39 "gaussian.impala"
-        if (_23572) goto l23573; else goto l23609;
-    l23609: ;
+        if (_23118) goto l23119; else goto l23155;
+    l23155: ;
         #line 49 "gaussian.impala"
-        goto l23610;
-    l23610: ;
-        #line 39 "gpu_device.impala"
-        double* index_23611;
-        index_23611 = _23590 + _23605;
-        #line 40 "gpu_device.impala"
-        double _23612;
-        _23612 = *index_23611;
-        #line 40 "gpu_device.impala"
-        double _23614;
-        _23614 = _23612;
+        goto l23156;
+    l23156: ;
+        #line 50 "gpu_device.impala"
+        double* _23157;
+        _23157 = _23136 + _23151;
+        #line 50 "gpu_device.impala"
+        double _23158;
+        _23158 = *_23157;
+        #line 50 "gpu_device.impala"
+        double _23160;
+        _23160 = _23158;
         #line 45 "gpu_device.impala"
-        *_23606 = _23614;
+        *_23152 = _23160;
         return ;
-    l23573: ;
+    l23119: ;
         #line 41 "gaussian.impala"
-        int _23608;
-        _23608 = 0 - v_anchor_23568;
+        int _23124;
+        _23124 = 1 + v_anchor_23114;
         #line 41 "gaussian.impala"
-        int _23578;
-        _23578 = 1 + v_anchor_23568;
+        int _23154;
+        _23154 = 0 - v_anchor_23114;
         #line 55 "gpu_device.impala"
-        struct_Buffer_5540 _23582;
-        _23582 = _21218_23535.e0;
+        struct_Buffer_5426 _23128;
+        _23128 = _20764_23081.e0;
         #line 55 "gpu_device.impala"
-        char* _23583;
-        _23583 = _23582.e1;
+        char* _23129;
+        _23129 = _23128.e1;
         #line 55 "gpu_device.impala"
-        double* _23584;
-        union { double* dst; char* src; } u_23584;
-        u_23584.src = _23583;
-        _23584 = u_23584.dst;
+        double* _23130;
+        union { double* dst; char* src; } u_23130;
+        u_23130.src = _23129;
+        _23130 = u_23130.dst;
         #line 19 "gpu_device.impala"
-        p_23575 = _23608;
-        psum_23577 = 0.000000e+00;
-        goto l23574;
-    l23574: ;
-        _23575 = p_23575;
-        sum_23577 = psum_23577;
+        p_23121 = _23154;
+        psum_23123 = 0.000000e+00;
+        goto l23120;
+    l23120: ;
+        _23121 = p_23121;
+        sum_23123 = psum_23123;
         #line 19 "gpu_device.impala"
-        bool _23579;
-        _23579 = _23575 < _23578;
+        bool _23125;
+        _23125 = _23121 < _23124;
         #line 19 "gpu_device.impala"
-        if (_23579) goto l23580; else goto l23601;
-    l23601: ;
+        if (_23125) goto l23126; else goto l23147;
+    l23147: ;
         #line 45 "gpu_device.impala"
-        *_23606 = sum_23577;
+        *_23152 = sum_23123;
         return ;
-    l23580: ;
+    l23126: ;
+        #line 43 "gaussian.impala"
+        int _23137;
+        _23137 = gid_y_23109 + _23121;
+        #line 50 "gpu_device.impala"
+        int _23138;
+        _23138 = _23137 * _23105;
         #line 23 "gpu_device.impala"
-        int _23581;
-        _23581 = 1 + _23575;
+        int _23127;
+        _23127 = 1 + _23121;
         #line 43 "gaussian.impala"
-        int _23591;
-        _23591 = gid_y_23563 + _23575;
-        #line 43 "gaussian.impala"
-        int _23585;
-        _23585 = _23575 + v_anchor_23568;
-        #line 43 "gaussian.impala"
-        int _23592;
-        _23592 = _23591 * _23559;
+        int _23131;
+        _23131 = _23121 + v_anchor_23114;
+        #line 50 "gpu_device.impala"
+        int _23139;
+        _23139 = _23138 + gid_x_23104;
         #line 54 "gpu_device.impala"
-        double* i_23586;
-        i_23586 = _23584 + _23585;
-        #line 43 "gaussian.impala"
-        int _23593;
-        _23593 = _23592 + gid_x_23558;
+        double* i_23132;
+        i_23132 = _23130 + _23131;
+        #line 50 "gpu_device.impala"
+        double* _23140;
+        _23140 = _23136 + _23139;
         #line 55 "gpu_device.impala"
-        double _23587;
-        _23587 = *i_23586;
-        #line 39 "gpu_device.impala"
-        double* index_23594;
-        index_23594 = _23590 + _23593;
+        double _23133;
+        _23133 = *i_23132;
         #line 55 "gpu_device.impala"
-        double _23597;
-        _23597 = _23587;
-        #line 40 "gpu_device.impala"
-        double _23595;
-        _23595 = *index_23594;
-        #line 40 "gpu_device.impala"
-        double _23598;
-        _23598 = _23595;
+        double _23143;
+        _23143 = _23133;
+        #line 50 "gpu_device.impala"
+        double _23141;
+        _23141 = *_23140;
+        #line 50 "gpu_device.impala"
+        double _23144;
+        _23144 = _23141;
         #line 43 "gaussian.impala"
-        double _23599;
-        _23599 = _23597 * _23598;
+        double _23145;
+        _23145 = _23143 * _23144;
         #line 43 "gaussian.impala"
-        double _23600;
-        _23600 = sum_23577 + _23599;
+        double _23146;
+        _23146 = sum_23123 + _23145;
         #line 19 "gpu_device.impala"
-        p_23575 = _23581;
-        psum_23577 = _23600;
-        goto l23574;
+        p_23121 = _23127;
+        psum_23123 = _23146;
+        goto l23120;
 }
 
 }
