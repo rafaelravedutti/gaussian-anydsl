@@ -9,7 +9,8 @@ struct image {
 /* Filter structure */
 struct filter {
   buffer : Buffer,      /* Buffer that contains target device data */
-  size : i32            /* Filter size */
+  width : i32,          /* Filter width */
+  height : i32          /* Filter height */
 };
 
 /* Iterate from min to max executing a function */
@@ -60,13 +61,24 @@ fn get_1d_filter_coeff(filt : filter, i : i32) -> f64 {
 /* Gets 2D filter coefficient at (i, j) index */
 fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
   let converted_data = filt.buffer.data as &[f64];
-  converted_data(j * filt.size + i) 
+  converted_data(j * filt.width + i) 
 }
 
-/* Allocate memory in target device */
-fn alloc_target(size : i32) -> Buffer {
-  /* CPU allocation */
-  alloc_cpu(size)
+/* Create temporary image */
+fn create_temporary_image(width : i32, height : i32) -> image {
+  /* Null buffer that musn't be used */
+  let null_buffer = Buffer {
+    device: 0,
+    data: 0 as &[i8]
+  };
+
+  /* Create image object and return it */
+  image {
+    buffer: alloc_cpu(width * height * sizeof[f64]()),
+    device_data: null_buffer,
+    width: width,
+    height: height
+  }
 }
 
 /* Get device data for image */
@@ -95,7 +107,7 @@ fn images(input_image : image, output_image : image, body: fn() -> ()) -> () {
 }
 
 /* Iterates over an image in CPU */
-fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ()) -> () {
+fn iterate(input_image : image, body : fn(i32, i32) -> ()) -> () {
   /* Go through the image lines */
   for y in range(0, input_image.height) {
     /* Go through the image columns */
@@ -106,13 +118,41 @@ fn iterate(input_image : image, output_image : image, body : fn(i32, i32) -> ())
   }
 }
 
-/* Generates a 5x1 filter data structure given its coefficients */
-fn filter_5x1(mask : Buffer) -> filter {
-  /* Allocates the filter data structure for a 5x1 filter */
-  filter {
-    buffer: mask,
-    size: 5
+/* Iterates over an image in CPU */
+fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, image) -> ()) -> () {
+  /* Go through the image lines */
+  for y in range(0, input_image.height) {
+    /* Go through the image columns */
+    for x in range(0, input_image.width) {
+      /* Call the body function with the obtained indexes */
+      body(x, y, input_image);
+    }
   }
+}
+
+
+/* Generates a 5x1 filter data structure given its coefficients */
+fn filter_5x1(mask : Buffer, is_row : bool) -> filter {
+  /* Filter result */
+  let mut result : filter;
+
+  /* Allocates the filter data structure for a 5x1 column filter */
+  if !is_row {
+    result = filter {
+      buffer: mask,
+      width: 5,
+      height: 1
+    };
+  /* Allocates the filter data structure for a 5x1 row filter */
+  } else {
+    result = filter {
+      buffer: mask,
+      width: 1,
+      height: 5
+    };
+  }
+
+  result
 }
 
 /* Generates a 5x5 filter data structure given its coefficients */
@@ -120,17 +160,33 @@ fn filter_5x5(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 5x5 filter */
   filter {
     buffer: mask,
-    size: 5
+    width: 5,
+    height: 5
   }
 }
 
 /* Generates a 7x1 filter data structure given its coefficients */
-fn filter_7x1(mask : Buffer) -> filter {
-  /* Allocates the filter data structure for a 7x1 filter */
-  filter {
-    buffer: mask,
-    size: 7
+fn filter_7x1(mask : Buffer, is_row : bool) -> filter {
+  /* Filter result */
+  let mut result : filter;
+
+  /* Allocates the filter data structure for a 7x1 column filter */
+  if !is_row {
+    result = filter {
+      buffer: mask,
+      width: 7,
+      height: 1
+    };
+  /* Allocates the filter data structure for a 7x1 row filter */
+  } else {
+    result = filter {
+      buffer: mask,
+      width: 1,
+      height: 7
+    };
   }
+
+  result
 }
 
 /* Generates a 7x7 filter data structure given its coefficients */
@@ -138,6 +194,7 @@ fn filter_7x7(mask : Buffer) -> filter {
   /* Allocates the filter data structure for a 7x7 filter */
   filter {
     buffer: mask,
-    size: 7
+    width: 7,
+    height: 7
   }
 }
