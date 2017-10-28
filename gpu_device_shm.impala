@@ -2,16 +2,23 @@
 struct image {
   buffer : Buffer,          /* Buffer that contains host data */
   device_data : Buffer,     /* Data in the target device */
-  shm_data : &mut[3][f64],  /* Data in the target device shared memory */
   width : i32,              /* Image width */
   height : i32              /* Image height */
 }
 
 /* Filter structure */
 struct filter {
-  buffer : Buffer,      /* Buffer that contains target device data */
-  width: i32,           /* Filter width */
-  height: i32           /* Filter height */
+  buffer : Buffer,          /* Buffer that contains target device data */
+  width : i32,              /* Filter width */
+  height : i32              /* Filter height */
+}
+
+/* Shared memory data */
+struct shared_memory {
+  data : &mut[3][f64],      /* Shared memory data */
+  width : i32,              /* Shared memory width */
+  offset_x : i32,           /* Offset for x axis */
+  offset_y : i32            /* Offset for y axis */
 }
 
 /* Iterate from min to max executing a function */
@@ -58,12 +65,11 @@ fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
 }
 
 /* Gets image pixel at (x, y) coordinates */
-fn get_pixel(img : image, x : i32, y : i32) -> f64 {
+fn get_pixel(shared : shared_memory, x : i32, y : i32) -> f64 {
   /* Use first CUDA accelerator */
   let accelerator = cuda_accelerator(0);
 
-  //bitcast[&[1][f64]](img.device_data.data)(y * img.width + x)
-  (img.shm_data)((y - accelerator.gdimy() * accelerator.gidy()) * img.width + x - accelerator.gdimx() * accelerator.gidx())
+  shared.data((y + shared.offset_y) * shared.width + x + shared.offset_x)
 }
 
 /* Gets 1D filter coefficient at i index */
@@ -91,7 +97,6 @@ fn create_temporary_image(width : i32, height : i32) -> image {
   image {
     buffer: null_buffer,
     device_data: accelerator.alloc(width * height * sizeof[f64]()),
-    shm_data: 0 as &mut[3][f64],
     width: width,
     height: height
   }
@@ -158,7 +163,7 @@ fn iterate(input_image : image, body : fn(i32, i32) -> ()) -> () {
 }
 
 /* Iterates over an image in GPU based on a stencil */
-fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32) -> ()) -> () {
+fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, shared_memory) -> ()) -> () {
   /* Use first CUDA accelerator */
   let acc = cuda_accelerator(0);
   /* CUDA kernel grid configuration */
@@ -173,22 +178,35 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32) ->
     /* Image y coordinate in the grid */
     let gid_y = acc.bidy() * acc.bdimy() + acc.tidy();
     /* Allocate shared memory for current block with size = (128 + 7 * 2) * (1 + 7 * 2) */
-    let shared = reserve_shared[f64](2130);
+    let shared = shared_memory {
+      data: reserve_shared[f64](2130),
+      width: acc.bdimx() + stencil.width * 2,
+      offset_x: acc.bdimx() + stencil.width - acc.bidx() * acc.bdimx(),
+      offset_y: acc.bdimy() + stencil.height - acc.bidy() * acc.bdimy()
+    };
 
     /* Go through each block step in the y axis (rows) */
     for j in offset_range(0, acc.bdimy() + stencil.height * 2, acc.bdimy()) {
       /* Go through each block step in the x axis (columns) */
       for i in offset_range(0, acc.bdimx() + stencil.width * 2, acc.bdimx()) {
-        /* Image x axis */
-        let img_index_x = gid_x - stencil.width + i;
-        /* Image y axis */
-        let img_index_y = gid_y - stencil.height + j;
+        /* Shared memory x axis */
+        let shm_index_x = acc.tidx() + i;
+        /* Shared memory y axis */
+        let shm_index_y = acc.tidy() + j;
 
-        /* Check image boundaries to avoid invalid memory region access */
-        if img_index_x >= 0 && img_index_x < input_image.width && img_index_y >= 0 && img_index_y < input_image.height {
-          /* Copy input image content to shared memory */
-          shared((acc.tidy() + j) * (acc.bdimy() + stencil.height * 2) + acc.tidx() + i) =
-            bitcast[&[1][f64]](input_image.device_data.data)(img_index_y * input_image.width + img_index_x);
+        /* Check shared memory boundaries to avoid invalid memory region access */
+        if shm_index_x < acc.bdimx() + stencil.width * 2 && shm_index_y < acc.bdimy() + stencil.height * 2 {
+          /* Image x axis */
+          let img_index_x = gid_x - stencil.width + i;
+          /* Image y axis */
+          let img_index_y = gid_y - stencil.height + j;
+
+          /* Check image boundaries to avoid invalid memory region access */
+          if img_index_x >= 0 && img_index_x < input_image.width && img_index_y >= 0 && img_index_y < input_image.height {
+            /* Copy input image content to shared memory */
+            shared.data(shm_index_y * (acc.bdimy() + stencil.height * 2) + shm_index_x) =
+              bitcast[&[1][f64]](input_image.device_data.data)(img_index_y * input_image.width + img_index_x);
+          }
         }
       }
     }
@@ -199,7 +217,7 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32) ->
     /* Check for image boundaries to avoid invalid memory region access */
     if gid_x < input_image.width && gid_y < input_image.height {
       /* Call the body function with the obtained indexes */
-      body(gid_x, gid_y);
+      body(gid_x, gid_y, shared);
     }
   }
 }
