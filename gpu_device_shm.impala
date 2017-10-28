@@ -177,34 +177,43 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, sh
     let gid_x = acc.bidx() * acc.bdimx() + acc.tidx();
     /* Image y coordinate in the grid */
     let gid_y = acc.bidy() * acc.bdimy() + acc.tidy();
-    /* Allocate shared memory for current block with size = (128 + 7 * 2) * (1 + 7 * 2) */
+    /* Width size in pixels to extended the block data in the shared memory */
+    let extend_width = stencil.width / 2;
+    /* Height size in pixels to extended the block data in the shared memory */
+    let extend_height = stencil.height / 2;
+    /* Shared memory x dimension size */
+    let shm_dimx = acc.bdimx() + extend_width * 2;
+    /* Shared memory y dimension size */
+    let shm_dimy = acc.bdimy() + extend_height * 2;
+
+    /* Allocate shared memory for current block with size = (128 + 3 * 2) * (1 + 3 * 2) */
     let shared = shared_memory {
-      data: reserve_shared[f64](2130),
-      width: acc.bdimx() + stencil.width * 2,
-      offset_x: stencil.width - acc.bidx() * acc.bdimx(),
-      offset_y: stencil.height - acc.bidy() * acc.bdimy()
+      data: reserve_shared[f64](938),
+      width: shm_dimx,
+      offset_x: extend_width - acc.bidx() * acc.bdimx(),
+      offset_y: extend_height - acc.bidy() * acc.bdimy()
     };
 
     /* Go through each block step in the y axis (rows) */
-    for j in offset_range(0, acc.bdimy() + stencil.height * 2, acc.bdimy()) {
+    for j in offset_range(0, shm_dimy, acc.bdimy()) {
       /* Go through each block step in the x axis (columns) */
-      for i in offset_range(0, acc.bdimx() + stencil.width * 2, acc.bdimx()) {
+      for i in offset_range(0, shm_dimx, acc.bdimx()) {
         /* Shared memory x axis */
         let shm_index_x = acc.tidx() + i;
         /* Shared memory y axis */
         let shm_index_y = acc.tidy() + j;
 
         /* Check shared memory boundaries to avoid invalid memory region access */
-        if shm_index_x < acc.bdimx() + stencil.width * 2 && shm_index_y < acc.bdimy() + stencil.height * 2 {
+        if shm_index_x < shm_dimx && shm_index_y < shm_dimy {
           /* Image x axis */
-          let img_index_x = gid_x - stencil.width + i;
+          let img_index_x = gid_x - extend_width + i;
           /* Image y axis */
-          let img_index_y = gid_y - stencil.height + j;
+          let img_index_y = gid_y - extend_height + j;
 
           /* Check image boundaries to avoid invalid memory region access */
           if img_index_x >= 0 && img_index_x < input_image.width && img_index_y >= 0 && img_index_y < input_image.height {
             /* Copy input image content to shared memory */
-            shared.data(shm_index_y * (acc.bdimy() + stencil.height * 2) + shm_index_x) =
+            shared.data(shm_index_y * shm_dimx + shm_index_x) =
               bitcast[&[1][f64]](input_image.device_data.data)(img_index_y * input_image.width + img_index_x);
           }
         }
