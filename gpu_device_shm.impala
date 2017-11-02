@@ -173,35 +173,45 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, sh
 
   /* Execute the following code in the GPU */
   with acc.exec(grid, block) @{
+    /* Block dimensions */
+    let bdimx = acc.bdimx();
+    let bdimy = acc.bdimy();
+    /* Block indexes */
+    let bidx = acc.bidx();
+    let bidy = acc.bidy();
+    /* Thread indexes */
+    let tidx = acc.tidx();
+    let tidy = acc.tidy();
+
     /* Image x coordinate in the grid */
-    let gid_x = acc.bidx() * acc.bdimx() + acc.tidx();
+    let gid_x = bidx * bdimx + tidx;
     /* Image y coordinate in the grid */
-    let gid_y = acc.bidy() * acc.bdimy() + acc.tidy();
+    let gid_y = bidy * bdimy + tidy;
     /* Width size in pixels to extended the block data in the shared memory */
     let extend_width = stencil.width / 2;
     /* Height size in pixels to extended the block data in the shared memory */
     let extend_height = stencil.height / 2;
     /* Shared memory x dimension size */
-    let shm_dimx = acc.bdimx() + extend_width * 2;
+    let shm_dimx = bdimx + extend_width * 2;
     /* Shared memory y dimension size */
-    let shm_dimy = acc.bdimy() + extend_height * 2;
+    let shm_dimy = bdimy + extend_height * 2;
 
     /* Allocate shared memory for current block with size = (128 + 3 * 2) * (1 + 3 * 2) */
     let shared = shared_memory {
       data: reserve_shared[f64](938),
       width: shm_dimx,
-      offset_x: extend_width - acc.bidx() * acc.bdimx(),
-      offset_y: extend_height - acc.bidy() * acc.bdimy()
+      offset_x: extend_width - bidx * acc.bdimx(),
+      offset_y: extend_height - bidy * acc.bdimy()
     };
 
     /* Go through each block step in the y axis (rows) */
-    for j in offset_range(0, shm_dimy, acc.bdimy()) {
+    for j in offset_range(0, shm_dimy, bdimy) {
       /* Go through each block step in the x axis (columns) */
-      for i in offset_range(0, shm_dimx, acc.bdimx()) {
+      for i in offset_range(0, shm_dimx, bdimx) {
         /* Shared memory x axis */
-        let shm_index_x = acc.tidx() + i;
+        let shm_index_x = tidx + i;
         /* Shared memory y axis */
-        let shm_index_y = acc.tidy() + j;
+        let shm_index_y = tidy + j;
 
         /* Check shared memory boundaries to avoid invalid memory region access */
         if shm_index_x < shm_dimx && shm_index_y < shm_dimy {
