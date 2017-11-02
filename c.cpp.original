@@ -12,9 +12,6 @@
 
 #include <sstream>
 
-#define FILTER_WIDTH        7
-#define FILTER_HEIGHT       7
-
 namespace thorin {
 
 class CCodeGen {
@@ -305,10 +302,6 @@ void CCodeGen::emit() {
         }
         assert(ret_param);
 
-        int bdimx = 0;
-        int bdimy = 0;
-        int bdimz = 0;
-
         // emit function & its declaration
         auto ret_param_fn_type = ret_param->type()->as<FnType>();
         auto ret_type = ret_param_fn_type->num_ops() > 2 ? world_.tuple_type(ret_param_fn_type->ops().skip_front()) : ret_param_fn_type->ops().back();
@@ -319,13 +312,8 @@ void CCodeGen::emit() {
                 case Lang::C99:    break;
                 case Lang::CUDA:   func_decls_ << "__global__ ";
                                    func_impl_  << "__global__ ";
-
-                                   bdimx = std::get<0>(config->second);
-                                   bdimy = std::get<1>(config->second);
-                                   bdimz = std::get<2>(config->second);
-
                                    if (config != kernel_config_.end())
-                                       func_impl_ << "__launch_bounds__ (" << bdimx << " * " << bdimy << " * " << bdimz << ") ";
+                                       func_impl_ << "__launch_bounds__ (" << std::get<0>(config->second) << " * " << std::get<1>(config->second) << " * " << std::get<2>(config->second) << ") ";
                                    break;
                 case Lang::OPENCL: func_decls_ << "__kernel ";
                                    func_impl_  << "__kernel ";
@@ -386,10 +374,6 @@ void CCodeGen::emit() {
         }
         func_decls_ << ");" << endl;
         func_impl_  << ") {" << up;
-
-        if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
-          func_impl_ << "__shared__ ds_img[" << (bdimx + FILTER_WIDTH * 2) << "][" << (bdimy + FILTER_HEIGHT * 2) << "];" << endl;
-        }
 
         // OpenCL: load struct from buffer
         for (auto param : continuation->params()) {
