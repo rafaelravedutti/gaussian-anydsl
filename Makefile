@@ -5,8 +5,14 @@ ANYDSL_PATH=/home/rafael/repositories/anydsl
 IMPALA_PATH=${ANYDSL_PATH}/impala
 IMPALA_BIN=${IMPALA_PATH}/build/bin
 
-# LLVM bin
+# LLVM binaries
 LLVM_BIN=${ANYDSL_PATH}/llvm_build/bin
+
+# Thorin source path
+THORIN_PATH=${ANYDSL_PATH}/thorin
+THORIN_BUILD=${THORIN_PATH}/build
+THORIN_SRC=${THORIN_PATH}/src
+THORIN_BACKEND_SRC=${THORIN_SRC}/thorin/be
 
 # OpenCV
 OPENCV_LIBS=-lopencv_core -lopencv_highgui -lopencv_imgproc 
@@ -30,7 +36,11 @@ IMPALA_LINK_FILES = \
 all: gaussian
 
 main.ll: ${PLATFORM_FILE} gaussian.impala opencv_image.impala main.impala
+	cp -p c.cpp ${THORIN_BACKEND_SRC}/
+	cd ${THORIN_BUILD} && make && cd -
 	${IMPALA_BIN}/impala -emit-llvm -g -O3 ${IMPALA_LINK_FILES} $^
+	cp -p c.cpp.original ${THORIN_BACKEND_SRC}/c.cpp
+	cd ${THORIN_BUILD} && make && cd -
 
 opencv_runtime.ll: opencv_runtime.cpp
 	${LLVM_BIN}/clang++ -S -emit-llvm ${OPENCV_RUNTIME_FLAGS} $^
