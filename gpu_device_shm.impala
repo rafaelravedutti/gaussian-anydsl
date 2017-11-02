@@ -200,8 +200,8 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, sh
     let shared = shared_memory {
       data: reserve_shared[f64](938),
       width: shm_dimx,
-      offset_x: extend_width - bidx * acc.bdimx(),
-      offset_y: extend_height - bidy * acc.bdimy()
+      offset_x: extend_width - bidx * bdimx,
+      offset_y: extend_height - bidy * bdimy
     };
 
     /* Go through each block step in the y axis (rows) */

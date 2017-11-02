@@ -2,18 +2,18 @@ extern "C" {
 typedef struct {
     int e0;
     char* e1;
-} struct_Buffer_6341;
+} struct_Buffer_6327;
 typedef struct {
-    struct_Buffer_6341 e0;
-    int e1;
-    int e2;
-} struct_filter_6340;
-typedef struct {
-    struct_Buffer_6341 e0;
-    struct_Buffer_6341 e1;
+    struct_Buffer_6327 e0;
+    struct_Buffer_6327 e1;
     int e2;
     int e3;
-} struct_image_6346;
+} struct_image_6326;
+typedef struct {
+    struct_Buffer_6327 e0;
+    int e1;
+    int e2;
+} struct_filter_6332;
 
 __device__ inline int threadIdx_x() { return threadIdx.x; }
 __device__ inline int threadIdx_y() { return threadIdx.y; }
@@ -27,1135 +27,1095 @@ __device__ inline int blockDim_z() { return blockDim.z; }
 __device__ inline int gridDim_x() { return gridDim.x; }
 __device__ inline int gridDim_y() { return gridDim.y; }
 __device__ inline int gridDim_z() { return gridDim.z; }
-__global__ void lambda_25604(struct_filter_6340, double*, struct_Buffer_6341, struct_image_6346);
-__global__ void lambda_25866(double*, double*, struct_filter_6340, struct_Buffer_6341, struct_image_6346);
+__global__ void lambda_25292(struct_image_6326, struct_Buffer_6327, double*, struct_filter_6332);
+__global__ void lambda_25546(struct_image_6326, struct_filter_6332, double*, double*, struct_Buffer_6327);
 
-__global__ __launch_bounds__ (128 * 1 * 1) void lambda_25604(struct_filter_6340 _25607_30475, double* _25608_30476, struct_Buffer_6341 _25609_30477, struct_image_6346 _25610_30478) {
-    int  bdimx_30484;
-    int pbdimx_30484;
-    int  bdimy_30490;
-    int pbdimy_30490;
-    int  bidx_30496;
-    int pbidx_30496;
-    int  bidy_30502;
-    int pbidy_30502;
-    int  tidx_30508;
-    int ptidx_30508;
-    int  tidy_30514;
-    int ptidy_30514;
-    double*  reserve_shared_30522;
-    double* preserve_shared_30522;
-    int  _30525;
-    int p_30525;
-    int  _30528;
-    int p_30528;
-    int  _30539;
-    int p_30539;
-    int  _30595;
-    int p_30595;
-    int  _30661;
-    int p_30661;
-    double  sum_30663;
-    double psum_30663;
-    int  _30600;
-    int p_30600;
+__global__ __launch_bounds__ (128 * 1 * 1) void lambda_25292(struct_image_6326 _25295_30003, struct_Buffer_6327 _25296_30004, double* _25297_30005, struct_filter_6332 _25298_30006) {
+    int  bdimx_30012;
+    int pbdimx_30012;
+    int  bdimy_30018;
+    int pbdimy_30018;
+    int  bidx_30024;
+    int pbidx_30024;
+    int  bidy_30030;
+    int pbidy_30030;
+    int  tidx_30036;
+    int ptidx_30036;
+    int  tidy_30042;
+    int ptidy_30042;
+    double*  reserve_shared_30050;
+    double* preserve_shared_30050;
+    int  _30061;
+    int p_30061;
+    int  _30117;
+    int p_30117;
+    int  _30183;
+    int p_30183;
+    double  sum_30185;
+    double psum_30185;
+    int  _30122;
+    int p_30122;
     #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-    bdimx_30484 = blockDim_x();
-    pbdimx_30484 = bdimx_30484;
-    l30482: ;
-        bdimx_30484 = pbdimx_30484;
+    bdimx_30012 = blockDim_x();
+    pbdimx_30012 = bdimx_30012;
+    l30010: ;
+        bdimx_30012 = pbdimx_30012;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        bdimy_30490 = blockDim_y();
-        pbdimy_30490 = bdimy_30490;
-    l30488: ;
-        bdimy_30490 = pbdimy_30490;
+        bdimy_30018 = blockDim_y();
+        pbdimy_30018 = bdimy_30018;
+    l30016: ;
+        bdimy_30018 = pbdimy_30018;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        bidx_30496 = blockIdx_x();
-        pbidx_30496 = bidx_30496;
-    l30494: ;
-        bidx_30496 = pbidx_30496;
+        bidx_30024 = blockIdx_x();
+        pbidx_30024 = bidx_30024;
+    l30022: ;
+        bidx_30024 = pbidx_30024;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        bidy_30502 = blockIdx_y();
-        pbidy_30502 = bidy_30502;
-    l30500: ;
-        bidy_30502 = pbidy_30502;
+        bidy_30030 = blockIdx_y();
+        pbidy_30030 = bidy_30030;
+    l30028: ;
+        bidy_30030 = pbidy_30030;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        tidx_30508 = threadIdx_x();
-        ptidx_30508 = tidx_30508;
-    l30506: ;
-        tidx_30508 = ptidx_30508;
+        tidx_30036 = threadIdx_x();
+        ptidx_30036 = tidx_30036;
+    l30034: ;
+        tidx_30036 = ptidx_30036;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        tidy_30514 = threadIdx_y();
-        ptidy_30514 = tidy_30514;
-    l30512: ;
-        tidy_30514 = ptidy_30514;
+        tidy_30042 = threadIdx_y();
+        ptidy_30042 = tidy_30042;
+    l30040: ;
+        tidy_30042 = ptidy_30042;
         #line 201 "gpu_device_shm.impala"
-        __shared__ double reserver_reserve_shared_30522[938];
-        preserve_shared_30522 = reserver_reserve_shared_30522;
-    l30520: ;
-        reserve_shared_30522 = preserve_shared_30522;
-        #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _30525 = blockDim_x();
-        p_30525 = _30525;
-    l30523: ;
-        _30525 = p_30525;
-        #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _30528 = blockDim_y();
-        p_30528 = _30528;
-    l30526: ;
-        _30528 = p_30528;
-        #line 4 "gaussian.impala"
-        int _30542;
-        _30542 = _25607_30475.e1;
-        #line 189 "gpu_device_shm.impala"
-        int _30562;
-        _30562 = bidy_30502 * bdimy_30490;
-        #line 187 "gpu_device_shm.impala"
-        int _30553;
-        _30553 = bidx_30496 * bdimx_30484;
+        __shared__ double reserver_reserve_shared_30050[938];
+        preserve_shared_30050 = reserver_reserve_shared_30050;
+    l30048: ;
+        reserve_shared_30050 = preserve_shared_30050;
         #line 193 "gpu_device_shm.impala"
-        int _30532;
-        _30532 = _25607_30475.e2;
+        int _30054;
+        _30054 = _25298_30006.e2;
         #line 189 "gpu_device_shm.impala"
-        int gid_y_30563;
-        gid_y_30563 = _30562 + tidy_30514;
-        #line 4 "gaussian.impala"
-        int h_anchor_30543;
-        h_anchor_30543 = _30542 / 2;
+        int _30084;
+        _30084 = bidy_30030 * bdimy_30018;
         #line 11 "main.impala"
-        int _30568;
-        _30568 = _25610_30478.e3;
-        #line 193 "gpu_device_shm.impala"
-        int extend_height_30533;
-        extend_height_30533 = _30532 / 2;
+        int _30081;
+        _30081 = _25295_30003.e2;
         #line 187 "gpu_device_shm.impala"
-        int gid_x_30554;
-        gid_x_30554 = _30553 + tidx_30508;
-        #line 195 "gpu_device_shm.impala"
-        int _30544;
-        _30544 = 2 * h_anchor_30543;
-        #line 197 "gpu_device_shm.impala"
-        int _30534;
-        _30534 = 2 * extend_height_30533;
+        int _30075;
+        _30075 = bidx_30024 * bdimx_30012;
         #line 11 "main.impala"
-        int _30559;
-        _30559 = _25610_30478.e2;
-        #line 195 "gpu_device_shm.impala"
-        int shm_dimx_30545;
-        shm_dimx_30545 = bdimx_30484 + _30544;
+        int _30090;
+        _30090 = _25295_30003.e3;
+        #line 4 "gaussian.impala"
+        int _30064;
+        _30064 = _25298_30006.e1;
+        #line 193 "gpu_device_shm.impala"
+        int extend_height_30055;
+        extend_height_30055 = _30054 / 2;
+        #line 189 "gpu_device_shm.impala"
+        int gid_y_30085;
+        gid_y_30085 = _30084 + tidy_30042;
+        #line 187 "gpu_device_shm.impala"
+        int gid_x_30076;
+        gid_x_30076 = _30075 + tidx_30036;
+        #line 4 "gaussian.impala"
+        int h_anchor_30065;
+        h_anchor_30065 = _30064 / 2;
         #line 197 "gpu_device_shm.impala"
-        int shm_dimy_30535;
-        shm_dimy_30535 = bdimy_30490 + _30534;
+        int _30056;
+        _30056 = 2 * extend_height_30055;
+        #line 195 "gpu_device_shm.impala"
+        int _30066;
+        _30066 = 2 * h_anchor_30065;
+        #line 197 "gpu_device_shm.impala"
+        int shm_dimy_30057;
+        shm_dimy_30057 = bdimy_30018 + _30056;
+        #line 195 "gpu_device_shm.impala"
+        int shm_dimx_30067;
+        shm_dimx_30067 = bdimx_30012 + _30066;
         #line 38 "gpu_device_shm.impala"
-        bool _30536;
-        _30536 = 0 < shm_dimy_30535;
+        bool _30058;
+        _30058 = 0 < shm_dimy_30057;
         #line 38 "gpu_device_shm.impala"
-        if (_30536) goto l30537; else goto l30714;
-    l30714: ;
+        if (_30058) goto l30059; else goto l30234;
+    l30234: ;
         #line 231 "gpu_device_shm.impala"
-        goto l30644;
-    l30537: ;
-        #line 219 "gpu_device_shm.impala"
-        int _30555;
-        _30555 = gid_x_30554 - h_anchor_30543;
+        goto l30166;
+    l30059: ;
         #line 226 "gpu_device_shm.impala"
-        int _30580;
-        _30580 = tidy_30514 * shm_dimx_30545;
+        int _30102;
+        _30102 = tidy_30042 * shm_dimx_30067;
         #line 221 "gpu_device_shm.impala"
-        int _30564;
-        _30564 = gid_y_30563 - extend_height_30533;
-        #line 224 "gpu_device_shm.impala"
-        bool _30569;
-        _30569 = _30564 < _30568;
-        #line 224 "gpu_device_shm.impala"
-        bool _30565;
-        _30565 = 0 <= _30564;
+        int _30086;
+        _30086 = gid_y_30085 - extend_height_30055;
+        #line 219 "gpu_device_shm.impala"
+        int _30077;
+        _30077 = gid_x_30076 - h_anchor_30065;
         #line 217 "gpu_device_shm.impala"
-        bool _30551;
-        _30551 = tidy_30514 < shm_dimy_30535;
+        bool _30073;
+        _30073 = tidy_30042 < shm_dimy_30057;
+        #line 224 "gpu_device_shm.impala"
+        bool _30087;
+        _30087 = 0 <= _30086;
+        #line 224 "gpu_device_shm.impala"
+        bool _30091;
+        _30091 = _30086 < _30090;
         #line 227 "gpu_device_shm.impala"
-        int _30574;
-        _30574 = _30564 * _30559;
+        int _30096;
+        _30096 = _30086 * _30081;
         #line 38 "gpu_device_shm.impala"
-        p_30539 = 0;
-        goto l30538;
-    l30538: ;
-        _30539 = p_30539;
+        p_30061 = 0;
+        goto l30060;
+    l30060: ;
+        _30061 = p_30061;
         #line 38 "gpu_device_shm.impala"
-        bool _30546;
-        _30546 = _30539 < shm_dimx_30545;
+        bool _30068;
+        _30068 = _30061 < shm_dimx_30067;
         #line 38 "gpu_device_shm.impala"
-        if (_30546) goto l30547; else goto l30593;
-    l30593: ;
+        if (_30068) goto l30069; else goto l30115;
+    l30115: ;
         #line 38 "gpu_device_shm.impala"
-        p_30595 = bdimy_30490;
-        goto l30594;
-    l30594: ;
-        _30595 = p_30595;
+        p_30117 = bdimy_30018;
+        goto l30116;
+    l30116: ;
+        _30117 = p_30117;
         #line 38 "gpu_device_shm.impala"
-        bool _30597;
-        _30597 = _30595 < shm_dimy_30535;
+        bool _30119;
+        _30119 = _30117 < shm_dimy_30057;
         #line 38 "gpu_device_shm.impala"
-        if (_30597) goto l30598; else goto l30643;
-    l30643: ;
+        if (_30119) goto l30120; else goto l30165;
+    l30165: ;
         #line 231 "gpu_device_shm.impala"
-        goto l30644;
-    l30644: ;
+        goto l30166;
+    l30166: ;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
         __syncthreads();
-    l30649: ;
+    l30171: ;
         #line 237 "gpu_device_shm.impala"
-        bool _30651;
-        _30651 = gid_x_30554 < _30559;
+        bool _30173;
+        _30173 = gid_x_30076 < _30081;
         #line 237 "gpu_device_shm.impala"
-        if (_30651) goto l30652; else goto l30713;
-    l30713: ;
+        if (_30173) goto l30174; else goto l30233;
+    l30233: ;
         #line 240 "gpu_device_shm.impala"
-        goto l30712;
-    l30652: ;
+        goto l30232;
+    l30174: ;
         #line 237 "gpu_device_shm.impala"
-        bool _30653;
-        _30653 = gid_y_30563 < _30568;
+        bool _30175;
+        _30175 = gid_y_30085 < _30090;
         #line 237 "gpu_device_shm.impala"
-        if (_30653) goto l30654; else goto l30711;
-    l30711: ;
+        if (_30175) goto l30176; else goto l30231;
+    l30231: ;
         #line 240 "gpu_device_shm.impala"
-        goto l30712;
-    l30712: ;
+        goto l30232;
+    l30232: ;
         return ;
-    l30654: ;
+    l30176: ;
+        #line 64 "gpu_device_shm.impala"
+        char* _30213;
+        _30213 = _25296_30004.e1;
         #line 204 "gpu_device_shm.impala"
-        int _30676;
-        _30676 = bidy_30502 * _30528;
+        int _30198;
+        _30198 = extend_height_30055 - _30084;
         #line 64 "gpu_device_shm.impala"
-        char* _30693;
-        _30693 = _25609_30477.e1;
-        #line 17 "gaussian.impala"
-        bool _30655;
-        _30655 = h_anchor_30543 <= gid_x_30554;
-        #line 64 "gpu_device_shm.impala"
-        double* _30694;
-        union { double* dst; char* src; } u_30694;
-        u_30694.src = _30693;
-        _30694 = u_30694.dst;
-        #line 204 "gpu_device_shm.impala"
-        int _30677;
-        _30677 = extend_height_30533 - _30676;
-        #line 64 "gpu_device_shm.impala"
-        int _30695;
-        _30695 = gid_y_30563 * _30559;
+        double* _30214;
+        union { double* dst; char* src; } u_30214;
+        u_30214.src = _30213;
+        _30214 = u_30214.dst;
         #line 203 "gpu_device_shm.impala"
-        int _30682;
-        _30682 = bidx_30496 * _30525;
-        #line 203 "gpu_device_shm.impala"
-        int _30683;
-        _30683 = h_anchor_30543 - _30682;
-        #line 72 "gpu_device_shm.impala"
-        int _30678;
-        _30678 = gid_y_30563 + _30677;
+        int _30203;
+        _30203 = h_anchor_30065 - _30075;
         #line 64 "gpu_device_shm.impala"
-        int _30696;
-        _30696 = _30695 + gid_x_30554;
-        #line 72 "gpu_device_shm.impala"
-        int _30679;
-        _30679 = _30678 * shm_dimx_30545;
-        #line 64 "gpu_device_shm.impala"
-        double* _30697;
-        _30697 = _30694 + _30696;
+        int _30215;
+        _30215 = gid_y_30085 * _30081;
         #line 17 "gaussian.impala"
-        if (_30655) goto l30656; else goto l30710;
-    l30710: ;
+        bool _30177;
+        _30177 = h_anchor_30065 <= gid_x_30076;
+        #line 64 "gpu_device_shm.impala"
+        int _30216;
+        _30216 = _30215 + gid_x_30076;
+        #line 72 "gpu_device_shm.impala"
+        int _30199;
+        _30199 = gid_y_30085 + _30198;
+        #line 64 "gpu_device_shm.impala"
+        double* _30217;
+        _30217 = _30214 + _30216;
+        #line 72 "gpu_device_shm.impala"
+        int _30200;
+        _30200 = _30199 * shm_dimx_30067;
+        #line 17 "gaussian.impala"
+        if (_30177) goto l30178; else goto l30230;
+    l30230: ;
         #line 27 "gaussian.impala"
-        goto l30702;
-    l30656: ;
+        goto l30222;
+    l30178: ;
         #line 17 "gaussian.impala"
-        int _30657;
-        _30657 = _30559 - h_anchor_30543;
+        int _30179;
+        _30179 = _30081 - h_anchor_30065;
         #line 17 "gaussian.impala"
-        bool _30658;
-        _30658 = gid_x_30554 < _30657;
+        bool _30180;
+        _30180 = gid_x_30076 < _30179;
         #line 17 "gaussian.impala"
-        if (_30658) goto l30659; else goto l30701;
-    l30701: ;
+        if (_30180) goto l30181; else goto l30221;
+    l30221: ;
         #line 27 "gaussian.impala"
-        goto l30702;
-    l30702: ;
+        goto l30222;
+    l30222: ;
         #line 72 "gpu_device_shm.impala"
-        int _30703;
-        _30703 = _30679 + gid_x_30554;
+        int _30223;
+        _30223 = _30200 + gid_x_30076;
         #line 72 "gpu_device_shm.impala"
-        int _30704;
-        _30704 = _30703 + _30683;
+        int _30224;
+        _30224 = _30223 + _30203;
         #line 72 "gpu_device_shm.impala"
-        double* _30705;
-        _30705 = reserve_shared_30522 + _30704;
+        double* _30225;
+        _30225 = reserve_shared_30050 + _30224;
         #line 72 "gpu_device_shm.impala"
-        double _30706;
-        _30706 = *_30705;
+        double _30226;
+        _30226 = *_30225;
         #line 72 "gpu_device_shm.impala"
-        double _30708;
-        _30708 = _30706;
+        double _30228;
+        _30228 = _30226;
         #line 64 "gpu_device_shm.impala"
-        *_30697 = _30708;
+        *_30217 = _30228;
         return ;
-    l30659: ;
+    l30181: ;
+        #line 77 "gpu_device_shm.impala"
+        struct_Buffer_6327 _30191;
+        _30191 = _25298_30006.e0;
         #line 19 "gaussian.impala"
-        int _30665;
-        _30665 = 1 + h_anchor_30543;
+        int _30219;
+        _30219 = 0 - h_anchor_30065;
         #line 77 "gpu_device_shm.impala"
-        struct_Buffer_6341 _30669;
-        _30669 = _25607_30475.e0;
+        char* _30192;
+        _30192 = _30191.e1;
         #line 19 "gaussian.impala"
-        int _30699;
-        _30699 = 0 - h_anchor_30543;
+        int _30187;
+        _30187 = 1 + h_anchor_30065;
         #line 77 "gpu_device_shm.impala"
-        char* _30670;
-        _30670 = _30669.e1;
-        #line 77 "gpu_device_shm.impala"
-        double* _30671;
-        union { double* dst; char* src; } u_30671;
-        u_30671.src = _30670;
-        _30671 = u_30671.dst;
+        double* _30193;
+        union { double* dst; char* src; } u_30193;
+        u_30193.src = _30192;
+        _30193 = u_30193.dst;
         #line 27 "gpu_device_shm.impala"
-        p_30661 = _30699;
-        psum_30663 = 0.000000e+00;
-        goto l30660;
-    l30660: ;
-        _30661 = p_30661;
-        sum_30663 = psum_30663;
+        p_30183 = _30219;
+        psum_30185 = 0.000000e+00;
+        goto l30182;
+    l30182: ;
+        _30183 = p_30183;
+        sum_30185 = psum_30185;
         #line 27 "gpu_device_shm.impala"
-        bool _30666;
-        _30666 = _30661 < _30665;
+        bool _30188;
+        _30188 = _30183 < _30187;
         #line 27 "gpu_device_shm.impala"
-        if (_30666) goto l30667; else goto l30692;
-    l30692: ;
+        if (_30188) goto l30189; else goto l30212;
+    l30212: ;
         #line 64 "gpu_device_shm.impala"
-        *_30697 = sum_30663;
+        *_30217 = sum_30185;
         return ;
-    l30667: ;
-        #line 21 "gaussian.impala"
-        int _30672;
-        _30672 = _30661 + h_anchor_30543;
-        #line 21 "gaussian.impala"
-        int _30680;
-        _30680 = gid_x_30554 + _30661;
+    l30189: ;
         #line 31 "gpu_device_shm.impala"
-        int _30668;
-        _30668 = 1 + _30661;
+        int _30190;
+        _30190 = 1 + _30183;
+        #line 21 "gaussian.impala"
+        int _30201;
+        _30201 = gid_x_30076 + _30183;
+        #line 72 "gpu_device_shm.impala"
+        int _30202;
+        _30202 = _30200 + _30201;
+        #line 21 "gaussian.impala"
+        int _30194;
+        _30194 = _30183 + h_anchor_30065;
+        #line 72 "gpu_device_shm.impala"
+        int _30204;
+        _30204 = _30202 + _30203;
         #line 76 "gpu_device_shm.impala"
-        double* i_30673;
-        i_30673 = _30671 + _30672;
+        double* i_30195;
+        i_30195 = _30193 + _30194;
         #line 72 "gpu_device_shm.impala"
-        int _30681;
-        _30681 = _30679 + _30680;
+        double* _30205;
+        _30205 = reserve_shared_30050 + _30204;
         #line 77 "gpu_device_shm.impala"
-        double _30674;
-        _30674 = *i_30673;
-        #line 72 "gpu_device_shm.impala"
-        int _30684;
-        _30684 = _30681 + _30683;
+        double _30196;
+        _30196 = *i_30195;
         #line 77 "gpu_device_shm.impala"
-        double _30688;
-        _30688 = _30674;
+        double _30208;
+        _30208 = _30196;
         #line 72 "gpu_device_shm.impala"
-        double* _30685;
-        _30685 = reserve_shared_30522 + _30684;
+        double _30206;
+        _30206 = *_30205;
         #line 72 "gpu_device_shm.impala"
-        double _30686;
-        _30686 = *_30685;
-        #line 72 "gpu_device_shm.impala"
-        double _30689;
-        _30689 = _30686;
+        double _30209;
+        _30209 = _30206;
         #line 21 "gaussian.impala"
-        double _30690;
-        _30690 = _30688 * _30689;
+        double _30210;
+        _30210 = _30208 * _30209;
         #line 21 "gaussian.impala"
-        double _30691;
-        _30691 = sum_30663 + _30690;
+        double _30211;
+        _30211 = sum_30185 + _30210;
         #line 27 "gpu_device_shm.impala"
-        p_30661 = _30668;
-        psum_30663 = _30691;
-        goto l30660;
-    l30598: ;
+        p_30183 = _30190;
+        psum_30185 = _30211;
+        goto l30182;
+    l30120: ;
         #line 221 "gpu_device_shm.impala"
-        int img_index_y_30615;
-        img_index_y_30615 = _30564 + _30595;
+        int img_index_y_30137;
+        img_index_y_30137 = _30086 + _30117;
         #line 214 "gpu_device_shm.impala"
-        int shm_index_y_30607;
-        shm_index_y_30607 = tidy_30514 + _30595;
-        #line 226 "gpu_device_shm.impala"
-        int _30628;
-        _30628 = shm_index_y_30607 * shm_dimx_30545;
+        int shm_index_y_30129;
+        shm_index_y_30129 = tidy_30042 + _30117;
         #line 224 "gpu_device_shm.impala"
-        bool _30616;
-        _30616 = 0 <= img_index_y_30615;
+        bool _30138;
+        _30138 = 0 <= img_index_y_30137;
         #line 227 "gpu_device_shm.impala"
-        int _30623;
-        _30623 = img_index_y_30615 * _30559;
+        int _30145;
+        _30145 = img_index_y_30137 * _30081;
         #line 224 "gpu_device_shm.impala"
-        bool _30618;
-        _30618 = img_index_y_30615 < _30568;
+        bool _30140;
+        _30140 = img_index_y_30137 < _30090;
         #line 217 "gpu_device_shm.impala"
-        bool _30608;
-        _30608 = shm_index_y_30607 < shm_dimy_30535;
+        bool _30130;
+        _30130 = shm_index_y_30129 < shm_dimy_30057;
+        #line 226 "gpu_device_shm.impala"
+        int _30150;
+        _30150 = shm_index_y_30129 * shm_dimx_30067;
         #line 38 "gpu_device_shm.impala"
-        p_30600 = 0;
-        goto l30599;
-    l30599: ;
-        _30600 = p_30600;
+        p_30122 = 0;
+        goto l30121;
+    l30121: ;
+        _30122 = p_30122;
         #line 38 "gpu_device_shm.impala"
-        bool _30602;
-        _30602 = _30600 < shm_dimx_30545;
+        bool _30124;
+        _30124 = _30122 < shm_dimx_30067;
         #line 38 "gpu_device_shm.impala"
-        if (_30602) goto l30603; else goto l30641;
-    l30641: ;
+        if (_30124) goto l30125; else goto l30163;
+    l30163: ;
         #line 42 "gpu_device_shm.impala"
-        int _30642;
-        _30642 = _30595 + bdimy_30490;
+        int _30164;
+        _30164 = _30117 + bdimy_30018;
         #line 38 "gpu_device_shm.impala"
-        p_30595 = _30642;
-        goto l30594;
-    l30603: ;
+        p_30117 = _30164;
+        goto l30116;
+    l30125: ;
         #line 212 "gpu_device_shm.impala"
-        int shm_index_x_30604;
-        shm_index_x_30604 = tidx_30508 + _30600;
+        int shm_index_x_30126;
+        shm_index_x_30126 = tidx_30036 + _30122;
         #line 217 "gpu_device_shm.impala"
-        bool _30605;
-        _30605 = shm_index_x_30604 < shm_dimx_30545;
+        bool _30127;
+        _30127 = shm_index_x_30126 < shm_dimx_30067;
         #line 217 "gpu_device_shm.impala"
-        if (_30605) goto l30606; else goto l30640;
-    l30640: ;
+        if (_30127) goto l30128; else goto l30162;
+    l30162: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30639;
-    l30606: ;
+        goto l30161;
+    l30128: ;
         #line 217 "gpu_device_shm.impala"
-        if (_30608) goto l30609; else goto l30638;
-    l30638: ;
+        if (_30130) goto l30131; else goto l30160;
+    l30160: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30639;
-    l30639: ;
+        goto l30161;
+    l30161: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30620;
-    l30609: ;
+        goto l30142;
+    l30131: ;
         #line 219 "gpu_device_shm.impala"
-        int img_index_x_30610;
-        img_index_x_30610 = _30555 + _30600;
+        int img_index_x_30132;
+        img_index_x_30132 = _30077 + _30122;
         #line 224 "gpu_device_shm.impala"
-        bool _30611;
-        _30611 = 0 <= img_index_x_30610;
+        bool _30133;
+        _30133 = 0 <= img_index_x_30132;
         #line 224 "gpu_device_shm.impala"
-        if (_30611) goto l30612; else goto l30637;
-    l30637: ;
+        if (_30133) goto l30134; else goto l30159;
+    l30159: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30634;
-    l30612: ;
+        goto l30156;
+    l30134: ;
         #line 224 "gpu_device_shm.impala"
-        bool _30613;
-        _30613 = img_index_x_30610 < _30559;
+        bool _30135;
+        _30135 = img_index_x_30132 < _30081;
         #line 224 "gpu_device_shm.impala"
-        if (_30613) goto l30614; else goto l30636;
-    l30636: ;
+        if (_30135) goto l30136; else goto l30158;
+    l30158: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30634;
-    l30614: ;
+        goto l30156;
+    l30136: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30616) goto l30617; else goto l30635;
-    l30635: ;
+        if (_30138) goto l30139; else goto l30157;
+    l30157: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30634;
-    l30617: ;
+        goto l30156;
+    l30139: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30618) goto l30619; else goto l30633;
-    l30633: ;
+        if (_30140) goto l30141; else goto l30155;
+    l30155: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30634;
-    l30634: ;
+        goto l30156;
+    l30156: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30620;
-    l30619: ;
+        goto l30142;
+    l30141: ;
         #line 226 "gpu_device_shm.impala"
-        int _30629;
-        _30629 = _30628 + shm_index_x_30604;
-        #line 227 "gpu_device_shm.impala"
-        int _30624;
-        _30624 = _30623 + img_index_x_30610;
+        int _30151;
+        _30151 = _30150 + shm_index_x_30126;
         #line 226 "gpu_device_shm.impala"
-        double* _30630;
-        _30630 = reserve_shared_30522 + _30629;
+        double* _30152;
+        _30152 = reserve_shared_30050 + _30151;
         #line 227 "gpu_device_shm.impala"
-        double* _30625;
-        _30625 = _25608_30476 + _30624;
+        int _30146;
+        _30146 = _30145 + img_index_x_30132;
         #line 227 "gpu_device_shm.impala"
-        double _30626;
-        _30626 = *_30625;
+        double* _30147;
+        _30147 = _25297_30005 + _30146;
         #line 227 "gpu_device_shm.impala"
-        double _30631;
-        _30631 = _30626;
+        double _30148;
+        _30148 = *_30147;
+        #line 227 "gpu_device_shm.impala"
+        double _30153;
+        _30153 = _30148;
         #line 226 "gpu_device_shm.impala"
-        *_30630 = _30631;
+        *_30152 = _30153;
         #line 40 "gpu_device_shm.impala"
-        goto l30620;
-    l30620: ;
+        goto l30142;
+    l30142: ;
         #line 42 "gpu_device_shm.impala"
-        int _30622;
-        _30622 = _30600 + bdimx_30484;
+        int _30144;
+        _30144 = _30122 + bdimx_30012;
         #line 38 "gpu_device_shm.impala"
-        p_30600 = _30622;
-        goto l30599;
-    l30547: ;
+        p_30122 = _30144;
+        goto l30121;
+    l30069: ;
         #line 212 "gpu_device_shm.impala"
-        int shm_index_x_30548;
-        shm_index_x_30548 = tidx_30508 + _30539;
+        int shm_index_x_30070;
+        shm_index_x_30070 = tidx_30036 + _30061;
         #line 217 "gpu_device_shm.impala"
-        bool _30549;
-        _30549 = shm_index_x_30548 < shm_dimx_30545;
+        bool _30071;
+        _30071 = shm_index_x_30070 < shm_dimx_30067;
         #line 217 "gpu_device_shm.impala"
-        if (_30549) goto l30550; else goto l30592;
-    l30592: ;
+        if (_30071) goto l30072; else goto l30114;
+    l30114: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30591;
-    l30550: ;
+        goto l30113;
+    l30072: ;
         #line 217 "gpu_device_shm.impala"
-        if (_30551) goto l30552; else goto l30590;
-    l30590: ;
+        if (_30073) goto l30074; else goto l30112;
+    l30112: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30591;
-    l30591: ;
+        goto l30113;
+    l30113: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30571;
-    l30552: ;
+        goto l30093;
+    l30074: ;
         #line 219 "gpu_device_shm.impala"
-        int img_index_x_30556;
-        img_index_x_30556 = _30555 + _30539;
+        int img_index_x_30078;
+        img_index_x_30078 = _30077 + _30061;
         #line 224 "gpu_device_shm.impala"
-        bool _30557;
-        _30557 = 0 <= img_index_x_30556;
+        bool _30079;
+        _30079 = 0 <= img_index_x_30078;
         #line 224 "gpu_device_shm.impala"
-        if (_30557) goto l30558; else goto l30589;
-    l30589: ;
+        if (_30079) goto l30080; else goto l30111;
+    l30111: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30586;
-    l30558: ;
+        goto l30108;
+    l30080: ;
         #line 224 "gpu_device_shm.impala"
-        bool _30560;
-        _30560 = img_index_x_30556 < _30559;
+        bool _30082;
+        _30082 = img_index_x_30078 < _30081;
         #line 224 "gpu_device_shm.impala"
-        if (_30560) goto l30561; else goto l30588;
-    l30588: ;
+        if (_30082) goto l30083; else goto l30110;
+    l30110: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30586;
-    l30561: ;
+        goto l30108;
+    l30083: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30565) goto l30566; else goto l30587;
-    l30587: ;
+        if (_30087) goto l30088; else goto l30109;
+    l30109: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30586;
-    l30566: ;
+        goto l30108;
+    l30088: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30569) goto l30570; else goto l30585;
-    l30585: ;
+        if (_30091) goto l30092; else goto l30107;
+    l30107: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30586;
-    l30586: ;
+        goto l30108;
+    l30108: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30571;
-    l30570: ;
-        #line 227 "gpu_device_shm.impala"
-        int _30575;
-        _30575 = _30574 + img_index_x_30556;
-        #line 227 "gpu_device_shm.impala"
-        double* _30576;
-        _30576 = _25608_30476 + _30575;
-        #line 227 "gpu_device_shm.impala"
-        double _30577;
-        _30577 = *_30576;
+        goto l30093;
+    l30092: ;
         #line 226 "gpu_device_shm.impala"
-        int _30581;
-        _30581 = _30580 + shm_index_x_30548;
+        int _30103;
+        _30103 = _30102 + shm_index_x_30070;
+        #line 226 "gpu_device_shm.impala"
+        double* _30104;
+        _30104 = reserve_shared_30050 + _30103;
         #line 227 "gpu_device_shm.impala"
-        double _30583;
-        _30583 = _30577;
+        int _30097;
+        _30097 = _30096 + img_index_x_30078;
+        #line 227 "gpu_device_shm.impala"
+        double* _30098;
+        _30098 = _25297_30005 + _30097;
+        #line 227 "gpu_device_shm.impala"
+        double _30099;
+        _30099 = *_30098;
+        #line 227 "gpu_device_shm.impala"
+        double _30105;
+        _30105 = _30099;
         #line 226 "gpu_device_shm.impala"
-        double* _30582;
-        _30582 = reserve_shared_30522 + _30581;
-        #line 226 "gpu_device_shm.impala"
-        *_30582 = _30583;
+        *_30104 = _30105;
         #line 40 "gpu_device_shm.impala"
-        goto l30571;
-    l30571: ;
+        goto l30093;
+    l30093: ;
         #line 42 "gpu_device_shm.impala"
-        int _30573;
-        _30573 = _30539 + bdimx_30484;
+        int _30095;
+        _30095 = _30061 + bdimx_30012;
         #line 38 "gpu_device_shm.impala"
-        p_30539 = _30573;
-        goto l30538;
+        p_30061 = _30095;
+        goto l30060;
 }
 
-__global__ __launch_bounds__ (128 * 1 * 1) void lambda_25866(double* _25869_30718, double* _25870_30719, struct_filter_6340 _25871_30720, struct_Buffer_6341 _25872_30721, struct_image_6346 _25873_30722) {
-    int  bdimx_30725;
-    int pbdimx_30725;
-    int  bdimy_30728;
-    int pbdimy_30728;
-    int  bidx_30731;
-    int pbidx_30731;
-    int  bidy_30734;
-    int pbidy_30734;
-    int  tidx_30737;
-    int ptidx_30737;
-    int  tidy_30740;
-    int ptidy_30740;
-    double*  reserve_shared_30743;
-    double* preserve_shared_30743;
-    int  _30746;
-    int p_30746;
-    int  _30749;
-    int p_30749;
-    int  _30757;
-    int p_30757;
-    int  _30810;
-    int p_30810;
-    int  _30873;
-    int p_30873;
-    double  sum_30875;
-    double psum_30875;
-    int  _30815;
-    int p_30815;
+__global__ __launch_bounds__ (128 * 1 * 1) void lambda_25546(struct_image_6326 _25549_30238, struct_filter_6332 _25550_30239, double* _25551_30240, double* _25552_30241, struct_Buffer_6327 _25553_30242) {
+    int  bdimx_30245;
+    int pbdimx_30245;
+    int  bdimy_30248;
+    int pbdimy_30248;
+    int  bidx_30251;
+    int pbidx_30251;
+    int  bidy_30254;
+    int pbidy_30254;
+    int  tidx_30257;
+    int ptidx_30257;
+    int  tidy_30260;
+    int ptidy_30260;
+    double*  reserve_shared_30263;
+    double* preserve_shared_30263;
+    int  _30271;
+    int p_30271;
+    int  _30324;
+    int p_30324;
+    int  _30387;
+    int p_30387;
+    double  sum_30389;
+    double psum_30389;
+    int  _30329;
+    int p_30329;
     #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-    bdimx_30725 = blockDim_x();
-    pbdimx_30725 = bdimx_30725;
-    l30723: ;
-        bdimx_30725 = pbdimx_30725;
+    bdimx_30245 = blockDim_x();
+    pbdimx_30245 = bdimx_30245;
+    l30243: ;
+        bdimx_30245 = pbdimx_30245;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        bdimy_30728 = blockDim_y();
-        pbdimy_30728 = bdimy_30728;
-    l30726: ;
-        bdimy_30728 = pbdimy_30728;
+        bdimy_30248 = blockDim_y();
+        pbdimy_30248 = bdimy_30248;
+    l30246: ;
+        bdimy_30248 = pbdimy_30248;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        bidx_30731 = blockIdx_x();
-        pbidx_30731 = bidx_30731;
-    l30729: ;
-        bidx_30731 = pbidx_30731;
+        bidx_30251 = blockIdx_x();
+        pbidx_30251 = bidx_30251;
+    l30249: ;
+        bidx_30251 = pbidx_30251;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        bidy_30734 = blockIdx_y();
-        pbidy_30734 = bidy_30734;
-    l30732: ;
-        bidy_30734 = pbidy_30734;
+        bidy_30254 = blockIdx_y();
+        pbidy_30254 = bidy_30254;
+    l30252: ;
+        bidy_30254 = pbidy_30254;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        tidx_30737 = threadIdx_x();
-        ptidx_30737 = tidx_30737;
-    l30735: ;
-        tidx_30737 = ptidx_30737;
+        tidx_30257 = threadIdx_x();
+        ptidx_30257 = tidx_30257;
+    l30255: ;
+        tidx_30257 = ptidx_30257;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        tidy_30740 = threadIdx_y();
-        ptidy_30740 = tidy_30740;
-    l30738: ;
-        tidy_30740 = ptidy_30740;
+        tidy_30260 = threadIdx_y();
+        ptidy_30260 = tidy_30260;
+    l30258: ;
+        tidy_30260 = ptidy_30260;
         #line 201 "gpu_device_shm.impala"
-        __shared__ double reserver_reserve_shared_30743[938];
-        preserve_shared_30743 = reserver_reserve_shared_30743;
-    l30741: ;
-        reserve_shared_30743 = preserve_shared_30743;
-        #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _30746 = blockDim_x();
-        p_30746 = _30746;
-    l30744: ;
-        _30746 = p_30746;
-        #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
-        _30749 = blockDim_y();
-        p_30749 = _30749;
-    l30747: ;
-        _30749 = p_30749;
-        #line 189 "gpu_device_shm.impala"
-        int _30779;
-        _30779 = bidy_30734 * bdimy_30728;
-        #line 11 "main.impala"
-        int _30784;
-        _30784 = _25873_30722.e3;
-        #line 191 "gpu_device_shm.impala"
-        int _30759;
-        _30759 = _25871_30720.e1;
+        __shared__ double reserver_reserve_shared_30263[938];
+        preserve_shared_30263 = reserver_reserve_shared_30263;
+    l30261: ;
+        reserve_shared_30263 = preserve_shared_30263;
         #line 187 "gpu_device_shm.impala"
-        int _30770;
-        _30770 = bidx_30731 * bdimx_30725;
-        #line 6 "gaussian.impala"
-        int _30750;
-        _30750 = _25871_30720.e2;
-        #line 6 "gaussian.impala"
-        int v_anchor_30751;
-        v_anchor_30751 = _30750 / 2;
-        #line 187 "gpu_device_shm.impala"
-        int gid_x_30771;
-        gid_x_30771 = _30770 + tidx_30737;
-        #line 189 "gpu_device_shm.impala"
-        int gid_y_30780;
-        gid_y_30780 = _30779 + tidy_30740;
-        #line 191 "gpu_device_shm.impala"
-        int extend_width_30760;
-        extend_width_30760 = _30759 / 2;
-        #line 197 "gpu_device_shm.impala"
-        int _30752;
-        _30752 = 2 * v_anchor_30751;
-        #line 197 "gpu_device_shm.impala"
-        int shm_dimy_30753;
-        shm_dimy_30753 = bdimy_30728 + _30752;
+        int _30284;
+        _30284 = bidx_30251 * bdimx_30245;
         #line 11 "main.impala"
-        int _30776;
-        _30776 = _25873_30722.e2;
+        int _30298;
+        _30298 = _25549_30238.e3;
+        #line 187 "gpu_device_shm.impala"
+        int gid_x_30285;
+        gid_x_30285 = _30284 + tidx_30257;
+        #line 6 "gaussian.impala"
+        int _30264;
+        _30264 = _25550_30239.e2;
+        #line 191 "gpu_device_shm.impala"
+        int _30273;
+        _30273 = _25550_30239.e1;
+        #line 189 "gpu_device_shm.impala"
+        int _30293;
+        _30293 = bidy_30254 * bdimy_30248;
+        #line 11 "main.impala"
+        int _30290;
+        _30290 = _25549_30238.e2;
+        #line 189 "gpu_device_shm.impala"
+        int gid_y_30294;
+        gid_y_30294 = _30293 + tidy_30260;
+        #line 191 "gpu_device_shm.impala"
+        int extend_width_30274;
+        extend_width_30274 = _30273 / 2;
+        #line 6 "gaussian.impala"
+        int v_anchor_30265;
+        v_anchor_30265 = _30264 / 2;
         #line 195 "gpu_device_shm.impala"
-        int _30761;
-        _30761 = 2 * extend_width_30760;
-        #line 38 "gpu_device_shm.impala"
-        bool _30754;
-        _30754 = 0 < shm_dimy_30753;
+        int _30275;
+        _30275 = 2 * extend_width_30274;
+        #line 197 "gpu_device_shm.impala"
+        int _30266;
+        _30266 = 2 * v_anchor_30265;
         #line 195 "gpu_device_shm.impala"
-        int shm_dimx_30762;
-        shm_dimx_30762 = bdimx_30725 + _30761;
+        int shm_dimx_30276;
+        shm_dimx_30276 = bdimx_30245 + _30275;
+        #line 197 "gpu_device_shm.impala"
+        int shm_dimy_30267;
+        shm_dimy_30267 = bdimy_30248 + _30266;
         #line 38 "gpu_device_shm.impala"
-        if (_30754) goto l30755; else goto l30926;
-    l30926: ;
+        bool _30268;
+        _30268 = 0 < shm_dimy_30267;
+        #line 38 "gpu_device_shm.impala"
+        if (_30268) goto l30269; else goto l30438;
+    l30438: ;
         #line 231 "gpu_device_shm.impala"
-        goto l30859;
-    l30755: ;
-        #line 219 "gpu_device_shm.impala"
-        int _30772;
-        _30772 = gid_x_30771 - extend_width_30760;
-        #line 217 "gpu_device_shm.impala"
-        bool _30768;
-        _30768 = tidy_30740 < shm_dimy_30753;
+        goto l30373;
+    l30269: ;
         #line 226 "gpu_device_shm.impala"
-        int _30795;
-        _30795 = tidy_30740 * shm_dimx_30762;
+        int _30309;
+        _30309 = tidy_30260 * shm_dimx_30276;
+        #line 219 "gpu_device_shm.impala"
+        int _30286;
+        _30286 = gid_x_30285 - extend_width_30274;
         #line 221 "gpu_device_shm.impala"
-        int _30781;
-        _30781 = gid_y_30780 - v_anchor_30751;
+        int _30295;
+        _30295 = gid_y_30294 - v_anchor_30265;
+        #line 217 "gpu_device_shm.impala"
+        bool _30282;
+        _30282 = tidy_30260 < shm_dimy_30267;
         #line 224 "gpu_device_shm.impala"
-        bool _30782;
-        _30782 = 0 <= _30781;
+        bool _30296;
+        _30296 = 0 <= _30295;
         #line 224 "gpu_device_shm.impala"
-        bool _30785;
-        _30785 = _30781 < _30784;
+        bool _30299;
+        _30299 = _30295 < _30298;
         #line 227 "gpu_device_shm.impala"
-        int _30790;
-        _30790 = _30781 * _30776;
+        int _30304;
+        _30304 = _30295 * _30290;
         #line 38 "gpu_device_shm.impala"
-        p_30757 = 0;
-        goto l30756;
-    l30756: ;
-        _30757 = p_30757;
+        p_30271 = 0;
+        goto l30270;
+    l30270: ;
+        _30271 = p_30271;
         #line 38 "gpu_device_shm.impala"
-        bool _30763;
-        _30763 = _30757 < shm_dimx_30762;
+        bool _30277;
+        _30277 = _30271 < shm_dimx_30276;
         #line 38 "gpu_device_shm.impala"
-        if (_30763) goto l30764; else goto l30808;
-    l30808: ;
+        if (_30277) goto l30278; else goto l30322;
+    l30322: ;
         #line 38 "gpu_device_shm.impala"
-        p_30810 = bdimy_30728;
-        goto l30809;
-    l30809: ;
-        _30810 = p_30810;
+        p_30324 = bdimy_30248;
+        goto l30323;
+    l30323: ;
+        _30324 = p_30324;
         #line 38 "gpu_device_shm.impala"
-        bool _30812;
-        _30812 = _30810 < shm_dimy_30753;
+        bool _30326;
+        _30326 = _30324 < shm_dimy_30267;
         #line 38 "gpu_device_shm.impala"
-        if (_30812) goto l30813; else goto l30858;
-    l30858: ;
+        if (_30326) goto l30327; else goto l30372;
+    l30372: ;
         #line 231 "gpu_device_shm.impala"
-        goto l30859;
-    l30859: ;
+        goto l30373;
+    l30373: ;
         #line 1 "/home/rafael/repositories/anydsl/runtime/platforms/intrinsics_cuda.impala"
         __syncthreads();
-    l30861: ;
+    l30375: ;
         #line 237 "gpu_device_shm.impala"
-        bool _30863;
-        _30863 = gid_x_30771 < _30776;
+        bool _30377;
+        _30377 = gid_x_30285 < _30290;
         #line 237 "gpu_device_shm.impala"
-        if (_30863) goto l30864; else goto l30925;
-    l30925: ;
+        if (_30377) goto l30378; else goto l30437;
+    l30437: ;
         #line 240 "gpu_device_shm.impala"
-        goto l30924;
-    l30864: ;
+        goto l30436;
+    l30378: ;
         #line 237 "gpu_device_shm.impala"
-        bool _30865;
-        _30865 = gid_y_30780 < _30784;
+        bool _30379;
+        _30379 = gid_y_30294 < _30298;
         #line 237 "gpu_device_shm.impala"
-        if (_30865) goto l30866; else goto l30923;
-    l30923: ;
+        if (_30379) goto l30380; else goto l30435;
+    l30435: ;
         #line 240 "gpu_device_shm.impala"
-        goto l30924;
-    l30924: ;
+        goto l30436;
+    l30436: ;
         return ;
-    l30866: ;
-        #line 203 "gpu_device_shm.impala"
-        int _30893;
-        _30893 = bidx_30731 * _30746;
-        #line 39 "gaussian.impala"
-        bool _30867;
-        _30867 = v_anchor_30751 <= gid_y_30780;
-        #line 64 "gpu_device_shm.impala"
-        char* _30904;
-        _30904 = _25872_30721.e1;
-        #line 203 "gpu_device_shm.impala"
-        int _30894;
-        _30894 = extend_width_30760 - _30893;
-        #line 64 "gpu_device_shm.impala"
-        int _30906;
-        _30906 = gid_y_30780 * _30776;
+    l30380: ;
         #line 204 "gpu_device_shm.impala"
-        int _30888;
-        _30888 = bidy_30734 * _30749;
+        int _30402;
+        _30402 = v_anchor_30265 - _30293;
         #line 64 "gpu_device_shm.impala"
-        double* _30905;
-        union { double* dst; char* src; } u_30905;
-        u_30905.src = _30904;
-        _30905 = u_30905.dst;
+        char* _30416;
+        _30416 = _25553_30242.e1;
+        #line 203 "gpu_device_shm.impala"
+        int _30406;
+        _30406 = extend_width_30274 - _30284;
         #line 64 "gpu_device_shm.impala"
-        int _30907;
-        _30907 = _30906 + gid_x_30771;
-        #line 204 "gpu_device_shm.impala"
-        int _30889;
-        _30889 = v_anchor_30751 - _30888;
+        int _30418;
+        _30418 = gid_y_30294 * _30290;
         #line 64 "gpu_device_shm.impala"
-        double* _30908;
-        _30908 = _30905 + _30907;
+        int _30419;
+        _30419 = _30418 + gid_x_30285;
+        #line 64 "gpu_device_shm.impala"
+        double* _30417;
+        union { double* dst; char* src; } u_30417;
+        u_30417.src = _30416;
+        _30417 = u_30417.dst;
         #line 39 "gaussian.impala"
-        if (_30867) goto l30868; else goto l30922;
-    l30922: ;
+        bool _30381;
+        _30381 = v_anchor_30265 <= gid_y_30294;
+        #line 64 "gpu_device_shm.impala"
+        double* _30420;
+        _30420 = _30417 + _30419;
+        #line 39 "gaussian.impala"
+        if (_30381) goto l30382; else goto l30434;
+    l30434: ;
         #line 49 "gaussian.impala"
-        goto l30912;
-    l30868: ;
+        goto l30424;
+    l30382: ;
         #line 39 "gaussian.impala"
-        int _30869;
-        _30869 = _30784 - v_anchor_30751;
+        int _30383;
+        _30383 = _30298 - v_anchor_30265;
         #line 39 "gaussian.impala"
-        bool _30870;
-        _30870 = gid_y_30780 < _30869;
+        bool _30384;
+        _30384 = gid_y_30294 < _30383;
         #line 39 "gaussian.impala"
-        if (_30870) goto l30871; else goto l30911;
-    l30911: ;
+        if (_30384) goto l30385; else goto l30423;
+    l30423: ;
         #line 49 "gaussian.impala"
-        goto l30912;
-    l30912: ;
+        goto l30424;
+    l30424: ;
         #line 72 "gpu_device_shm.impala"
-        int _30913;
-        _30913 = gid_y_30780 + _30889;
+        int _30425;
+        _30425 = gid_y_30294 + _30402;
         #line 72 "gpu_device_shm.impala"
-        int _30914;
-        _30914 = _30913 * shm_dimx_30762;
+        int _30426;
+        _30426 = _30425 * shm_dimx_30276;
         #line 72 "gpu_device_shm.impala"
-        int _30915;
-        _30915 = _30914 + gid_x_30771;
+        int _30427;
+        _30427 = _30426 + gid_x_30285;
         #line 72 "gpu_device_shm.impala"
-        int _30916;
-        _30916 = _30915 + _30894;
+        int _30428;
+        _30428 = _30427 + _30406;
         #line 72 "gpu_device_shm.impala"
-        double* _30917;
-        _30917 = reserve_shared_30743 + _30916;
+        double* _30429;
+        _30429 = reserve_shared_30263 + _30428;
         #line 72 "gpu_device_shm.impala"
-        double _30918;
-        _30918 = *_30917;
+        double _30430;
+        _30430 = *_30429;
         #line 72 "gpu_device_shm.impala"
-        double _30920;
-        _30920 = _30918;
+        double _30432;
+        _30432 = _30430;
         #line 64 "gpu_device_shm.impala"
-        *_30908 = _30920;
+        *_30420 = _30432;
         return ;
-    l30871: ;
-        #line 77 "gpu_device_shm.impala"
-        struct_Buffer_6341 _30880;
-        _30880 = _25871_30720.e0;
+    l30385: ;
         #line 41 "gaussian.impala"
-        int _30910;
-        _30910 = 0 - v_anchor_30751;
+        int _30422;
+        _30422 = 0 - v_anchor_30265;
+        #line 77 "gpu_device_shm.impala"
+        struct_Buffer_6327 _30394;
+        _30394 = _25550_30239.e0;
         #line 41 "gaussian.impala"
-        int _30876;
-        _30876 = 1 + v_anchor_30751;
+        int _30390;
+        _30390 = 1 + v_anchor_30265;
         #line 77 "gpu_device_shm.impala"
-        char* _30881;
-        _30881 = _30880.e1;
+        char* _30395;
+        _30395 = _30394.e1;
         #line 77 "gpu_device_shm.impala"
-        double* _30882;
-        union { double* dst; char* src; } u_30882;
-        u_30882.src = _30881;
-        _30882 = u_30882.dst;
+        double* _30396;
+        union { double* dst; char* src; } u_30396;
+        u_30396.src = _30395;
+        _30396 = u_30396.dst;
         #line 27 "gpu_device_shm.impala"
-        p_30873 = _30910;
-        psum_30875 = 0.000000e+00;
-        goto l30872;
-    l30872: ;
-        _30873 = p_30873;
-        sum_30875 = psum_30875;
+        p_30387 = _30422;
+        psum_30389 = 0.000000e+00;
+        goto l30386;
+    l30386: ;
+        _30387 = p_30387;
+        sum_30389 = psum_30389;
         #line 27 "gpu_device_shm.impala"
-        bool _30877;
-        _30877 = _30873 < _30876;
+        bool _30391;
+        _30391 = _30387 < _30390;
         #line 27 "gpu_device_shm.impala"
-        if (_30877) goto l30878; else goto l30903;
-    l30903: ;
+        if (_30391) goto l30392; else goto l30415;
+    l30415: ;
         #line 64 "gpu_device_shm.impala"
-        *_30908 = sum_30875;
+        *_30420 = sum_30389;
         return ;
-    l30878: ;
+    l30392: ;
+        #line 43 "gaussian.impala"
+        int _30401;
+        _30401 = gid_y_30294 + _30387;
+        #line 43 "gaussian.impala"
+        int _30397;
+        _30397 = _30387 + v_anchor_30265;
         #line 31 "gpu_device_shm.impala"
-        int _30879;
-        _30879 = 1 + _30873;
-        #line 43 "gaussian.impala"
-        int _30887;
-        _30887 = gid_y_30780 + _30873;
+        int _30393;
+        _30393 = 1 + _30387;
         #line 72 "gpu_device_shm.impala"
-        int _30890;
-        _30890 = _30887 + _30889;
-        #line 43 "gaussian.impala"
-        int _30883;
-        _30883 = _30873 + v_anchor_30751;
-        #line 72 "gpu_device_shm.impala"
-        int _30891;
-        _30891 = _30890 * shm_dimx_30762;
+        int _30403;
+        _30403 = _30401 + _30402;
         #line 76 "gpu_device_shm.impala"
-        double* i_30884;
-        i_30884 = _30882 + _30883;
+        double* i_30398;
+        i_30398 = _30396 + _30397;
         #line 72 "gpu_device_shm.impala"
-        int _30892;
-        _30892 = _30891 + gid_x_30771;
+        int _30404;
+        _30404 = _30403 * shm_dimx_30276;
         #line 77 "gpu_device_shm.impala"
-        double _30885;
-        _30885 = *i_30884;
+        double _30399;
+        _30399 = *i_30398;
         #line 72 "gpu_device_shm.impala"
-        int _30895;
-        _30895 = _30892 + _30894;
+        int _30405;
+        _30405 = _30404 + gid_x_30285;
         #line 77 "gpu_device_shm.impala"
-        double _30899;
-        _30899 = _30885;
+        double _30411;
+        _30411 = _30399;
         #line 72 "gpu_device_shm.impala"
-        double* _30896;
-        _30896 = reserve_shared_30743 + _30895;
+        int _30407;
+        _30407 = _30405 + _30406;
         #line 72 "gpu_device_shm.impala"
-        double _30897;
-        _30897 = *_30896;
+        double* _30408;
+        _30408 = reserve_shared_30263 + _30407;
         #line 72 "gpu_device_shm.impala"
-        double _30900;
-        _30900 = _30897;
+        double _30409;
+        _30409 = *_30408;
+        #line 72 "gpu_device_shm.impala"
+        double _30412;
+        _30412 = _30409;
         #line 43 "gaussian.impala"
-        double _30901;
-        _30901 = _30899 * _30900;
+        double _30413;
+        _30413 = _30411 * _30412;
         #line 43 "gaussian.impala"
-        double _30902;
-        _30902 = sum_30875 + _30901;
+        double _30414;
+        _30414 = sum_30389 + _30413;
         #line 27 "gpu_device_shm.impala"
-        p_30873 = _30879;
-        psum_30875 = _30902;
-        goto l30872;
-    l30813: ;
+        p_30387 = _30393;
+        psum_30389 = _30414;
+        goto l30386;
+    l30327: ;
         #line 221 "gpu_device_shm.impala"
-        int img_index_y_30830;
-        img_index_y_30830 = _30781 + _30810;
-        #line 227 "gpu_device_shm.impala"
-        int _30838;
-        _30838 = img_index_y_30830 * _30776;
+        int img_index_y_30344;
+        img_index_y_30344 = _30295 + _30324;
+        #line 224 "gpu_device_shm.impala"
+        bool _30347;
+        _30347 = img_index_y_30344 < _30298;
+        #line 224 "gpu_device_shm.impala"
+        bool _30345;
+        _30345 = 0 <= img_index_y_30344;
         #line 214 "gpu_device_shm.impala"
-        int shm_index_y_30822;
-        shm_index_y_30822 = tidy_30740 + _30810;
-        #line 224 "gpu_device_shm.impala"
-        bool _30833;
-        _30833 = img_index_y_30830 < _30784;
-        #line 224 "gpu_device_shm.impala"
-        bool _30831;
-        _30831 = 0 <= img_index_y_30830;
+        int shm_index_y_30336;
+        shm_index_y_30336 = tidy_30260 + _30324;
+        #line 227 "gpu_device_shm.impala"
+        int _30352;
+        _30352 = img_index_y_30344 * _30290;
         #line 217 "gpu_device_shm.impala"
-        bool _30823;
-        _30823 = shm_index_y_30822 < shm_dimy_30753;
+        bool _30337;
+        _30337 = shm_index_y_30336 < shm_dimy_30267;
         #line 226 "gpu_device_shm.impala"
-        int _30843;
-        _30843 = shm_index_y_30822 * shm_dimx_30762;
+        int _30357;
+        _30357 = shm_index_y_30336 * shm_dimx_30276;
         #line 38 "gpu_device_shm.impala"
-        p_30815 = 0;
-        goto l30814;
-    l30814: ;
-        _30815 = p_30815;
+        p_30329 = 0;
+        goto l30328;
+    l30328: ;
+        _30329 = p_30329;
         #line 38 "gpu_device_shm.impala"
-        bool _30817;
-        _30817 = _30815 < shm_dimx_30762;
+        bool _30331;
+        _30331 = _30329 < shm_dimx_30276;
         #line 38 "gpu_device_shm.impala"
-        if (_30817) goto l30818; else goto l30856;
-    l30856: ;
+        if (_30331) goto l30332; else goto l30370;
+    l30370: ;
         #line 42 "gpu_device_shm.impala"
-        int _30857;
-        _30857 = _30810 + bdimy_30728;
+        int _30371;
+        _30371 = _30324 + bdimy_30248;
         #line 38 "gpu_device_shm.impala"
-        p_30810 = _30857;
-        goto l30809;
-    l30818: ;
+        p_30324 = _30371;
+        goto l30323;
+    l30332: ;
         #line 212 "gpu_device_shm.impala"
-        int shm_index_x_30819;
-        shm_index_x_30819 = tidx_30737 + _30815;
+        int shm_index_x_30333;
+        shm_index_x_30333 = tidx_30257 + _30329;
         #line 217 "gpu_device_shm.impala"
-        bool _30820;
-        _30820 = shm_index_x_30819 < shm_dimx_30762;
+        bool _30334;
+        _30334 = shm_index_x_30333 < shm_dimx_30276;
         #line 217 "gpu_device_shm.impala"
-        if (_30820) goto l30821; else goto l30855;
-    l30855: ;
+        if (_30334) goto l30335; else goto l30369;
+    l30369: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30854;
-    l30821: ;
+        goto l30368;
+    l30335: ;
         #line 217 "gpu_device_shm.impala"
-        if (_30823) goto l30824; else goto l30853;
-    l30853: ;
+        if (_30337) goto l30338; else goto l30367;
+    l30367: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30854;
-    l30854: ;
+        goto l30368;
+    l30368: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30835;
-    l30824: ;
+        goto l30349;
+    l30338: ;
         #line 219 "gpu_device_shm.impala"
-        int img_index_x_30825;
-        img_index_x_30825 = _30772 + _30815;
+        int img_index_x_30339;
+        img_index_x_30339 = _30286 + _30329;
         #line 224 "gpu_device_shm.impala"
-        bool _30826;
-        _30826 = 0 <= img_index_x_30825;
+        bool _30340;
+        _30340 = 0 <= img_index_x_30339;
         #line 224 "gpu_device_shm.impala"
-        if (_30826) goto l30827; else goto l30852;
-    l30852: ;
+        if (_30340) goto l30341; else goto l30366;
+    l30366: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30849;
-    l30827: ;
+        goto l30363;
+    l30341: ;
         #line 224 "gpu_device_shm.impala"
-        bool _30828;
-        _30828 = img_index_x_30825 < _30776;
+        bool _30342;
+        _30342 = img_index_x_30339 < _30290;
         #line 224 "gpu_device_shm.impala"
-        if (_30828) goto l30829; else goto l30851;
-    l30851: ;
+        if (_30342) goto l30343; else goto l30365;
+    l30365: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30849;
-    l30829: ;
+        goto l30363;
+    l30343: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30831) goto l30832; else goto l30850;
-    l30850: ;
+        if (_30345) goto l30346; else goto l30364;
+    l30364: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30849;
-    l30832: ;
+        goto l30363;
+    l30346: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30833) goto l30834; else goto l30848;
-    l30848: ;
+        if (_30347) goto l30348; else goto l30362;
+    l30362: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30849;
-    l30849: ;
+        goto l30363;
+    l30363: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30835;
-    l30834: ;
+        goto l30349;
+    l30348: ;
         #line 227 "gpu_device_shm.impala"
-        int _30839;
-        _30839 = _30838 + img_index_x_30825;
+        int _30353;
+        _30353 = _30352 + img_index_x_30339;
+        #line 227 "gpu_device_shm.impala"
+        double* _30354;
+        _30354 = _25551_30240 + _30353;
+        #line 227 "gpu_device_shm.impala"
+        double _30355;
+        _30355 = *_30354;
         #line 226 "gpu_device_shm.impala"
-        int _30844;
-        _30844 = _30843 + shm_index_x_30819;
+        int _30358;
+        _30358 = _30357 + shm_index_x_30333;
+        #line 227 "gpu_device_shm.impala"
+        double _30360;
+        _30360 = _30355;
         #line 226 "gpu_device_shm.impala"
-        double* _30845;
-        _30845 = reserve_shared_30743 + _30844;
-        #line 227 "gpu_device_shm.impala"
-        double* _30840;
-        _30840 = _25870_30719 + _30839;
-        #line 227 "gpu_device_shm.impala"
-        double _30841;
-        _30841 = *_30840;
-        #line 227 "gpu_device_shm.impala"
-        double _30846;
-        _30846 = _30841;
+        double* _30359;
+        _30359 = reserve_shared_30263 + _30358;
         #line 226 "gpu_device_shm.impala"
-        *_30845 = _30846;
+        *_30359 = _30360;
         #line 40 "gpu_device_shm.impala"
-        goto l30835;
-    l30835: ;
+        goto l30349;
+    l30349: ;
         #line 42 "gpu_device_shm.impala"
-        int _30837;
-        _30837 = _30815 + bdimx_30725;
+        int _30351;
+        _30351 = _30329 + bdimx_30245;
         #line 38 "gpu_device_shm.impala"
-        p_30815 = _30837;
-        goto l30814;
-    l30764: ;
+        p_30329 = _30351;
+        goto l30328;
+    l30278: ;
         #line 212 "gpu_device_shm.impala"
-        int shm_index_x_30765;
-        shm_index_x_30765 = tidx_30737 + _30757;
+        int shm_index_x_30279;
+        shm_index_x_30279 = tidx_30257 + _30271;
         #line 217 "gpu_device_shm.impala"
-        bool _30766;
-        _30766 = shm_index_x_30765 < shm_dimx_30762;
+        bool _30280;
+        _30280 = shm_index_x_30279 < shm_dimx_30276;
         #line 217 "gpu_device_shm.impala"
-        if (_30766) goto l30767; else goto l30807;
-    l30807: ;
+        if (_30280) goto l30281; else goto l30321;
+    l30321: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30806;
-    l30767: ;
+        goto l30320;
+    l30281: ;
         #line 217 "gpu_device_shm.impala"
-        if (_30768) goto l30769; else goto l30805;
-    l30805: ;
+        if (_30282) goto l30283; else goto l30319;
+    l30319: ;
         #line 229 "gpu_device_shm.impala"
-        goto l30806;
-    l30806: ;
+        goto l30320;
+    l30320: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30787;
-    l30769: ;
+        goto l30301;
+    l30283: ;
         #line 219 "gpu_device_shm.impala"
-        int img_index_x_30773;
-        img_index_x_30773 = _30772 + _30757;
+        int img_index_x_30287;
+        img_index_x_30287 = _30286 + _30271;
         #line 224 "gpu_device_shm.impala"
-        bool _30774;
-        _30774 = 0 <= img_index_x_30773;
+        bool _30288;
+        _30288 = 0 <= img_index_x_30287;
         #line 224 "gpu_device_shm.impala"
-        if (_30774) goto l30775; else goto l30804;
-    l30804: ;
+        if (_30288) goto l30289; else goto l30318;
+    l30318: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30801;
-    l30775: ;
+        goto l30315;
+    l30289: ;
         #line 224 "gpu_device_shm.impala"
-        bool _30777;
-        _30777 = img_index_x_30773 < _30776;
+        bool _30291;
+        _30291 = img_index_x_30287 < _30290;
         #line 224 "gpu_device_shm.impala"
-        if (_30777) goto l30778; else goto l30803;
-    l30803: ;
+        if (_30291) goto l30292; else goto l30317;
+    l30317: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30801;
-    l30778: ;
+        goto l30315;
+    l30292: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30782) goto l30783; else goto l30802;
-    l30802: ;
+        if (_30296) goto l30297; else goto l30316;
+    l30316: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30801;
-    l30783: ;
+        goto l30315;
+    l30297: ;
         #line 224 "gpu_device_shm.impala"
-        if (_30785) goto l30786; else goto l30800;
-    l30800: ;
+        if (_30299) goto l30300; else goto l30314;
+    l30314: ;
         #line 228 "gpu_device_shm.impala"
-        goto l30801;
-    l30801: ;
+        goto l30315;
+    l30315: ;
         #line 40 "gpu_device_shm.impala"
-        goto l30787;
-    l30786: ;
+        goto l30301;
+    l30300: ;
         #line 226 "gpu_device_shm.impala"
-        int _30796;
-        _30796 = _30795 + shm_index_x_30765;
+        int _30310;
+        _30310 = _30309 + shm_index_x_30279;
         #line 227 "gpu_device_shm.impala"
-        int _30791;
-        _30791 = _30790 + img_index_x_30773;
-        #line 227 "gpu_device_shm.impala"
-        double* _30792;
-        _30792 = _25870_30719 + _30791;
+        int _30305;
+        _30305 = _30304 + img_index_x_30287;
         #line 226 "gpu_device_shm.impala"
-        double* _30797;
-        _30797 = reserve_shared_30743 + _30796;
+        double* _30311;
+        _30311 = reserve_shared_30263 + _30310;
         #line 227 "gpu_device_shm.impala"
-        double _30793;
-        _30793 = *_30792;
+        double* _30306;
+        _30306 = _25551_30240 + _30305;
         #line 227 "gpu_device_shm.impala"
-        double _30798;
-        _30798 = _30793;
+        double _30307;
+        _30307 = *_30306;
+        #line 227 "gpu_device_shm.impala"
+        double _30312;
+        _30312 = _30307;
         #line 226 "gpu_device_shm.impala"
-        *_30797 = _30798;
+        *_30311 = _30312;
         #line 40 "gpu_device_shm.impala"
-        goto l30787;
-    l30787: ;
+        goto l30301;
+    l30301: ;
         #line 42 "gpu_device_shm.impala"
-        int _30789;
-        _30789 = _30757 + bdimx_30725;
+        int _30303;
+        _30303 = _30271 + bdimx_30245;
         #line 38 "gpu_device_shm.impala"
-        p_30757 = _30789;
-        goto l30756;
+        p_30271 = _30303;
+        goto l30270;
 }
 
 }
