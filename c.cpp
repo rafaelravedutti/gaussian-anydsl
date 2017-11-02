@@ -285,6 +285,8 @@ void CCodeGen::emit() {
     }
 
     Scope::for_each(world(), [&] (const Scope& scope) {
+        int bdimx = 0, bdimy = 0, bdimz = 0;
+
         if (scope.entry() == world().branch())
             return;
 
@@ -304,10 +306,6 @@ void CCodeGen::emit() {
             }
         }
         assert(ret_param);
-
-        int bdimx = 0;
-        int bdimy = 0;
-        int bdimz = 0;
 
         // emit function & its declaration
         auto ret_param_fn_type = ret_param->type()->as<FnType>();
@@ -388,7 +386,7 @@ void CCodeGen::emit() {
         func_impl_  << ") {" << up;
 
         if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
-          func_impl_ << "__shared__ ds_img[" << (bdimx + FILTER_WIDTH * 2) << "][" << (bdimy + FILTER_HEIGHT * 2) << "];" << endl;
+          func_impl_ << endl << "__shared__ ds_img[" << (bdimx + (FILTER_WIDTH / 2) * 2) << "][" << (bdimy + (FILTER_HEIGHT / 2) * 2) << "];";
         }
 
         // OpenCL: load struct from buffer
