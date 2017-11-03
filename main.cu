@@ -31,6 +31,7 @@ __global__ void lambda_25292(struct_image_6326, struct_Buffer_6327, double*, str
 __global__ void lambda_25546(struct_image_6326, struct_filter_6332, double*, double*, struct_Buffer_6327);
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_25292(struct_image_6326 _25295_30003, struct_Buffer_6327 _25296_30004, double* _25297_30005, struct_filter_6332 _25298_30006) {
+    __shared__ double ds_img[134][7];
     int  bdimx_30012;
     int pbdimx_30012;
     int  bdimy_30018;
@@ -572,6 +573,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_25292(struct_image_6326 _
 }
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_25546(struct_image_6326 _25549_30238, struct_filter_6332 _25550_30239, double* _25551_30240, double* _25552_30241, struct_Buffer_6327 _25553_30242) {
+    __shared__ double ds_img[134][7];
     int  bdimx_30245;
     int pbdimx_30245;
     int  bdimy_30248;

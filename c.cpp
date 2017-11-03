@@ -46,6 +46,7 @@ private:
     std::string& get_name(const Def*);
     const std::string var_name(const Def*);
     const std::string get_lang() const;
+    const std::string get_input_image_buffer(const Scope& scope, std::list<const Type*> kernel_structs) const;
     bool is_texture_type(const Type*);
 
     World& world_;
@@ -260,6 +261,10 @@ std::ostream& CCodeGen::emit_aggop_decl(const Type* type) {
     return type_decls_;
 }
 
+const std::string CCodeGen::get_input_image_buffer(const Scope& scope, std::list<const Type*> kernel_structs) const {
+  return "Test";
+}
+
 void CCodeGen::emit() {
     if (lang_==Lang::CUDA) {
         func_decls_ << "__device__ inline int threadIdx_x() { return threadIdx.x; }" << endl;
@@ -285,6 +290,7 @@ void CCodeGen::emit() {
     }
 
     Scope::for_each(world(), [&] (const Scope& scope) {
+        std::list<const Type*> kernel_structs;
         int bdimx = 0, bdimy = 0, bdimz = 0;
 
         if (scope.entry() == world().branch())
@@ -374,11 +380,16 @@ void CCodeGen::emit() {
                     emit_type(func_decls_, param->type()) << " *";
                     emit_type(func_impl_,  param->type()) << " *" << param->unique_name() << "_";
                 } else {
+                    if(param->type()->isa<StructType>() && lookup(param->type())) {
+                      kernel_structs.push_back(param->type());
+                    }
+
                     emit_addr_space(func_decls_, param->type());
                     emit_addr_space(func_impl_,  param->type());
                     emit_type(func_decls_, param->type());
                     emit_type(func_impl_,  param->type()) << " " << param->unique_name();
                 }
+
                 insert(param, param->unique_name());
             }
         }
@@ -386,7 +397,7 @@ void CCodeGen::emit() {
         func_impl_  << ") {" << up;
 
         if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
-          func_impl_ << endl << "__shared__ ds_img[" << (bdimx + (FILTER_WIDTH / 2) * 2) << "][" << (bdimy + (FILTER_HEIGHT / 2) * 2) << "];";
+          func_impl_ << endl << "__shared__ double ds_img[" << (bdimx + (FILTER_WIDTH / 2) * 2) << "][" << (bdimy + (FILTER_HEIGHT / 2) * 2) << "];";
         }
 
         // OpenCL: load struct from buffer
