@@ -274,21 +274,25 @@ std::ostream& CCodeGen::emit_shm_copy(const std::string shm_name, const std::str
   std::string idxx_string = "((blockIdx.x * blockDim.x + threadIdx.x) - " + std::to_string(extend_width) + " + i)";
   std::string idxy_string = "((blockIdx.y * blockDim.y + threadIdx.y) - " + std::to_string(extend_height) + " + j)";
 
-  func_impl_ << "for(int i = 0; i < blockDim.x + " << extend_width * 2 << "; i += blockDim.x) {" << endl;
-  func_impl_ << "for(int j = 0; j < blockDim.y + " << extend_height * 2 << "; j += blockDim.y) {" << endl;
+  func_impl_ << endl;
+
+  func_impl_ << "for(int i = 0; i < blockDim.x + " << extend_width * 2 << "; i += blockDim.x) {" << up << endl;
+  func_impl_ << "for(int j = 0; j < blockDim.y + " << extend_height * 2 << "; j += blockDim.y) {" << up << endl;
   func_impl_ << "if(threadIdx.x + i < blockDim.x + " << extend_width * 2 << " && " << endl << \
                 "   threadIdx.y + j < blockDim.y + " << extend_height * 2 << " && " << endl << \
-                "   " << idxx_string << ">= 0 && " << idxx_string << " < " << width << " && \
-                    " << idxy_string << ">= 0 && " << idxy_string << " < " << height << ") {";
+                "   " << idxx_string << " >= 0 && " << endl << \
+                "   " << idxx_string << " < " << width << " && " << endl << \
+                "   " << idxy_string << " >= 0 && " << endl << \
+                "   " << idxy_string << " < " << height << ") {" << up << endl;
 
-  func_impl_ << shm_name << "[threadIdx.x + i][threadIdx.y + j] = \\" \
-             << src_buffer << "[" << idxy_string << " * " << width << " + " << idxx_string << "];";
+  func_impl_ << shm_name << "[threadIdx.x + i][threadIdx.y + j] = \\" << endl << \
+                "  " << src_buffer << "[" << idxy_string << " * " << width << " + " << idxx_string << "];" << down << endl;
 
-  func_impl_ << "}";
-  func_impl_ << "}";
-  func_impl_ << "}";
+  func_impl_ << "}" << down << endl;
+  func_impl_ << "}" << down << endl;
+  func_impl_ << "}" << endl;
 
-  func_impl_ << "__syncthreads();";
+  func_impl_ << endl << "__syncthreads();" << endl;
 
   return func_impl_;
 }
