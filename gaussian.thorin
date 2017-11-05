@@ -1,0 +1,570 @@
+module 'main'
+
+fn(mem, fn(mem), image, filter, Buffer)* lambda_20760 = global_immutable lambda_20643
+fn(mem, fn(mem), filter, image, Buffer, [pf64]*, Buffer)* lambda_20875 = global_immutable lambda_20775
+[11 x pu8]* _20913 = global_immutable ([11 x pu8] definite_array pu8 114, pu8 101, pu8 115, pu8 117, pu8 108, pu8 116, pu8 46, pu8 112, pu8 110, pu8 103, pu8 0)
+[43 x pu8]* _20400 = global_immutable ([43 x pu8] definite_array pu8 89, pu8 111, pu8 117, pu8 32, pu8 109, pu8 117, pu8 115, pu8 116, pu8 32, pu8 115, pu8 112, pu8 101, pu8 99, pu8 105, pu8 102, pu8 121, pu8 32, pu8 116, pu8 104, pu8 101, pu8 32, pu8 105, pu8 110, pu8 112, pu8 117, pu8 116, pu8 32, pu8 105, pu8 109, pu8 97, pu8 103, pu8 101, pu8 32, pu8 102, pu8 105, pu8 108, pu8 101, pu8 110, pu8 97, pu8 109, pu8 101, pu8 33, pu8 0)
+
+main_20364(mem mem_20365, qs32 argc_20366, [[pu8]*]* argv_20367, fn(mem) return_20368) extern 
+    bool _20370 = lt argc_20366, qs32 2
+    (mem, frame) _20376 = enter mem_20365
+    mem _20378 = extract _20376, qu32 0
+    frame _20415 = extract _20376, qu32 1
+    image* img_20416 = slot _20415
+    br_20359(_20370, if_then_20371, if_else_20402)
+
+    if_else_20402()
+        [pu8]** _20410 = lea argv_20367, qs32 1
+        (mem, [pu8]*) _20411 = load _20378, _20410
+        qs32* pwidth_20418 = lea img_20416, qu32 2
+        mem _20412 = extract _20411, qu32 0
+        qs32* pheight_20420 = lea img_20416, qu32 3
+        [pu8]* _20414 = extract _20411, qu32 1
+        opencv_load_image_20403(_20412, _20414, pwidth_20418, pheight_20420, opencv_load_image_cont_20421)
+    
+    opencv_load_image_cont_20421(mem mem_20422, [pf64]* opencv_load_image_20423)
+        [qs8]* _20431 = bitcast opencv_load_image_20423
+        Buffer _20432 = struct_agg qs32 0, _20431
+        Buffer* _20429 = lea img_20416, qu32 0
+        mem _20433 = store mem_20422, _20429, _20432
+        (mem, image) _20434 = load _20433, img_20416
+        mem _20435 = extract _20434, qu32 0
+        image _20437 = extract _20434, qu32 1
+        qs32 _20438 = extract _20437, qu32 2
+        qs32 _20439 = extract _20437, qu32 3
+        qs32 _20440 = mul _20438, _20439
+        qs32 _20441 = mul qs32 8, _20440
+        qs64 _20442 = cast _20441
+        anydsl_alloc_20424(_20435, qs32 1, _20442, anydsl_alloc_cont_20443)
+    
+    anydsl_alloc_cont_20443(mem mem_20444, [qs8]* anydsl_alloc_20445)
+        Buffer _20452 = struct_agg qs32 1, anydsl_alloc_20445
+        Buffer* _20451 = lea img_20416, qu32 1
+        mem _20453 = store mem_20444, _20451, _20452
+        (mem, image) _20454 = load _20453, img_20416
+        image _20456 = extract _20454, qu32 1
+        mem _20455 = extract _20454, qu32 0
+        qs32 _20458 = extract _20456, qu32 3
+        qs32 _20457 = extract _20456, qu32 2
+        opencv_create_image_20446(_20455, _20457, _20458, opencv_create_image_cont_20459)
+    
+    opencv_create_image_cont_20459(mem mem_20460, [pf64]* opencv_create_image_20461)
+        qs32 _20462 = mul _20457, _20458
+        qs32 image_size_20463 = mul qs32 8, _20462
+        qs64 _20464 = cast image_size_20463
+        anydsl_alloc_20424(mem_20460, qs32 1, _20464, anydsl_alloc_cont_20465)
+    
+    anydsl_alloc_cont_20465(mem mem_20466, [qs8]* anydsl_alloc_20467)
+        Buffer _20478 = extract _20456, qu32 0
+        [qs8]* _20480 = extract _20478, qu32 1
+        Buffer _20482 = extract _20456, qu32 1
+        qs32 _20479 = extract _20478, qu32 0
+        [qs8]* _20484 = extract _20482, qu32 1
+        qs32 _20483 = extract _20482, qu32 0
+        anydsl_copy_20468(mem_20466, _20479, _20480, qs64 0, _20483, _20484, qs64 0, _20464, copy_cont_20485)
+    
+    copy_cont_20485(mem mem_20486)
+        anydsl_alloc_20424(mem_20486, qs32 0, qs64 392, anydsl_alloc_cont_20488)
+    
+    anydsl_alloc_cont_20488(mem mem_20489, [qs8]* anydsl_alloc_20490)
+        anydsl_alloc_20424(mem_20489, qs32 0, qs64 56, anydsl_alloc_cont_20492)
+    
+    anydsl_alloc_cont_20492(mem mem_20493, [qs8]* anydsl_alloc_20494)
+        anydsl_alloc_20424(mem_20493, qs32 0, qs64 56, anydsl_alloc_cont_20495)
+    
+    anydsl_alloc_cont_20495(mem mem_20496, [qs8]* anydsl_alloc_20497)
+        [pf64]* mask_x_20544 = bitcast anydsl_alloc_20494
+        [pf64]* mask_xy_20531 = bitcast anydsl_alloc_20490
+        [pf64]* mask_y_20551 = bitcast anydsl_alloc_20497
+        while_head_20498(qs32 0, mem_20496, pf64 0, pf64 0)
+    
+    while_head_20498(qs32 _20499, mem mem_20500, pf64 sum_x_20501, pf64 sum_y_20502)
+        bool _20504 = lt _20499, qs32 7
+        br_20359(_20504, while_body_20505, next_20562)
+    
+    next_20562()
+        pf64 _20574 = div pf64 1, sum_x_20501
+        pf64 _20581 = div pf64 1, sum_y_20502
+        while_head_20563(qs32 0, mem_20500)
+    
+    while_head_20563(qs32 _20564, mem mem_20565)
+        bool _20566 = lt _20564, qs32 7
+        br_20359(_20566, while_body_20567, next_20584)
+    
+    next_20584()
+        Buffer _20617 = struct_agg qs32 0, anydsl_alloc_20494
+        filter_Nx1_20585(mem_20565, _20617, bool 0, filter_Nx1_cont_20619)
+    
+    filter_Nx1_cont_20619(mem mem_20620, filter column_filter_20621)
+        Buffer _20622 = struct_agg qs32 0, anydsl_alloc_20497
+        filter_Nx1_20585(mem_20620, _20622, bool 1, filter_Nx1_cont_20624)
+    
+    filter_Nx1_cont_20624(mem mem_20625, filter row_filter_20626)
+        anydsl_alloc_20424(mem_20625, qs32 1, _20464, anydsl_alloc_cont_20627)
+    
+    anydsl_alloc_cont_20627(mem mem_20628, [qs8]* anydsl_alloc_20629)
+        Buffer _20920 = struct_agg qs32 1, anydsl_alloc_20629
+        (qs32, qs32, qs32) grid_20640 = tuple _20457, _20458, qs32 1
+        cuda_20630(mem_20628, qs32 0, grid_20640, ((qs32, qs32, qs32) tuple qs32 128, qs32 1, qs32 1), lambda_20760, break_20761, _20456, column_filter_20621, _20920)
+    
+    break_20761(mem mem_20762)
+        Buffer _20919 = struct_agg qs32 1, anydsl_alloc_20467
+        cuda_20763(mem_20762, qs32 0, grid_20640, ((qs32, qs32, qs32) tuple qs32 128, qs32 1, qs32 1), lambda_20875, break_20876, row_filter_20626, _20456, _20919, opencv_create_image_20461, _20920)
+    
+    break_20876(mem mem_20877)
+        anydsl_release_20878(mem_20877, qs32 1, anydsl_alloc_20629, release_image_cont_20883)
+    
+    release_image_cont_20883(mem mem_20884)
+        Buffer _20885 = extract column_filter_20621, qu32 0
+        qs32 _20886 = extract _20885, qu32 0
+        [qs8]* _20887 = extract _20885, qu32 1
+        anydsl_release_20878(mem_20884, _20886, _20887, release_filter_cont_20888)
+    
+    release_filter_cont_20888(mem mem_20889)
+        Buffer _20890 = extract row_filter_20626, qu32 0
+        qs32 _20891 = extract _20890, qu32 0
+        [qs8]* _20892 = extract _20890, qu32 1
+        anydsl_release_20878(mem_20889, _20891, _20892, release_filter_cont_20893)
+    
+    release_filter_cont_20893(mem mem_20894)
+        anydsl_release_20878(mem_20894, qs32 0, anydsl_alloc_20490, release_cont_20895)
+    
+    release_cont_20895(mem mem_20896)
+        anydsl_release_20878(mem_20896, qs32 0, anydsl_alloc_20494, release_cont_20897)
+    
+    release_cont_20897(mem mem_20898)
+        anydsl_release_20878(mem_20898, qs32 0, anydsl_alloc_20497, body_cont_20899)
+    
+    body_cont_20899(mem mem_20900)
+        [qs8]* _20901 = bitcast opencv_create_image_20461
+        anydsl_copy_20468(mem_20900, qs32 1, anydsl_alloc_20467, qs64 0, qs32 0, _20901, qs64 0, _20464, copy_cont_20902)
+    
+    copy_cont_20902(mem mem_20903)
+        [pf64]* _20909 = bitcast _20901
+        opencv_write_image_20904(mem_20903, _20909, ([pu8]* bitcast _20913), write_image_cont_20915)
+    
+    write_image_cont_20915(mem mem_20916)
+        anydsl_release_20878(mem_20916, _20483, _20484, release_image_cont_20917)
+    
+    release_image_cont_20917(mem mem_20918)
+        anydsl_release_20878(mem_20918, qs32 1, anydsl_alloc_20467, return_20921)
+    
+    while_body_20567()
+        qs32 _20568 = add qs32 1, _20564
+        pf64* i_20577 = lea mask_y_20551, _20564
+        pf64* i_20569 = lea mask_x_20544, _20564
+        (mem, pf64) _20570 = load mem_20565, i_20569
+        mem _20571 = extract _20570, qu32 0
+        pf64 _20572 = extract _20570, qu32 1
+        pf64 _20575 = mul _20572, _20574
+        mem _20576 = store _20571, i_20569, _20575
+        (mem, pf64) _20578 = load _20576, i_20577
+        mem _20579 = extract _20578, qu32 0
+        pf64 _20580 = extract _20578, qu32 1
+        pf64 _20582 = mul _20580, _20581
+        mem _20583 = store _20579, i_20577, _20582
+        while_head_20563(_20568, _20583)
+    
+    while_body_20505()
+        pf64 _20516 = cast _20499
+        pf64 x_20518 = sub _20516, pf64 2
+        pf64 _20519 = mul x_20518, x_20518
+        while_head_20506(qs32 0, mem_20500)
+    
+    while_head_20506(qs32 _20507, mem mem_20508)
+        bool _20509 = lt _20507, qs32 7
+        br_20359(_20509, while_body_20510, next_20538)
+    
+    next_20538()
+        pf64 _20539 = div _20519, pf64 2.42
+        pf64 _20540 = sub pf64 -0, _20539
+        exp_20511(mem_20508, _20540, exp_cont_20541)
+    
+    exp_cont_20541(mem mem_20542, pf64 exp_20543)
+        pf64* i_20545 = lea mask_x_20544, _20499
+        mem _20546 = store mem_20542, i_20545, exp_20543
+        exp_20511(_20546, _20540, exp_cont_20547)
+    
+    exp_cont_20547(mem mem_20548, pf64 exp_20549)
+        pf64* i_20552 = lea mask_y_20551, _20499
+        qs32 _20550 = add qs32 1, _20499
+        mem _20553 = store mem_20548, i_20552, exp_20549
+        (mem, pf64) _20554 = load _20553, i_20545
+        pf64 _20558 = extract _20554, qu32 1
+        mem _20555 = extract _20554, qu32 0
+        pf64 _20559 = add sum_x_20501, _20558
+        (mem, pf64) _20556 = load _20555, i_20552
+        mem _20557 = extract _20556, qu32 0
+        pf64 _20560 = extract _20556, qu32 1
+        pf64 _20561 = add sum_y_20502, _20560
+        while_head_20498(_20550, _20557, _20559, _20561)
+    
+    while_body_20510()
+        pf64 _20520 = cast _20507
+        pf64 y_20521 = sub _20520, pf64 2
+        pf64 _20522 = mul y_20521, y_20521
+        pf64 _20523 = add _20519, _20522
+        pf64 _20525 = div _20523, pf64 2.42
+        pf64 _20526 = sub pf64 -0, _20525
+        exp_20511(mem_20508, _20526, exp_cont_20527)
+    
+    exp_cont_20527(mem mem_20528, pf64 exp_20529)
+        qs32 _20530 = add qs32 1, _20507
+        pf64 _20536 = mul pf64 0.131533, exp_20529
+        qs32 _20532 = mul qs32 7, _20507
+        qs32 _20533 = add _20532, _20499
+        pf64* _20534 = lea mask_xy_20531, _20533
+        mem _20537 = store mem_20528, _20534, _20536
+        while_head_20506(_20530, _20537)
+    
+    if_then_20371()
+        anydsl_print_string_20372(_20378, ([pu8]* bitcast _20400), return_20921)
+    
+    return_20921(mem return_20922)
+        return_20368(return_20922)
+    
+
+br_20359(bool br_20360, fn() br_20361, fn() br_20362)
+    
+
+
+opencv_load_image_20403(mem opencv_load_image_20404, [pu8]* opencv_load_image_20405, qs32* opencv_load_image_20406, qs32* opencv_load_image_20407, fn(mem, [pf64]*) opencv_load_image_20408)
+    
+
+
+anydsl_alloc_20424(mem anydsl_alloc_20425, qs32 anydsl_alloc_20426, qs64 anydsl_alloc_20427, fn(mem, [qs8]*) anydsl_alloc_20428)
+    
+
+
+opencv_create_image_20446(mem opencv_create_image_20447, qs32 opencv_create_image_20448, qs32 opencv_create_image_20449, fn(mem, [pf64]*) opencv_create_image_20450)
+    
+
+
+anydsl_copy_20468(mem anydsl_copy_20469, qs32 anydsl_copy_20470, [qs8]* anydsl_copy_20471, qs64 anydsl_copy_20472, qs32 anydsl_copy_20473, [qs8]* anydsl_copy_20474, qs64 anydsl_copy_20475, qs64 anydsl_copy_20476, fn(mem) anydsl_copy_20477)
+    
+
+
+filter_Nx1_20585(mem mem_20586, Buffer mask_20587, bool is_row_20588, fn(mem, filter) return_20589)
+    br_20359(is_row_20588, if_else_20590, if_then_20611)
+
+    if_then_20611()
+        anydsl_alloc_20424(mem_20586, qs32 1, qs64 56, anydsl_alloc_cont_20612)
+    
+    anydsl_alloc_cont_20612(mem mem_20613, [qs8]* anydsl_alloc_20614)
+        Buffer _20615 = struct_agg qs32 1, anydsl_alloc_20614
+        filter _20616 = struct_agg _20615, qs32 7, qs32 1
+        next_20594(_20616, mem_20613)
+    
+    if_else_20590()
+        anydsl_alloc_20424(mem_20586, qs32 1, qs64 56, anydsl_alloc_cont_20591)
+    
+    anydsl_alloc_cont_20591(mem mem_20592, [qs8]* anydsl_alloc_20593)
+        Buffer _20609 = struct_agg qs32 1, anydsl_alloc_20593
+        filter _20610 = struct_agg _20609, qs32 1, qs32 7
+        next_20594(_20610, mem_20592)
+    
+    next_20594(filter _20595, mem mem_20596)
+        Buffer _20599 = extract _20595, qu32 0
+        qs32 _20603 = extract _20595, qu32 2
+        [qs8]* _20601 = extract _20599, qu32 1
+        qs32 _20602 = extract _20595, qu32 1
+        qs32 _20597 = extract mask_20587, qu32 0
+        [qs8]* _20598 = extract mask_20587, qu32 1
+        qs32 _20600 = extract _20599, qu32 0
+        qs32 _20604 = mul _20602, _20603
+        qs32 _20605 = mul qs32 8, _20604
+        qs64 _20606 = cast _20605
+        anydsl_copy_20468(mem_20596, _20597, _20598, qs64 0, _20600, _20601, qs64 0, _20606, copy_cont_20607)
+    
+    copy_cont_20607(mem mem_20608)
+        return_20589(mem_20608, _20595)
+    
+
+cuda_20630(mem cuda_20631, qs32 cuda_20632, (qs32, qs32, qs32) cuda_20633, (qs32, qs32, qs32) cuda_20634, fn(mem, fn(mem), image, filter, Buffer)* cuda_20635, fn(mem) cuda_20636, image cuda_20637, filter cuda_20638, Buffer cuda_20639)
+    
+
+
+lambda_20643(mem mem_20644, fn(mem) break_20645, image _20646, filter _20647, Buffer _20648)
+    (mem, frame) _20652 = enter mem_20644
+    mem _20653 = extract _20652, qu32 0
+    frame _20727 = extract _20652, qu32 1
+    pf64* sum_20728 = slot _20727
+    blockIdx_x_20649(_20653, _cont_20654)
+
+    _cont_20654(mem mem_20655, qs32 _20656)
+        blockDim_x_20657(mem_20655, _cont_20660)
+    
+    _cont_20660(mem mem_20661, qs32 _20662)
+        threadIdx_x_20663(mem_20661, _cont_20666)
+    
+    _cont_20666(mem mem_20667, qs32 _20668)
+        blockIdx_y_20669(mem_20667, _cont_20672)
+    
+    _cont_20672(mem mem_20673, qs32 _20674)
+        blockDim_y_20675(mem_20673, _cont_20678)
+    
+    _cont_20678(mem mem_20679, qs32 _20680)
+        threadIdx_y_20681(mem_20679, _cont_20684)
+    
+    _cont_20684(mem mem_20685, qs32 _20686)
+        qs32 _20689 = extract _20646, qu32 2
+        qs32 _20687 = mul _20656, _20662
+        qs32 gid_x_20688 = add _20687, _20668
+        bool _20690 = lt gid_x_20688, _20689
+        br_20359(_20690, and_extra_20691, if_else_20759)
+    
+    if_else_20759()
+        if_else_20758()
+    
+    and_extra_20691()
+        qs32 _20694 = extract _20646, qu32 3
+        qs32 _20692 = mul _20674, _20680
+        qs32 gid_y_20693 = add _20692, _20686
+        bool _20695 = lt gid_y_20693, _20694
+        br_20359(_20695, if_then_20696, if_else_crit_20757)
+    
+    if_else_crit_20757()
+        if_else_20758()
+    
+    if_else_20758()
+        break_20645(mem_20685)
+    
+    if_then_20696()
+        mem _20748 = store mem_20685, sum_20728, pf64 0
+        qs32 _20697 = extract _20647, qu32 1
+        qs32 h_anchor_20698 = div _20697, qs32 2
+        Buffer _20718 = extract _20646, qu32 1
+        [qs8]* _20719 = extract _20718, qu32 1
+        qs32 _20721 = mul gid_y_20693, _20689
+        [qs8]* _20740 = extract _20648, qu32 1
+        bool _20699 = le h_anchor_20698, gid_x_20688
+        [pf64]*[Global] _20720 = bitcast _20719
+        qs32 _20742 = add _20721, gid_x_20688
+        [pf64]*[Global] _20741 = bitcast _20740
+        pf64*[Global] _20743 = lea _20741, _20742
+        br_20359(_20699, and_extra_20700, if_else_20756)
+    
+    if_else_20756()
+        if_else_20750()
+    
+    and_extra_20700()
+        qs32 _20701 = sub _20689, h_anchor_20698
+        bool _20702 = lt gid_x_20688, _20701
+        br_20359(_20702, if_then_20703, if_else_crit_20749)
+    
+    if_else_crit_20749()
+        if_else_20750()
+    
+    if_else_20750()
+        pf64*[Global] _20751 = lea _20720, _20742
+        (mem, pf64) _20752 = load _20748, _20751
+        pf64 _20754 = extract _20752, qu32 1
+        mem _20753 = extract _20752, qu32 0
+        mem _20755 = store _20753, _20743, _20754
+        break_20645(_20755)
+    
+    if_then_20703()
+        Buffer _20711 = extract _20647, qu32 0
+        qs32 _20746 = sub qs32 0, h_anchor_20698
+        qs32 _20707 = add qs32 1, h_anchor_20698
+        [qs8]* _20712 = extract _20711, qu32 1
+        [pf64]*[Global] _20713 = bitcast _20712
+        while_head_20704(_20746, _20748)
+    
+    while_head_20704(qs32 _20705, mem mem_20706)
+        bool _20708 = lt _20705, _20707
+        br_20359(_20708, while_body_20709, next_20737)
+    
+    next_20737()
+        (mem, pf64) _20738 = load mem_20706, sum_20728
+        mem _20739 = extract _20738, qu32 0
+        pf64 _20744 = extract _20738, qu32 1
+        mem _20745 = store _20739, _20743, _20744
+        break_20645(_20745)
+    
+    while_body_20709()
+        qs32 _20714 = add _20705, h_anchor_20698
+        pf64*[Global] i_20715 = lea _20713, _20714
+        qs32 _20722 = add gid_x_20688, _20705
+        (mem, pf64) _20716 = load mem_20706, i_20715
+        pf64 _20732 = extract _20716, qu32 1
+        qs32 _20723 = add _20721, _20722
+        mem _20717 = extract _20716, qu32 0
+        pf64*[Global] _20724 = lea _20720, _20723
+        qs32 _20710 = add qs32 1, _20705
+        (mem, pf64) _20725 = load _20717, _20724
+        mem _20726 = extract _20725, qu32 0
+        pf64 _20733 = extract _20725, qu32 1
+        (mem, pf64) _20729 = load _20726, sum_20728
+        pf64 _20734 = mul _20732, _20733
+        mem _20730 = extract _20729, qu32 0
+        pf64 _20731 = extract _20729, qu32 1
+        pf64 _20735 = add _20731, _20734
+        mem _20736 = store _20730, sum_20728, _20735
+        while_head_20704(_20710, _20736)
+    
+
+cuda_20763(mem cuda_20764, qs32 cuda_20765, (qs32, qs32, qs32) cuda_20766, (qs32, qs32, qs32) cuda_20767, fn(mem, fn(mem), filter, image, Buffer, [pf64]*, Buffer)* cuda_20768, fn(mem) cuda_20769, filter cuda_20770, image cuda_20771, Buffer cuda_20772, [pf64]* cuda_20773, Buffer cuda_20774)
+    
+
+
+lambda_20775(mem mem_20776, fn(mem) break_20777, filter _20778, image _20779, Buffer _20780, [pf64]* _20781, Buffer _20782)
+    (mem, frame) _20783 = enter mem_20776
+    frame _20842 = extract _20783, qu32 1
+    mem _20784 = extract _20783, qu32 0
+    pf64* sum_20843 = slot _20842
+    blockIdx_x_20649(_20784, _cont_20785)
+
+    _cont_20785(mem mem_20786, qs32 _20787)
+        blockDim_x_20657(mem_20786, _cont_20788)
+    
+    _cont_20788(mem mem_20789, qs32 _20790)
+        threadIdx_x_20663(mem_20789, _cont_20791)
+    
+    _cont_20791(mem mem_20792, qs32 _20793)
+        blockIdx_y_20669(mem_20792, _cont_20794)
+    
+    _cont_20794(mem mem_20795, qs32 _20796)
+        blockDim_y_20675(mem_20795, _cont_20797)
+    
+    _cont_20797(mem mem_20798, qs32 _20799)
+        threadIdx_y_20681(mem_20798, _cont_20800)
+    
+    _cont_20800(mem mem_20801, qs32 _20802)
+        qs32 _20803 = mul _20787, _20790
+        qs32 _20805 = extract _20779, qu32 2
+        qs32 gid_x_20804 = add _20803, _20793
+        bool _20806 = lt gid_x_20804, _20805
+        br_20359(_20806, and_extra_20807, if_else_20874)
+    
+    if_else_20874()
+        if_else_20873()
+    
+    and_extra_20807()
+        qs32 _20810 = extract _20779, qu32 3
+        qs32 _20808 = mul _20796, _20799
+        qs32 gid_y_20809 = add _20808, _20802
+        bool _20811 = lt gid_y_20809, _20810
+        br_20359(_20811, if_then_20812, if_else_crit_20872)
+    
+    if_else_crit_20872()
+        if_else_20873()
+    
+    if_else_20873()
+        break_20777(mem_20801)
+    
+    if_then_20812()
+        mem _20863 = store mem_20801, sum_20843, pf64 0
+        qs32 _20813 = extract _20778, qu32 2
+        qs32 _20857 = mul gid_y_20809, _20805
+        [qs8]* _20834 = extract _20782, qu32 1
+        qs32 v_anchor_20814 = div _20813, qs32 2
+        [qs8]* _20855 = extract _20780, qu32 1
+        qs32 _20858 = add _20857, gid_x_20804
+        bool _20815 = le v_anchor_20814, gid_y_20809
+        [pf64]*[Global] _20835 = bitcast _20834
+        [pf64]*[Global] _20856 = bitcast _20855
+        pf64*[Global] _20859 = lea _20856, _20858
+        br_20359(_20815, and_extra_20816, if_else_20871)
+    
+    if_else_20871()
+        if_else_20865()
+    
+    and_extra_20816()
+        qs32 _20817 = sub _20810, v_anchor_20814
+        bool _20818 = lt gid_y_20809, _20817
+        br_20359(_20818, if_then_20819, if_else_crit_20864)
+    
+    if_else_crit_20864()
+        if_else_20865()
+    
+    if_else_20865()
+        pf64*[Global] _20866 = lea _20835, _20858
+        (mem, pf64) _20867 = load _20863, _20866
+        mem _20868 = extract _20867, qu32 0
+        pf64 _20869 = extract _20867, qu32 1
+        mem _20870 = store _20868, _20859, _20869
+        break_20777(_20870)
+    
+    if_then_20819()
+        qs32 _20823 = add qs32 1, v_anchor_20814
+        qs32 _20862 = sub qs32 0, v_anchor_20814
+        Buffer _20827 = extract _20778, qu32 0
+        [qs8]* _20828 = extract _20827, qu32 1
+        [pf64]*[Global] _20829 = bitcast _20828
+        while_head_20820(_20862, _20863)
+    
+    while_head_20820(qs32 _20821, mem mem_20822)
+        bool _20824 = lt _20821, _20823
+        br_20359(_20824, while_body_20825, next_20852)
+    
+    next_20852()
+        (mem, pf64) _20853 = load mem_20822, sum_20843
+        pf64 _20860 = extract _20853, qu32 1
+        mem _20854 = extract _20853, qu32 0
+        mem _20861 = store _20854, _20859, _20860
+        break_20777(_20861)
+    
+    while_body_20825()
+        qs32 _20836 = add gid_y_20809, _20821
+        qs32 _20837 = mul _20836, _20805
+        qs32 _20838 = add _20837, gid_x_20804
+        pf64*[Global] _20839 = lea _20835, _20838
+        qs32 _20826 = add qs32 1, _20821
+        qs32 _20830 = add _20821, v_anchor_20814
+        pf64*[Global] i_20831 = lea _20829, _20830
+        (mem, pf64) _20832 = load mem_20822, i_20831
+        pf64 _20847 = extract _20832, qu32 1
+        mem _20833 = extract _20832, qu32 0
+        (mem, pf64) _20840 = load _20833, _20839
+        mem _20841 = extract _20840, qu32 0
+        pf64 _20848 = extract _20840, qu32 1
+        (mem, pf64) _20844 = load _20841, sum_20843
+        pf64 _20849 = mul _20847, _20848
+        mem _20845 = extract _20844, qu32 0
+        pf64 _20846 = extract _20844, qu32 1
+        pf64 _20850 = add _20846, _20849
+        mem _20851 = store _20845, sum_20843, _20850
+        while_head_20820(_20826, _20851)
+    
+
+anydsl_release_20878(mem anydsl_release_20879, qs32 anydsl_release_20880, [qs8]* anydsl_release_20881, fn(mem) anydsl_release_20882)
+    
+
+
+opencv_write_image_20904(mem opencv_write_image_20905, [pf64]* opencv_write_image_20906, [pu8]* opencv_write_image_20907, fn(mem) opencv_write_image_20908)
+    
+
+
+exp_20511(mem exp_20512, pf64 exp_20513, fn(mem, pf64) exp_20514) device 
+    
+
+
+anydsl_print_string_20372(mem anydsl_print_string_20373, [pu8]* anydsl_print_string_20374, fn(mem) anydsl_print_string_20375)
+    
+
+
+blockIdx_x_20649(mem blockIdx_x_20650, fn(mem, qs32) blockIdx_x_20651) device 
+    
+
+
+blockDim_x_20657(mem blockDim_x_20658, fn(mem, qs32) blockDim_x_20659) device 
+    
+
+
+threadIdx_x_20663(mem threadIdx_x_20664, fn(mem, qs32) threadIdx_x_20665) device 
+    
+
+
+blockIdx_y_20669(mem blockIdx_y_20670, fn(mem, qs32) blockIdx_y_20671) device 
+    
+
+
+blockDim_y_20675(mem blockDim_y_20676, fn(mem, qs32) blockDim_y_20677) device 
+    
+
+
+threadIdx_y_20681(mem threadIdx_y_20682, fn(mem, qs32) threadIdx_y_20683) device 
+    
+
+
