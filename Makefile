@@ -18,7 +18,7 @@ THORIN_BACKEND_SRC=${THORIN_SRC}/thorin/be
 OPENCV_LIBS=-lopencv_core -lopencv_highgui -lopencv_imgproc 
 
 # Device file (gpu or cpu)
-PLATFORM_FILE=gpu_device_shm.impala
+PLATFORM_FILE=gpu_device.impala
 
 # Impala files to link
 RUNTIME_PATH=${ANYDSL_PATH}/runtime
