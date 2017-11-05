@@ -31,6 +31,7 @@ __global__ void lambda_20643(struct_image_5424, struct_filter_5428, struct_Buffe
 __global__ void lambda_20775(struct_filter_5428, struct_image_5424, struct_Buffer_5425, double*, struct_Buffer_5425);
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _20646_22982, struct_filter_5428 _20647_22983, struct_Buffer_5425 _20648_22984) {
+    __shared__ double ds_img[134][7];
     int  _22990;
     int p_22990;
     int  _22996;
@@ -260,6 +261,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
 }
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 _20778_23095, struct_image_5424 _20779_23096, struct_Buffer_5425 _20780_23097, double* _20781_23098, struct_Buffer_5425 _20782_23099) {
+    __shared__ double ds_img[134][7];
     int  _23102;
     int p_23102;
     int  _23105;
