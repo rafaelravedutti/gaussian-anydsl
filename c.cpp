@@ -38,6 +38,8 @@ private:
     std::ostream& emit_addr_space(std::ostream&, const Type*);
     std::ostream& emit_type(std::ostream&, const Type*);
     std::ostream& emit(const Def*);
+    std::ostream& emit_shm_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height);
+    std::ostream& emit_shm_access(const std::string shm_name, std::string x, std::string y);
     bool lookup(const Type*);
     bool lookup(const Def*);
     void insert(const Type*, std::string);
@@ -263,6 +265,42 @@ std::ostream& CCodeGen::emit_aggop_decl(const Type* type) {
 
 const std::string CCodeGen::get_input_image_buffer(const Scope& scope, std::list<const Type*> kernel_structs) const {
   return "Test";
+}
+
+std::ostream& CCodeGen::emit_shm_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
+  int extend_width = FILTER_WIDTH / 2;
+  int extend_height = FILTER_HEIGHT / 2;
+
+  std::string idxx_string = "((blockIdx.x * blockDim.x + threadIdx.x) - " + std::to_string(extend_width) + " + i)";
+  std::string idxy_string = "((blockIdx.y * blockDim.y + threadIdx.y) - " + std::to_string(extend_height) + " + j)";
+
+  func_impl_ << "for(int i = 0; i < blockDim.x + " << extend_width * 2 << "; i += blockDim.x) {" << endl;
+  func_impl_ << "for(int j = 0; j < blockDim.y + " << extend_height * 2 << "; j += blockDim.y) {" << endl;
+  func_impl_ << "if(threadIdx.x + i < blockDim.x + " << extend_width * 2 << " && " << endl << \
+                "   threadIdx.y + j < blockDim.y + " << extend_height * 2 << " && " << endl << \
+                "   " << idxx_string << ">= 0 && " << idxx_string << " < " << width << " && \
+                    " << idxy_string << ">= 0 && " << idxy_string << " < " << height << ") {";
+
+  func_impl_ << shm_name << "[threadIdx.x + i][threadIdx.y + j] = \\" \
+             << src_buffer << "[" << idxy_string << " * " << width << " + " << idxx_string << "];";
+
+  func_impl_ << "}";
+  func_impl_ << "}";
+  func_impl_ << "}";
+
+  func_impl_ << "__syncthreads();";
+
+  return func_impl_;
+}
+
+std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string x, std::string y) {
+  int extend_width = FILTER_WIDTH / 2;
+  int extend_height = FILTER_HEIGHT / 2;
+
+  func_impl_ << shm_name << "[" << x << " + " << extend_width << " - blockIdx.x * blockDim.x][" \
+                                << y << " + " << extend_height << " - blockIdx.y * blockDim.y]";
+
+  return func_impl_;
 }
 
 void CCodeGen::emit() {
