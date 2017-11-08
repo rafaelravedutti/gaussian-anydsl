@@ -17,6 +17,8 @@
 
 namespace thorin {
 
+static std::list<std::string> shm_buffers;
+static std::list<std::string> shm_blacklist;
 static std::list<std::string> kernel_references;
 static std::list<std::string> kernel_pointers;
 
@@ -460,6 +462,64 @@ void CCodeGen::emit() {
 
         Schedule schedule(scope);
 
+        for(const auto& block : schedule) {
+          auto continuation = block.continuation();
+          if(continuation->empty()) {
+            continue;
+          }
+
+          assert(continuation == scope.entry() || continuation->is_basicblock());
+
+          for(auto primop : block) {
+            auto primop_name = var_name(primop);
+
+            if(auto aggop = primop->isa<AggOp>()) {
+              if(aggop->isa<Extract>()) {
+                auto found = std::find(kernel_references.begin(), kernel_references.end(), aggop->agg()->unique_name());
+
+                if(found != kernel_references.end()) {
+                  if(aggop->type()->isa<StructType>()) {
+                    kernel_references.push_back(primop_name);
+                  } else if(aggop->type()->isa<PtrType>()) {
+                    kernel_pointers.push_back(primop_name);
+                  }
+                }
+              }
+            } else if(auto conv = primop->isa<ConvOp>()) {
+              if(conv->isa<Bitcast>()) {
+                auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), conv->from()->unique_name());
+
+                if(found != kernel_pointers.end()) {
+                  kernel_pointers.push_back(primop_name);
+                }
+              }
+            } else if(auto lea = primop->isa<LEA>()) {
+              auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), lea->ptr()->unique_name());
+
+              if(found != kernel_pointers.end()) {
+                kernel_pointers.push_back(primop_name);
+              }
+            } else if(auto load = primop->isa<Load>()) {
+              auto ptr_name = load->ptr()->unique_name();
+              auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), ptr_name);
+              auto blacklisted = std::find(shm_blacklist.begin(), shm_blacklist.end(), ptr_name) != shm_blacklist.end();
+
+              if(!blacklisted && found != kernel_pointers.end()) {
+                shm_buffers.push_back(ptr_name);
+              }
+            } else if(auto store = primop->isa<Store>()) {
+              auto ptr_name = store->ptr()->unique_name();
+              auto found = std::find(shm_buffers.begin(), shm_buffers.end(), ptr_name);
+
+              if(found != shm_buffers.end()) {
+                shm_buffers.remove(ptr_name);
+              }
+
+              shm_blacklist.push_back(ptr_name);
+            }
+          }
+        }
+
         // emit function arguments and phi nodes
         for (const auto& block : schedule) {
             for (auto param : block.continuation()->params()) {
@@ -830,12 +890,6 @@ std::ostream& CCodeGen::emit(const Def* def) {
             func_impl_ << "u" << def_name << ".src = ";
             emit(conv->from()) << ";" << endl;
             func_impl_ << def_name << " = u" << def_name << ".dst;";
-
-            auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), conv->from()->unique_name());
-
-            if(found != kernel_pointers.end()) {
-              kernel_pointers.push_back(def_name);
-            }
         }
 
         insert(def, def_name);
@@ -919,16 +973,6 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 if (is_mem(extract) || extract->type()->isa<FrameType>())
                     return func_impl_;
                 if (!extract->agg()->isa<Assembly>()) { // extract is a nop for inline assembly
-                    auto found = std::find(kernel_references.begin(), kernel_references.end(), aggop->agg()->unique_name());
-
-                    if(found != kernel_references.end()) {
-                        if(aggop->type()->isa<StructType>()) {
-                          kernel_references.push_back(def_name);
-                        } else if(aggop->type()->isa<PtrType>()) {
-                          kernel_pointers.push_back(def_name);
-                        }
-                    }
-
                     emit_type(func_impl_, aggop->type()) << " " << def_name << ";" << endl;
                     func_impl_ << def_name << " = ";
                     if (auto memop = extract->agg()->isa<MemOp>())
@@ -1052,9 +1096,9 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 emit(lea->ptr()) << " + ";
                 emit(lea->index()) << ";";
 
-                auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), lea->ptr()->unique_name());
+                auto found = std::find(shm_buffers.begin(), shm_buffers.end(), def_name);
 
-                if(found != kernel_pointers.end()) {
+                if(found != shm_buffers.end()) {
                     emit_shm_access("ds_img", lea->index()->unique_name(), lea->index()->unique_name());
                 }
             }

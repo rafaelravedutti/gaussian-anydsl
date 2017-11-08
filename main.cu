@@ -136,7 +136,6 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         #line 45 "gpu_device.impala"
         double* _23076;
         _23076 = _23074 + _23075;
-        ds_img[_23075 + 3 - blockIdx.x * blockDim.x][_23075 + 3 - blockIdx.y * blockDim.y]
         #line 4 "gaussian.impala"
         int _23034;
         _23034 = _20647_22983.e1;
@@ -381,7 +380,6 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
         #line 45 "gpu_device.impala"
         double* _23167;
         _23167 = _23164 + _23166;
-        ds_img[_23166 + 3 - blockIdx.x * blockDim.x][_23166 + 3 - blockIdx.y * blockDim.y]
         #line 39 "gaussian.impala"
         bool _23130;
         _23130 = v_anchor_23129 <= gid_y_23124;
