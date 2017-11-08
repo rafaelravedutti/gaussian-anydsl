@@ -301,8 +301,6 @@ std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string 
   int extend_width = FILTER_WIDTH / 2;
   int extend_height = FILTER_HEIGHT / 2;
 
-  func_impl_ << endl;
-
   func_impl_ << shm_name << "[" << x << " + " << extend_width << " - blockIdx.x * blockDim.x][" \
                                 << y << " + " << extend_height << " - blockIdx.y * blockDim.y]";
 
@@ -1093,13 +1091,15 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 emit_addr_space(func_impl_, lea->ptr()->type());
                 emit_type(func_impl_, lea->type()) << " " << def_name << ";" << endl;
                 func_impl_ << def_name << " = ";
-                emit(lea->ptr()) << " + ";
-                emit(lea->index()) << ";";
 
                 auto found = std::find(shm_buffers.begin(), shm_buffers.end(), def_name);
 
                 if(found != shm_buffers.end()) {
                     emit_shm_access("ds_img", lea->index()->unique_name(), lea->index()->unique_name());
+                    func_impl_ << ";";
+                } else { 
+                    emit(lea->ptr()) << " + ";
+                    emit(lea->index()) << ";";
                 }
             }
         }
