@@ -421,7 +421,13 @@ void CCodeGen::emit() {
                     emit_type(func_decls_, param->type()) << " *";
                     emit_type(func_impl_,  param->type()) << " *" << param->unique_name() << "_";
                 } else {
-                    kernel_references.push_back(param->unique_name());
+                    std::stringstream type_stream;
+
+                    type_stream << param->type();
+
+                    if(type_stream.str().compare("filter") != 0) {
+                      kernel_references.push_back(param->unique_name());
+                    }
 
                     if(param->type()->isa<PtrType>()) {
                       kernel_pointers.push_back(param->unique_name());
