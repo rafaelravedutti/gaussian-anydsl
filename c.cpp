@@ -17,6 +17,9 @@
 
 namespace thorin {
 
+static std::list<std::string> kernel_references;
+static std::list<std::string> kernel_pointers;
+
 class CCodeGen {
 public:
     CCodeGen(World& world, const Cont2Config& kernel_config, std::ostream& stream, Lang lang, bool debug)
@@ -48,7 +51,6 @@ private:
     std::string& get_name(const Def*);
     const std::string var_name(const Def*);
     const std::string get_lang() const;
-    const std::string get_input_image_buffer(const Scope& scope, std::list<const Type*> kernel_structs) const;
     bool is_texture_type(const Type*);
 
     World& world_;
@@ -263,10 +265,6 @@ std::ostream& CCodeGen::emit_aggop_decl(const Type* type) {
     return type_decls_;
 }
 
-const std::string CCodeGen::get_input_image_buffer(const Scope& scope, std::list<const Type*> kernel_structs) const {
-  return "Test";
-}
-
 std::ostream& CCodeGen::emit_shm_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
   int extend_width = FILTER_WIDTH / 2;
   int extend_height = FILTER_HEIGHT / 2;
@@ -332,7 +330,6 @@ void CCodeGen::emit() {
     }
 
     Scope::for_each(world(), [&] (const Scope& scope) {
-        std::list<const Type*> kernel_structs;
         int bdimx = 0, bdimy = 0, bdimz = 0;
 
         if (scope.entry() == world().branch())
@@ -422,8 +419,10 @@ void CCodeGen::emit() {
                     emit_type(func_decls_, param->type()) << " *";
                     emit_type(func_impl_,  param->type()) << " *" << param->unique_name() << "_";
                 } else {
-                    if(param->type()->isa<StructType>() && lookup(param->type())) {
-                      kernel_structs.push_back(param->type());
+                    kernel_references.push_back(param->unique_name());
+
+                    if(param->type()->isa<PtrType>()) {
+                      kernel_pointers.push_back(param->unique_name());
                     }
 
                     emit_addr_space(func_decls_, param->type());
@@ -912,6 +911,16 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 if (is_mem(extract) || extract->type()->isa<FrameType>())
                     return func_impl_;
                 if (!extract->agg()->isa<Assembly>()) { // extract is a nop for inline assembly
+                    auto found = std::find(kernel_references.begin(), kernel_references.end(), aggop->agg()->unique_name());
+
+                    if(found != kernel_references.end()) {
+                        if(aggop->type()->isa<StructType>()) {
+                          kernel_references.push_back(def_name);
+                        } else if(aggop->type()->isa<PtrType>()) {
+                          kernel_pointers.push_back(def_name);
+                        }
+                    }
+
                     emit_type(func_impl_, aggop->type()) << " " << def_name << ";" << endl;
                     func_impl_ << def_name << " = ";
                     if (auto memop = extract->agg()->isa<MemOp>())
