@@ -19,7 +19,7 @@ Thorin is a CPS graph based higher-order intermediate representation, this means
 
 In the first part, we defined a macro with the filter dimensions (for now), then at each kernel declaration, we get the kernel block dimensions to emit the shared memory buffer declaration. We also retrieve all the structures and pointers in the kernel parameters for further evaluation of which will be input buffers to store in the faster memories.
 
-Following the analysis, we go through the kernel primops to check the parameters behavior, if a extraction, a bitcast or a LEA operation is performed, we keep inserting the targets in the list so they also are evaluated.
+Following the analysis, we go through the kernel primops to check the parameters behavior, if an extraction, a bitcast or a LEA operation is performed, we keep inserting the targets in the list so they also are evaluated.
 
 When we find a load operation in one of our targets, we insert them in the shared memory candidates list if they weren't blacklisted. A target is blacklisted when a store operation is performed in it (we don't want to store writable kernel buffers in the shared memory).
 
@@ -27,12 +27,16 @@ After the analysis, for each bitcasting operation with the targets we emit the s
 
 \section{Modifications}
 
+We use four lists to perform the analysis, the kernel\_references will have all the references to the kernel parameters (doesn't matter which type they are), the kernel\_pointers list will contain all the pointers (directly defined or inside a struct) that come from the kernel parameters. The shm\_buffers list will contain all the selected buffers that must go to the shared memory and the shm\_blacklist will contain all the blacklisted buffers.
+
 \begin{minted}{cpp}
 static std::list<std::string> shm_buffers;
 static std::list<std::string> shm_blacklist;
 static std::list<std::string> kernel_references;
 static std::list<std::string> kernel_pointers;
 \end{minted}
+
+The following code shows the functions that emits the copy from the global memory to the shared memory and the access in the shared memory, respectively.
 
 \begin{minted}{cpp}
 std::ostream& CCodeGen::emit_shm_copy(
@@ -74,6 +78,7 @@ std::ostream& CCodeGen::emit_shm_copy(
 }
 
 \end{minted}
+
 \begin{minted}{cpp}
 std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string x, std::string y) {
   int extend_width = FILTER_WIDTH / 2;
@@ -85,6 +90,8 @@ std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string 
   return func_impl_;
 }
 \end{minted}
+
+To avoid the filter data to be used for shared memory, we still ignore all the parameters with type filter from the kernel parameters. This must be changed in next work.
 
 \begin{minted}{cpp}
 std::stringstream type_stream;
@@ -100,11 +107,16 @@ if(param->type()->isa<PtrType>()) {
 }
 \end{minted}
 
+The following code emits the shared memory declaration in the kernel using the filter dimension macros.
+
 \begin{minted}{cpp}
 if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
-  func_impl_ << endl << "__shared__ double ds_img[" << (bdimx + (FILTER_WIDTH / 2) * 2) << "][" << (bdimy + (FILTER_HEIGHT / 2) * 2) << "];";
+  func_impl_ << endl << "__shared__ double ds_img[" << (bdimx + (FILTER_WIDTH / 2) * 2) << "][" << \
+                                                       (bdimy + (FILTER_HEIGHT / 2) * 2) << "];";
 }
 \end{minted}
+
+The following code is executed before the code generation, it perform our analysis of possible candidates to be optimized using the shared memory.
 
 \begin{minted}{cpp}
 for(const auto& block : schedule) {
@@ -166,6 +178,8 @@ for(const auto& block : schedule) {
 }
 \end{minted}
 
+Finally, the next code emits the shared memory access when necessary (it's still necessary to fix the indexes).
+
 \begin{minted}{cpp}
 auto found = std::find(shm_buffers.begin(), shm_buffers.end(), def_name);
 
@@ -177,6 +191,14 @@ if(found != shm_buffers.end()) {
     emit(lea->index()) << ";";
 }
 \end{minted}
+
+\section{Things to do}
+\begin{itemize}
+\item Perform analysis of the image dimensions by identifying the computing of gid\_x and gid\_y and then finding the "less than" comparison with the image dimensions
+\item Adjust the index in the shared memory access
+\item Emit the shared memory copy after the bitcast of the target pointer
+\item Use the filter saving its data into texture memory, the challenge is to identify which read-only (in relation to the analysis) buffer is the filter and which one is the image
+\end{itemize}
 
 \end{document}
 
