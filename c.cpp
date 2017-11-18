@@ -15,11 +15,24 @@
 #define FILTER_WIDTH        7
 #define FILTER_HEIGHT       7
 
+#ifndef list_contains
+#  define list_contains(a,b) (std::find(a.begin(), a.end(), b) != a.end())
+#endif
+
+#ifndef print_list
+#  define print_list(h,a)     std::cout << h << std::endl;                                              \
+                              for(std::list<std::string>::iterator i = a.begin(); i != a.end(); i++) {  \
+                                std::cout << *i << std::endl;                                           \
+                              }
+#endif
+
+
 namespace thorin {
 
 static std::list<std::string> shm_buffers;
 static std::list<std::string> shm_blacklist;
-static std::list<std::string> kernel_references;
+static std::list<std::string> kernel_images;
+static std::list<std::string> kernel_filters;
 static std::list<std::string> kernel_pointers;
 
 class CCodeGen {
@@ -425,11 +438,15 @@ void CCodeGen::emit() {
 
                     type_stream << param->type();
 
-                    if(type_stream.str().compare("filter") != 0) {
-                      kernel_references.push_back(param->unique_name());
+                    if(type_stream.str().compare("filter") == 0 && !list_contains(kernel_filters, param->unique_name())) {
+                      kernel_filters.push_back(param->unique_name());
                     }
 
-                    if(param->type()->isa<PtrType>()) {
+                    if(type_stream.str().compare("image") == 0 && !list_contains(kernel_images, param->unique_name())) {
+                      kernel_images.push_back(param->unique_name());
+                    }
+
+                    if(param->type()->isa<PtrType>() && !list_contains(kernel_pointers, param->unique_name())) {
                       kernel_pointers.push_back(param->unique_name());
                     }
 
@@ -479,11 +496,9 @@ void CCodeGen::emit() {
 
             if(auto aggop = primop->isa<AggOp>()) {
               if(aggop->isa<Extract>()) {
-                auto found = std::find(kernel_references.begin(), kernel_references.end(), aggop->agg()->unique_name());
-
-                if(found != kernel_references.end()) {
-                  if(aggop->type()->isa<StructType>()) {
-                    kernel_references.push_back(primop_name);
+                if(list_contains(kernel_images, aggop->agg()->unique_name())) {
+                  if(aggop->type()->isa<StructType>() && !list_contains(kernel_images, primop_name)) {
+                    kernel_images.push_back(primop_name);
                   } else if(aggop->type()->isa<PtrType>()) {
                     kernel_pointers.push_back(primop_name);
                   }
@@ -491,31 +506,25 @@ void CCodeGen::emit() {
               }
             } else if(auto conv = primop->isa<ConvOp>()) {
               if(conv->isa<Bitcast>()) {
-                auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), conv->from()->unique_name());
-
-                if(found != kernel_pointers.end()) {
+                if(list_contains(kernel_pointers, conv->from()->unique_name())) {
                   kernel_pointers.push_back(primop_name);
                 }
               }
             } else if(auto lea = primop->isa<LEA>()) {
-              auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), lea->ptr()->unique_name());
-
-              if(found != kernel_pointers.end()) {
+              if(list_contains(kernel_pointers, lea->ptr()->unique_name())) {
                 kernel_pointers.push_back(primop_name);
               }
             } else if(auto load = primop->isa<Load>()) {
               auto ptr_name = load->ptr()->unique_name();
-              auto found = std::find(kernel_pointers.begin(), kernel_pointers.end(), ptr_name);
-              auto blacklisted = std::find(shm_blacklist.begin(), shm_blacklist.end(), ptr_name) != shm_blacklist.end();
+              auto blacklisted = list_contains(shm_blacklist, ptr_name);
 
-              if(!blacklisted && found != kernel_pointers.end()) {
+              if(!blacklisted && list_contains(kernel_pointers, ptr_name)) {
                 shm_buffers.push_back(ptr_name);
               }
             } else if(auto store = primop->isa<Store>()) {
               auto ptr_name = store->ptr()->unique_name();
-              auto found = std::find(shm_buffers.begin(), shm_buffers.end(), ptr_name);
 
-              if(found != shm_buffers.end()) {
+              if(list_contains(shm_buffers, ptr_name)) {
                 shm_buffers.remove(ptr_name);
               }
 
@@ -1098,9 +1107,7 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 emit_type(func_impl_, lea->type()) << " " << def_name << ";" << endl;
                 func_impl_ << def_name << " = ";
 
-                auto found = std::find(shm_buffers.begin(), shm_buffers.end(), def_name);
-
-                if(found != shm_buffers.end()) {
+                if(list_contains(shm_buffers, def_name)) {
                     emit_shm_access("ds_img", lea->index()->unique_name(), lea->index()->unique_name());
                     func_impl_ << ";";
                 } else { 
@@ -1288,3 +1295,7 @@ void emit_c(World& world, const Cont2Config& kernel_config, std::ostream& stream
 //------------------------------------------------------------------------------
 
 }
+
+#undef print_list
+#undef list_contains
+
