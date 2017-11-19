@@ -150,6 +150,22 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         union { double* dst; char* src; } u_23061;
         u_23061.src = _23060;
         _23061 = u_23061.dst;
+        for(int i = 0; i < blockDim.x + 6; i += blockDim.x) {
+            for(int j = 0; j < blockDim.y + 6; j += blockDim.y) {
+                if(threadIdx.x + i < blockDim.x + 6 && 
+                   threadIdx.y + j < blockDim.y + 6 && 
+                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) >= 0 && 
+                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) < IMAGE_WIDTH && 
+                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) >= 0 && 
+                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) < IMAGE_HEIGHT) {
+                    ds_img[threadIdx.x + i][threadIdx.y + j] = \
+                      _23061[((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) * IMAGE_WIDTH + ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i)];
+                }
+            }
+        }
+        
+        __syncthreads();
+        
         #line 17 "gaussian.impala"
         bool _23037;
         _23037 = h_anchor_23036 <= gid_x_23022;
@@ -201,6 +217,22 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         union { double* dst; char* src; } u_23054;
         u_23054.src = _23053;
         _23054 = u_23054.dst;
+        for(int i = 0; i < blockDim.x + 6; i += blockDim.x) {
+            for(int j = 0; j < blockDim.y + 6; j += blockDim.y) {
+                if(threadIdx.x + i < blockDim.x + 6 && 
+                   threadIdx.y + j < blockDim.y + 6 && 
+                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) >= 0 && 
+                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) < IMAGE_WIDTH && 
+                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) >= 0 && 
+                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) < IMAGE_HEIGHT) {
+                    ds_img[threadIdx.x + i][threadIdx.y + j] = \
+                      _23054[((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) * IMAGE_WIDTH + ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i)];
+                }
+            }
+        }
+        
+        __syncthreads();
+        
         #line 19 "gpu_device.impala"
         p_23043 = _23079;
         psum_23045 = 0.000000e+00;
@@ -229,7 +261,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         _23063 = gid_x_23022 + _23043;
         #line 54 "gpu_device.impala"
         double* i_23056;
-        i_23056 = _23054 + _23055;
+        i_23056 = ds_img[_23055 + 3 - blockIdx.x * blockDim.x][_23055 + 3 - blockIdx.y * blockDim.y];
         #line 50 "gpu_device.impala"
         int _23064;
         _23064 = _23062 + _23063;
@@ -400,7 +432,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
     l23171: ;
         #line 50 "gpu_device.impala"
         double* _23172;
-        _23172 = ds_img[_23166 + 3 - blockIdx.x * blockDim.x][_23166 + 3 - blockIdx.y * blockDim.y];
+        _23172 = _23151 + _23166;
         #line 50 "gpu_device.impala"
         double _23173;
         _23173 = *_23172;
@@ -428,6 +460,22 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
         union { double* dst; char* src; } u_23145;
         u_23145.src = _23144;
         _23145 = u_23145.dst;
+        for(int i = 0; i < blockDim.x + 6; i += blockDim.x) {
+            for(int j = 0; j < blockDim.y + 6; j += blockDim.y) {
+                if(threadIdx.x + i < blockDim.x + 6 && 
+                   threadIdx.y + j < blockDim.y + 6 && 
+                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) >= 0 && 
+                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) < IMAGE_WIDTH && 
+                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) >= 0 && 
+                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) < IMAGE_HEIGHT) {
+                    ds_img[threadIdx.x + i][threadIdx.y + j] = \
+                      _23145[((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) * IMAGE_WIDTH + ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i)];
+                }
+            }
+        }
+        
+        __syncthreads();
+        
         #line 19 "gpu_device.impala"
         p_23136 = _23169;
         psum_23138 = 0.000000e+00;
@@ -459,7 +507,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
         _23142 = 1 + _23136;
         #line 54 "gpu_device.impala"
         double* i_23147;
-        i_23147 = _23145 + _23146;
+        i_23147 = ds_img[_23146 + 3 - blockIdx.x * blockDim.x][_23146 + 3 - blockIdx.y * blockDim.y];
         #line 55 "gpu_device.impala"
         double _23148;
         _23148 = *i_23147;
@@ -471,7 +519,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
         _23158 = _23148;
         #line 50 "gpu_device.impala"
         double* _23155;
-        _23155 = ds_img[_23154 + 3 - blockIdx.x * blockDim.x][_23154 + 3 - blockIdx.y * blockDim.y];
+        _23155 = _23151 + _23154;
         #line 50 "gpu_device.impala"
         double _23156;
         _23156 = *_23155;

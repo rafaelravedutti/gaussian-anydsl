@@ -11,12 +11,13 @@
 #include "thorin/be/c.h"
 
 #include <sstream>
+#include <map>
 
 #define FILTER_WIDTH        7
 #define FILTER_HEIGHT       7
 
 #ifndef list_contains
-#  define list_contains(a,b) (std::find(a.begin(), a.end(), b) != a.end())
+#  define list_contains(a,b)  (std::find(a.begin(), a.end(), b) != a.end())
 #endif
 
 #ifndef print_list
@@ -34,6 +35,7 @@ static std::list<std::string> shm_blacklist;
 static std::list<std::string> kernel_images;
 static std::list<std::string> kernel_filters;
 static std::list<std::string> kernel_pointers;
+static std::map<std::string, std::string> conv_map;
 
 class CCodeGen {
 public:
@@ -499,7 +501,15 @@ void CCodeGen::emit() {
                 if(list_contains(kernel_images, aggop->agg()->unique_name())) {
                   if(aggop->type()->isa<StructType>() && !list_contains(kernel_images, primop_name)) {
                     kernel_images.push_back(primop_name);
-                  } else if(aggop->type()->isa<PtrType>()) {
+                  } else if(aggop->type()->isa<PtrType>() && !list_contains(kernel_pointers, primop_name)) {
+                    kernel_pointers.push_back(primop_name);
+                  }
+                }
+
+                if(list_contains(kernel_filters, aggop->agg()->unique_name())) {
+                  if(aggop->type()->isa<StructType>() && !list_contains(kernel_filters, primop_name)) {
+                    kernel_images.push_back(primop_name);
+                  } else if(aggop->type()->isa<PtrType>() && !list_contains(kernel_pointers, primop_name)) {
                     kernel_pointers.push_back(primop_name);
                   }
                 }
@@ -512,6 +522,7 @@ void CCodeGen::emit() {
               }
             } else if(auto lea = primop->isa<LEA>()) {
               if(list_contains(kernel_pointers, lea->ptr()->unique_name())) {
+                conv_map.insert(std::pair<std::string, std::string>(lea->ptr()->unique_name(), primop_name));
                 kernel_pointers.push_back(primop_name);
               }
             } else if(auto load = primop->isa<Load>()) {
@@ -903,6 +914,18 @@ std::ostream& CCodeGen::emit(const Def* def) {
             func_impl_ << "u" << def_name << ".src = ";
             emit(conv->from()) << ";" << endl;
             func_impl_ << def_name << " = u" << def_name << ".dst;";
+
+            if(list_contains(kernel_pointers, def_name)) {
+              std::map<std::string, std::string>::iterator i;
+
+              if((i = conv_map.find(def_name)) != conv_map.end()) {
+                if( list_contains(shm_buffers, i->second)) {
+                  emit_shm_copy("ds_img", def_name, "IMAGE_WIDTH", "IMAGE_HEIGHT");
+                  // func_impl_ << def_name << " = ds_img;";
+                }
+              }
+            }
+
         }
 
         insert(def, def_name);
