@@ -293,13 +293,14 @@ std::ostream& CCodeGen::emit_shm_copy(const std::string shm_name, const std::str
 
   func_impl_ << endl;
 
+  func_impl_ << "#line 100 \"shared_memory_copy\"" << endl;
   func_impl_ << "for(int i = 0; i < blockDim.x + " << extend_width * 2 << "; i += blockDim.x) {" << up << endl;
   func_impl_ << "for(int j = 0; j < blockDim.y + " << extend_height * 2 << "; j += blockDim.y) {" << up << endl;
   func_impl_ << "if(threadIdx.x + i < blockDim.x + " << extend_width * 2 << " && " << endl << \
                 "   threadIdx.y + j < blockDim.y + " << extend_height * 2 << " && " << endl << \
-                "   " << idxx_string << " >= 0 && " << endl << \
+                // "   " << idxx_string << " >= 0 && " << endl <<
                 "   " << idxx_string << " < " << width << " && " << endl << \
-                "   " << idxy_string << " >= 0 && " << endl << \
+                // "   " << idxy_string << " >= 0 && " << endl <<
                 "   " << idxy_string << " < " << height << ") {" << up << endl;
 
   func_impl_ << shm_name << "[threadIdx.x + i][threadIdx.y + j] = \\" << endl << \
@@ -318,8 +319,8 @@ std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string 
   int extend_width = FILTER_WIDTH / 2;
   int extend_height = FILTER_HEIGHT / 2;
 
-  func_impl_ << shm_name << "[" << x << " + " << extend_width << " - blockIdx.x * blockDim.x][" \
-                                << y << " + " << extend_height << " - blockIdx.y * blockDim.y]";
+  func_impl_ << "&" << shm_name << "[" << x << " + " << extend_width << " - blockIdx.x * blockDim.x][" \
+                                       << y << " + " << extend_height << " - blockIdx.y * blockDim.y]";
 
   return func_impl_;
 }
@@ -1130,6 +1131,10 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 emit(lea->ptr()) << "->e[";
                 emit(lea->index()) << "];";
             } else {
+                if(list_contains(shm_buffers, def_name)) {
+                  func_impl_ << "#line 100 \"shared_memory_access\"" << endl;
+                }
+
                 emit_addr_space(func_impl_, lea->ptr()->type());
                 emit_type(func_impl_, lea->type()) << " " << def_name << ";" << endl;
                 func_impl_ << def_name << " = ";
