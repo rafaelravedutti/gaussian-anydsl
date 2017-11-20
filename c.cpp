@@ -36,6 +36,8 @@ static std::list<std::string> kernel_images;
 static std::list<std::string> kernel_filters;
 static std::list<std::string> kernel_pointers;
 static std::map<std::string, std::string> conv_map;
+static std::string image_width_name;
+static std::string image_height_name;
 
 class CCodeGen {
 public:
@@ -445,6 +447,8 @@ void CCodeGen::emit() {
                     }
 
                     if(type_stream.str().compare("image") == 0 && !list_contains(kernel_images, param->unique_name())) {
+                      image_width_name = param->unique_name() + ".e2";
+                      image_height_name = param->unique_name() + ".e3";
                       kernel_images.push_back(param->unique_name());
                     }
 
@@ -508,9 +512,9 @@ void CCodeGen::emit() {
 
                 if(list_contains(kernel_filters, aggop->agg()->unique_name())) {
                   if(aggop->type()->isa<StructType>() && !list_contains(kernel_filters, primop_name)) {
-                    kernel_images.push_back(primop_name);
+                    kernel_filters.push_back(primop_name);
                   } else if(aggop->type()->isa<PtrType>() && !list_contains(kernel_pointers, primop_name)) {
-                    kernel_pointers.push_back(primop_name);
+                    //kernel_pointers.push_back(primop_name);
                   }
                 }
               }
@@ -920,7 +924,7 @@ std::ostream& CCodeGen::emit(const Def* def) {
 
               if((i = conv_map.find(def_name)) != conv_map.end()) {
                 if( list_contains(shm_buffers, i->second)) {
-                  emit_shm_copy("ds_img", def_name, "IMAGE_WIDTH", "IMAGE_HEIGHT");
+                  emit_shm_copy("ds_img", def_name, image_width_name, image_height_name);
                   // func_impl_ << def_name << " = ds_img;";
                 }
               }
