@@ -150,13 +150,12 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         union { double* dst; char* src; } u_23061;
         u_23061.src = _23060;
         _23061 = u_23061.dst;
+        #line 100 "shared_memory_copy"
         for(int i = 0; i < blockDim.x + 6; i += blockDim.x) {
             for(int j = 0; j < blockDim.y + 6; j += blockDim.y) {
                 if(threadIdx.x + i < blockDim.x + 6 && 
                    threadIdx.y + j < blockDim.y + 6 && 
-                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) >= 0 && 
                    ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) < _20646_22982.e2 && 
-                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) >= 0 && 
                    ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) < _20646_22982.e3) {
                     ds_img[threadIdx.x + i][threadIdx.y + j] = \
                       _23061[((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) * _20646_22982.e2 + ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i)];
@@ -188,8 +187,9 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         goto l23082;
     l23082: ;
         #line 50 "gpu_device.impala"
+        #line 100 "shared_memory_access"
         double* _23083;
-        _23083 = ds_img[_23075 + 3 - blockIdx.x * blockDim.x][_23075 + 3 - blockIdx.y * blockDim.y];
+        _23083 = &ds_img[_23075 + 3 - blockIdx.x * blockDim.x][_23075 + 3 - blockIdx.y * blockDim.y];
         #line 50 "gpu_device.impala"
         double _23084;
         _23084 = *_23083;
@@ -253,8 +253,9 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         double _23057;
         _23057 = *i_23056;
         #line 50 "gpu_device.impala"
+        #line 100 "shared_memory_access"
         double* _23065;
-        _23065 = ds_img[_23064 + 3 - blockIdx.x * blockDim.x][_23064 + 3 - blockIdx.y * blockDim.y];
+        _23065 = &ds_img[_23064 + 3 - blockIdx.x * blockDim.x][_23064 + 3 - blockIdx.y * blockDim.y];
         #line 55 "gpu_device.impala"
         double _23068;
         _23068 = _23057;
