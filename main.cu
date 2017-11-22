@@ -385,6 +385,21 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
         union { double* dst; char* src; } u_23151;
         u_23151.src = _23150;
         _23151 = u_23151.dst;
+        #line 100 "shared_memory_copy"
+        for(int i = 0; i < blockDim.x + 6; i += blockDim.x) {
+            for(int j = 0; j < blockDim.y + 6; j += blockDim.y) {
+                if(threadIdx.x + i < blockDim.x + 6 && 
+                   threadIdx.y + j < blockDim.y + 6 && 
+                   ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i) < _20779_23096.e2 && 
+                   ((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) < _20779_23096.e3) {
+                    ds_img[threadIdx.x + i][threadIdx.y + j] = \
+                      _23151[((blockIdx.y * blockDim.y + threadIdx.y) - 3 + j) * _20779_23096.e2 + ((blockIdx.x * blockDim.x + threadIdx.x) - 3 + i)];
+                }
+            }
+        }
+        
+        __syncthreads();
+        
         #line 50 "gpu_device.impala"
         int _23166;
         _23166 = _23165 + gid_x_23119;
@@ -416,8 +431,9 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
         goto l23171;
     l23171: ;
         #line 50 "gpu_device.impala"
+        #line 100 "shared_memory_access"
         double* _23172;
-        _23172 = _23151 + _23166;
+        _23172 = &ds_img[_23166 % _20779_23096.e2 + 3 - blockIdx.x * blockDim.x][_23166 / _20779_23096.e2 + 3 - blockIdx.y * blockDim.y];
         #line 50 "gpu_device.impala"
         double _23173;
         _23173 = *_23172;
@@ -487,8 +503,9 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20775(struct_filter_5428 
         double _23158;
         _23158 = _23148;
         #line 50 "gpu_device.impala"
+        #line 100 "shared_memory_access"
         double* _23155;
-        _23155 = _23151 + _23154;
+        _23155 = &ds_img[_23154 % _20779_23096.e2 + 3 - blockIdx.x * blockDim.x][_23154 / _20779_23096.e2 + 3 - blockIdx.y * blockDim.y];
         #line 50 "gpu_device.impala"
         double _23156;
         _23156 = *_23155;

@@ -453,6 +453,10 @@ void CCodeGen::emit() {
                       kernel_images.push_back(param->unique_name());
                     }
 
+                    if(type_stream.str().compare("Buffer") == 0 && !list_contains(kernel_images, param->unique_name())) {
+                      kernel_images.push_back(param->unique_name());
+                    }
+
                     if(param->type()->isa<PtrType>() && !list_contains(kernel_pointers, param->unique_name())) {
                       kernel_pointers.push_back(param->unique_name());
                     }
