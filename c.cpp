@@ -1140,7 +1140,11 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 func_impl_ << def_name << " = ";
 
                 if(list_contains(shm_buffers, def_name)) {
-                    emit_shm_access("ds_img", lea->index()->unique_name(), lea->index()->unique_name());
+                    emit_shm_access(
+                      "ds_img",
+                      lea->index()->unique_name() + " % " + image_width_name,
+                      lea->index()->unique_name() + " / " + image_width_name
+                    );
                     func_impl_ << ";";
                 } else { 
                     emit(lea->ptr()) << " + ";

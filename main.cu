@@ -189,7 +189,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         #line 50 "gpu_device.impala"
         #line 100 "shared_memory_access"
         double* _23083;
-        _23083 = &ds_img[_23075 + 3 - blockIdx.x * blockDim.x][_23075 + 3 - blockIdx.y * blockDim.y];
+        _23083 = &ds_img[_23075 % _20646_22982.e2 + 3 - blockIdx.x * blockDim.x][_23075 / _20646_22982.e2 + 3 - blockIdx.y * blockDim.y];
         #line 50 "gpu_device.impala"
         double _23084;
         _23084 = *_23083;
@@ -255,7 +255,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_20643(struct_image_5424 _
         #line 50 "gpu_device.impala"
         #line 100 "shared_memory_access"
         double* _23065;
-        _23065 = &ds_img[_23064 + 3 - blockIdx.x * blockDim.x][_23064 + 3 - blockIdx.y * blockDim.y];
+        _23065 = &ds_img[_23064 % _20646_22982.e2 + 3 - blockIdx.x * blockDim.x][_23064 / _20646_22982.e2 + 3 - blockIdx.y * blockDim.y];
         #line 55 "gpu_device.impala"
         double _23068;
         _23068 = _23057;
