@@ -33,14 +33,27 @@ IMPALA_LINK_FILES = \
 	${PLATFORMS_PATH}/intrinsics_opencl.impala \
 	${PLATFORMS_PATH}/intrinsics_cuda.impala
 
+# Use modified version of Thorin code generator?
+USE_MODIFIED_CODEGEN=yes
+
+# Dataset path
+DATASET_PATH=/home/rafael/repositories/tcc/anydsl/canny/dataset
+
 all: gaussian
 
 main.ll: ${PLATFORM_FILE} gaussian.impala opencv_image.impala main.impala
-	cp -p c.cpp ${THORIN_BACKEND_SRC}/
+
+ifeq ($(USE_MODIFIED_CODEGEN), yes)
+	cp c.cpp ${THORIN_BACKEND_SRC}/
 	cd ${THORIN_BUILD} && make && cd -
+endif
+
 	${IMPALA_BIN}/impala -emit-llvm -g -O3 ${IMPALA_LINK_FILES} $^
-	cp -p c.cpp.original ${THORIN_BACKEND_SRC}/c.cpp
+
+ifeq ($(USE_MODIFIED_CODEGEN), yes)
+	cp c.cpp.original ${THORIN_BACKEND_SRC}/c.cpp
 	cd ${THORIN_BUILD} && make && cd -
+endif
 
 opencv_runtime.ll: opencv_runtime.cpp
 	${LLVM_BIN}/clang++ -S -emit-llvm ${OPENCV_RUNTIME_FLAGS} $^
