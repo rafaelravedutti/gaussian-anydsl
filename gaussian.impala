@@ -1,5 +1,5 @@
 /* Apply 2D filter convolution with separable kernels (tiling) */
-fn apply_2d_tiled_convolution(input_image : image, output_image : image, h_mask : filter, v_mask : filter) -> () {
+fn apply_separable_convolution(input_image : image, output_image : image, h_mask : filter, v_mask : filter) -> () {
   /* Horizontal anchor based in the horizontal mask size */
   let h_anchor = h_mask.width / 2;
   /* Vertical anchor based in the vertical mask size */
@@ -57,7 +57,7 @@ fn apply_2d_tiled_convolution(input_image : image, output_image : image, h_mask 
 }
 
 /* Apply 2D filter convolution with non-separable kernels (blocks) */
-fn apply_2d_block_convolution(input_image : image, output_image : image, mask : filter) -> () {
+fn apply_block_convolution(input_image : image, output_image : image, mask : filter) -> () {
   let h_anchor = mask.width / 2;
   let v_anchor = mask.height / 2;
 
@@ -141,14 +141,14 @@ fn gaussian_blur(input_image : image, output_image : image, use_tiled : bool) ->
     let column_filter = filter_Nx1(bmask_x, false);
     let row_filter = filter_Nx1(bmask_y, true);
 
-    apply_2d_tiled_convolution(input_image, output_image, column_filter, row_filter);
+    apply_separable_convolution(input_image, output_image, column_filter, row_filter);
 
     release_filter(column_filter);
     release_filter(row_filter);
   /* Applies the not separable kernel in blocks */
   } else {
     let block_filter = filter_NxN(bmask_xy);
-    apply_2d_block_convolution(input_image, output_image, block_filter);
+    apply_block_convolution(input_image, output_image, block_filter);
     release_filter(block_filter);
   }
 
