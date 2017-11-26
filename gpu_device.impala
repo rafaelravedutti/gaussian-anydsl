@@ -156,7 +156,7 @@ fn iterate(input_image : image, body: fn(i32, i32) -> ()) -> () {
 }
 
 /* Iterates over an image in GPU based on a stencil */
-fn iterate_stencil(input_image : image, stencil : filter, body: fn(i32, i32, image) -> ()) -> () {
+fn iterate_stencil(input_image : image, stencil : filter, body: fn(i32, i32, image, filter) -> ()) -> () {
   /* Use first CUDA accelerator */
   let accelerator = cuda_accelerator(0);
   /* CUDA kernel grid configuration */
@@ -174,7 +174,7 @@ fn iterate_stencil(input_image : image, stencil : filter, body: fn(i32, i32, ima
     /* Check for image boundaries to avoid invalid memory region access */
     if gid_x < input_image.width && gid_y < input_image.height {
       /* Call the body function with the obtained indexes */
-      body(gid_x, gid_y, input_image);
+      body(gid_x, gid_y, input_image, stencil);
     }
   }
 }

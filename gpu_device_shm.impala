@@ -87,13 +87,13 @@ fn get_pixel(shared : shared_memory, x : i32, y : i32) -> f64 {
 }
 
 /* Gets 1D filter coefficient at i index */
-fn get_1d_filter_coeff(filt : filter, i : i32) -> f64 {
-  bitcast[&[1][f64]](filt.buffer.data)(i)
+fn get_1d_filter_coeff(shared : shared_memory, i : i32) -> f64 {
+  shared.data(i)
 }
 
 /* Gets 2D filter coefficient at (i, j) index */
-fn get_2d_filter_coeff(filt : filter, i : i32, j : i32) -> f64 {
-  bitcast[&[1][f64]](filt.buffer.data)(j * filt.width + i)
+fn get_2d_filter_coeff(shared : shared_memory, i : i32, j : i32) -> f64 {
+  shared.data((j + shared.offset_y) * shared.width + i + shared.offset_x)
 }
 
 /* Create temporary image */
@@ -177,7 +177,7 @@ fn iterate(input_image : image, body : fn(i32, i32) -> ()) -> () {
 }
 
 /* Iterates over an image in GPU based on a stencil */
-fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, shared_memory) -> ()) -> () {
+fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, shared_memory, shared_memory) -> ()) -> () {
   /* Use first CUDA accelerator */
   let acc = cuda_accelerator(0);
   /* CUDA kernel grid configuration */
@@ -218,6 +218,14 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, sh
       offset_y: extend_height - bidy * bdimy
     };
 
+    /* Allocate shared memory for filter */
+    let shared_filter = shared_memory {
+      data: reserve_shared[f64](49),
+      width: stencil.width,
+      offset_x: 0,
+      offset_y: 0
+    };
+
     /* Go through each block step in the y axis (rows) */
     for j in offset_range(0, shm_dimy, bdimy) {
       /* Go through each block step in the x axis (columns) */
@@ -244,13 +252,31 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, sh
       }
     }
 
+    /* Go through each block step in the y axis (rows) */
+    for j in offset_range(0, stencil.height, bdimy) {
+      /* Go through each block step in the x axis (columns) */
+      for i in offset_range(0, stencil.width, bdimx) {
+        /* Shared memory x axis */
+        let shm_index_x = tidx + i;
+        /* Shared memory y axis */
+        let shm_index_y = tidy + j;
+
+        /* Check shared memory boundaries to avoid invalid memory region access */
+        if shm_index_x < stencil.width && shm_index_y < stencil.height {
+          /* Copy input filter content to shared memory */
+          shared_filter.data(shm_index_y * stencil.width + shm_index_x) =
+            bitcast[&[1][f64]](stencil.buffer.data)(shm_index_y * stencil.width + shm_index_x);
+        }
+      }
+    }
+
     /* Thread barrier synchronization */
     acc.barrier();
 
     /* Check for image boundaries to avoid invalid memory region access */
     if gid_x < input_image.width && gid_y < input_image.height {
       /* Call the body function with the obtained indexes */
-      body(gid_x, gid_y, shared);
+      body(gid_x, gid_y, shared, shared_filter);
     }
   }
 }
