@@ -32,6 +32,20 @@ fn range(mut min : i32, max : i32, body : fn(i32) -> ()) -> () {
   }
 }
 
+/* Return kernel block configuration for device */
+fn get_block_config() -> (i32, i32, i32) {
+  (128, 1, 1)
+}
+
+/* Return kernel grid configuration for device based on the image dimensions and block configuration */
+fn get_grid_config(input_image : image) -> (i32, i32, i32) {
+  let block_config = get_block_config();
+  let gidx_size = input_image.width + (block_config(0) - input_image.width % block_config(0));
+  let gidy_size = input_image.height + (block_config(1) - input_image.height % block_config(1));
+
+  (gidx_size, gidy_size, 1)
+}
+
 /* Iterate from min to max with a offset executing a function */
 fn offset_range(mut min : i32, max : i32, offset : i32, body : fn(i32) -> ()) -> () {
   /* While maximum value not reached */
@@ -143,9 +157,9 @@ fn iterate(input_image : image, body : fn(i32, i32) -> ()) -> () {
   /* Use first CUDA accelerator */
   let accelerator = cuda_accelerator(0);
   /* CUDA kernel grid configuration */
-  let grid = (input_image.width, input_image.height, 1);
+  let grid = get_grid_config(input_image);
   /* CUDA kernel block configuration */
-  let block = (128, 1, 1);
+  let block = get_block_config();
 
   /* Execute the following code in the GPU */
   with accelerator.exec(grid, block) @{
@@ -167,9 +181,9 @@ fn iterate_stencil(input_image : image, stencil : filter, body : fn(i32, i32, sh
   /* Use first CUDA accelerator */
   let acc = cuda_accelerator(0);
   /* CUDA kernel grid configuration */
-  let grid = (input_image.width, input_image.height, 1);
+  let grid = get_grid_config(input_image);
   /* CUDA kernel block configuration */
-  let block = (128, 1, 1);
+  let block = get_block_config();
 
   /* Execute the following code in the GPU */
   with acc.exec(grid, block) @{
