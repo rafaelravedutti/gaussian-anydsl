@@ -326,9 +326,6 @@ std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string 
 }
 
 std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
-  int extend_width = FILTER_WIDTH / 2;
-  int extend_height = FILTER_HEIGHT / 2;
-
   std::string idx_string = "(threadIdx.y + j) * " << FILTER_WIDTH << " + threadIdx.x + i";
 
   func_impl_ << endl;
@@ -352,9 +349,6 @@ std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const s
 }
 
 std::ostream& CCodeGen::emit_shm_filter_access(const std::string shm_name, std::string index) {
-  int extend_width = FILTER_WIDTH / 2;
-  int extend_height = FILTER_HEIGHT / 2;
-
   func_impl_ << "&" << shm_name << "[" << index << "]";
 
   return func_impl_;
