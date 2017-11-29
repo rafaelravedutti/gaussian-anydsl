@@ -325,6 +325,41 @@ std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string 
   return func_impl_;
 }
 
+std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
+  int extend_width = FILTER_WIDTH / 2;
+  int extend_height = FILTER_HEIGHT / 2;
+
+  std::string idx_string = "(threadIdx.y + j) * " << FILTER_WIDTH << " + threadIdx.x + i";
+
+  func_impl_ << endl;
+
+  func_impl_ << "#line 100 \"shared_memory_filter_copy\"" << endl;
+  func_impl_ << "for(int i = 0; i < " << FILTER_HEIGHT << "; i += blockDim.x) {" << up << endl;
+  func_impl_ << "for(int j = 0; j < " << FILTER_WIDTH << "; j += blockDim.y) {" << up << endl;
+  func_impl_ << "if(threadIdx.x + i < " << FILTER_WIDTH << " && " << endl << \
+                "   threadIdx.y + j < " << FILTER_HEIGHT << ") {" up << endl;
+
+  func_impl_ << shm_name << "[" << idx_string << "] = \\" << endl << \
+                "  " << src_buffer << "[" << idx_string << "];" << down << endl;
+
+  func_impl_ << "}" << down << endl;
+  func_impl_ << "}" << down << endl;
+  func_impl_ << "}" << endl;
+
+  func_impl_ << endl << "__syncthreads();" << endl;
+
+  return func_impl_;
+}
+
+std::ostream& CCodeGen::emit_shm_filter_access(const std::string shm_name, std::string index) {
+  int extend_width = FILTER_WIDTH / 2;
+  int extend_height = FILTER_HEIGHT / 2;
+
+  func_impl_ << "&" << shm_name << "[" << index << "]";
+
+  return func_impl_;
+}
+
 void CCodeGen::emit() {
     if (lang_==Lang::CUDA) {
         func_decls_ << "__device__ inline int threadIdx_x() { return threadIdx.x; }" << endl;
