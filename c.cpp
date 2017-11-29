@@ -34,7 +34,8 @@ static std::list<std::string> shm_buffers;
 static std::list<std::string> shm_blacklist;
 static std::list<std::string> kernel_images;
 static std::list<std::string> kernel_filters;
-static std::list<std::string> kernel_pointers;
+static std::list<std::string> image_pointers;
+static std::list<std::string> filter_pointers;
 static std::map<std::string, std::string> conv_map;
 static std::string image_width_name;
 static std::string image_height_name;
@@ -60,8 +61,11 @@ private:
     std::ostream& emit_addr_space(std::ostream&, const Type*);
     std::ostream& emit_type(std::ostream&, const Type*);
     std::ostream& emit(const Def*);
-    std::ostream& emit_shm_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height);
-    std::ostream& emit_shm_access(const std::string shm_name, std::string x, std::string y);
+    std::ostream& emit_shm_image_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height);
+    std::ostream& emit_shm_image_access(const std::string shm_name, std::string x, std::string y);
+    std::ostream& emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer);
+    std::ostream& emit_shm_filter_access(const std::string shm_name, std::string index);
+
     bool lookup(const Type*);
     bool lookup(const Def*);
     void insert(const Type*, std::string);
@@ -284,7 +288,7 @@ std::ostream& CCodeGen::emit_aggop_decl(const Type* type) {
     return type_decls_;
 }
 
-std::ostream& CCodeGen::emit_shm_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
+std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
   int extend_width = FILTER_WIDTH / 2;
   int extend_height = FILTER_HEIGHT / 2;
 
@@ -293,7 +297,7 @@ std::ostream& CCodeGen::emit_shm_copy(const std::string shm_name, const std::str
 
   func_impl_ << endl;
 
-  func_impl_ << "#line 100 \"shared_memory_copy\"" << endl;
+  func_impl_ << "#line 100 \"shared_memory_image_copy\"" << endl;
   func_impl_ << "for(int i = 0; i < blockDim.x + " << extend_width * 2 << "; i += blockDim.x) {" << up << endl;
   func_impl_ << "for(int j = 0; j < blockDim.y + " << extend_height * 2 << "; j += blockDim.y) {" << up << endl;
   func_impl_ << "if(threadIdx.x + i < blockDim.x + " << extend_width * 2 << " && " << endl << \
@@ -315,7 +319,7 @@ std::ostream& CCodeGen::emit_shm_copy(const std::string shm_name, const std::str
   return func_impl_;
 }
 
-std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string x, std::string y) {
+std::ostream& CCodeGen::emit_shm_image_access(const std::string shm_name, std::string x, std::string y) {
   int extend_width = FILTER_WIDTH / 2;
   int extend_height = FILTER_HEIGHT / 2;
 
@@ -325,16 +329,16 @@ std::ostream& CCodeGen::emit_shm_access(const std::string shm_name, std::string 
   return func_impl_;
 }
 
-std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
-  std::string idx_string = "(threadIdx.y + j) * " << FILTER_WIDTH << " + threadIdx.x + i";
+std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer) {
+  std::string idx_string = "(threadIdx.y + j) * " + std::to_string(FILTER_WIDTH) + " + threadIdx.x + i";
 
   func_impl_ << endl;
 
-  func_impl_ << "#line 100 \"shared_memory_filter_copy\"" << endl;
+  func_impl_ << "#line 200 \"shared_memory_filter_copy\"" << endl;
   func_impl_ << "for(int i = 0; i < " << FILTER_HEIGHT << "; i += blockDim.x) {" << up << endl;
   func_impl_ << "for(int j = 0; j < " << FILTER_WIDTH << "; j += blockDim.y) {" << up << endl;
   func_impl_ << "if(threadIdx.x + i < " << FILTER_WIDTH << " && " << endl << \
-                "   threadIdx.y + j < " << FILTER_HEIGHT << ") {" up << endl;
+                "   threadIdx.y + j < " << FILTER_HEIGHT << ") {" << up << endl;
 
   func_impl_ << shm_name << "[" << idx_string << "] = \\" << endl << \
                 "  " << src_buffer << "[" << idx_string << "];" << down << endl;
@@ -486,8 +490,8 @@ void CCodeGen::emit() {
                       kernel_images.push_back(param->unique_name());
                     }
 
-                    if(param->type()->isa<PtrType>() && !list_contains(kernel_pointers, param->unique_name())) {
-                      kernel_pointers.push_back(param->unique_name());
+                    if(param->type()->isa<PtrType>() && !list_contains(image_pointers, param->unique_name())) {
+                      image_pointers.push_back(param->unique_name());
                     }
 
                     emit_addr_space(func_decls_, param->type());
@@ -504,6 +508,7 @@ void CCodeGen::emit() {
 
         if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
           func_impl_ << endl << "__shared__ double ds_img[" << (bdimx + (FILTER_WIDTH / 2) * 2) << "][" << (bdimy + (FILTER_HEIGHT / 2) * 2) << "];";
+          func_impl_ << endl << "__shared__ double ds_filter[" << (FILTER_WIDTH * FILTER_HEIGHT) << "];";
         }
 
         // OpenCL: load struct from buffer
@@ -539,35 +544,44 @@ void CCodeGen::emit() {
                 if(list_contains(kernel_images, aggop->agg()->unique_name())) {
                   if(aggop->type()->isa<StructType>() && !list_contains(kernel_images, primop_name)) {
                     kernel_images.push_back(primop_name);
-                  } else if(aggop->type()->isa<PtrType>() && !list_contains(kernel_pointers, primop_name)) {
-                    kernel_pointers.push_back(primop_name);
+                  } else if(aggop->type()->isa<PtrType>() && !list_contains(image_pointers, primop_name)) {
+                    image_pointers.push_back(primop_name);
                   }
                 }
 
                 if(list_contains(kernel_filters, aggop->agg()->unique_name())) {
                   if(aggop->type()->isa<StructType>() && !list_contains(kernel_filters, primop_name)) {
                     kernel_filters.push_back(primop_name);
-                  } else if(aggop->type()->isa<PtrType>() && !list_contains(kernel_pointers, primop_name)) {
-                    //kernel_pointers.push_back(primop_name);
+                  } else if(aggop->type()->isa<PtrType>() && !list_contains(filter_pointers, primop_name)) {
+                    filter_pointers.push_back(primop_name);
                   }
                 }
               }
             } else if(auto conv = primop->isa<ConvOp>()) {
               if(conv->isa<Bitcast>()) {
-                if(list_contains(kernel_pointers, conv->from()->unique_name())) {
-                  kernel_pointers.push_back(primop_name);
+                if(list_contains(image_pointers, conv->from()->unique_name())) {
+                  image_pointers.push_back(primop_name);
+                }
+
+                if(list_contains(filter_pointers, conv->from()->unique_name())) {
+                  filter_pointers.push_back(primop_name);
                 }
               }
             } else if(auto lea = primop->isa<LEA>()) {
-              if(list_contains(kernel_pointers, lea->ptr()->unique_name())) {
+              if(list_contains(image_pointers, lea->ptr()->unique_name())) {
                 conv_map.insert(std::pair<std::string, std::string>(lea->ptr()->unique_name(), primop_name));
-                kernel_pointers.push_back(primop_name);
+                image_pointers.push_back(primop_name);
+              }
+
+              if(list_contains(filter_pointers, lea->ptr()->unique_name())) {
+                conv_map.insert(std::pair<std::string, std::string>(lea->ptr()->unique_name(), primop_name));
+                filter_pointers.push_back(primop_name);
               }
             } else if(auto load = primop->isa<Load>()) {
               auto ptr_name = load->ptr()->unique_name();
               auto blacklisted = list_contains(shm_blacklist, ptr_name);
 
-              if(!blacklisted && list_contains(kernel_pointers, ptr_name)) {
+              if(!blacklisted && (list_contains(image_pointers, ptr_name) || list_contains(filter_pointers, ptr_name))) {
                 shm_buffers.push_back(ptr_name);
               }
             } else if(auto store = primop->isa<Store>()) {
@@ -953,13 +967,22 @@ std::ostream& CCodeGen::emit(const Def* def) {
             emit(conv->from()) << ";" << endl;
             func_impl_ << def_name << " = u" << def_name << ".dst;";
 
-            if(list_contains(kernel_pointers, def_name)) {
+            if(list_contains(image_pointers, def_name)) {
               std::map<std::string, std::string>::iterator i;
 
               if((i = conv_map.find(def_name)) != conv_map.end()) {
-                if( list_contains(shm_buffers, i->second)) {
-                  emit_shm_copy("ds_img", def_name, image_width_name, image_height_name);
-                  // func_impl_ << def_name << " = ds_img;";
+                if(list_contains(shm_buffers, i->second)) {
+                  emit_shm_image_copy("ds_img", def_name, image_width_name, image_height_name);
+                }
+              }
+            }
+
+            if(list_contains(filter_pointers, def_name)) {
+              std::map<std::string, std::string>::iterator i;
+
+              if((i = conv_map.find(def_name)) != conv_map.end()) {
+                if(list_contains(shm_buffers, i->second)) {
+                  emit_shm_filter_copy("ds_filter", def_name);
                 }
               }
             }
@@ -1173,11 +1196,27 @@ std::ostream& CCodeGen::emit(const Def* def) {
                 func_impl_ << def_name << " = ";
 
                 if(list_contains(shm_buffers, def_name)) {
-                    emit_shm_access(
-                      "ds_img",
-                      lea->index()->unique_name() + " % " + image_width_name,
-                      lea->index()->unique_name() + " / " + image_width_name
-                    );
+                    std::map<std::string, std::string>::iterator i;
+                    auto is_filter = list_contains(filter_pointers, def_name);
+
+                    /*
+                    for(i = conv_map.begin(); i != conv_map.end(); ++i) {
+                      if(i->second.compare(def_name) && list_contains(filter_pointers, i->first)) {
+                        is_filter = true;
+                      }
+                    }
+                    */
+
+                    if(!is_filter) {
+                      emit_shm_image_access(
+                        "ds_img",
+                        lea->index()->unique_name() + " % " + image_width_name,
+                        lea->index()->unique_name() + " / " + image_width_name
+                      );
+                    } else {
+                      emit_shm_filter_access("ds_filter", lea->index()->unique_name());
+                    }
+
                     func_impl_ << ";";
                 } else { 
                     emit(lea->ptr()) << " + ";

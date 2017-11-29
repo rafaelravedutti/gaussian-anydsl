@@ -32,6 +32,7 @@ __global__ void lambda_21173(struct_filter_5490, struct_Buffer_5491, double*, st
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 _21044_23380, struct_Buffer_5491 _21045_23381, struct_image_5494 _21046_23382) {
     __shared__ double ds_img[134][7];
+    __shared__ double ds_filter[49];
     int  _23388;
     int p_23388;
     int  _23394;
@@ -153,7 +154,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 
         union { double* dst; char* src; } u_23459;
         u_23459.src = _23458;
         _23459 = u_23459.dst;
-        #line 100 "shared_memory_copy"
+        #line 100 "shared_memory_image_copy"
         for(int i = 0; i < blockDim.x + 6; i += blockDim.x) {
             for(int j = 0; j < blockDim.y + 6; j += blockDim.y) {
                 if(threadIdx.x + i < blockDim.x + 6 && 
@@ -217,6 +218,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 
         union { double* dst; char* src; } u_23452;
         u_23452.src = _23451;
         _23452 = u_23452.dst;
+        #line 200 "shared_memory_filter_copy"
+        for(int i = 0; i < 7; i += blockDim.x) {
+            for(int j = 0; j < 7; j += blockDim.y) {
+                if(threadIdx.x + i < 7 && 
+                   threadIdx.y + j < 7) {
+                    ds_filter[(threadIdx.y + j) * 7 + threadIdx.x + i] = \
+                      _23452[(threadIdx.y + j) * 7 + threadIdx.x + i];
+                }
+            }
+        }
+        
+        __syncthreads();
+        
         #line 19 "gpu_device.impala"
         p_23441 = _23477;
         psum_23443 = 0.000000e+00;
@@ -247,8 +261,9 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 
         int _23462;
         _23462 = _23460 + _23461;
         #line 69 "gpu_device.impala"
+        #line 100 "shared_memory_access"
         double* i_23454;
-        i_23454 = _23452 + _23453;
+        i_23454 = &ds_filter[_23453];
         #line 65 "gpu_device.impala"
         #line 100 "shared_memory_access"
         double* _23463;
@@ -279,6 +294,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21173(struct_filter_5490 _21176_23493, struct_Buffer_5491 _21177_23494, double* _21178_23495, struct_Buffer_5491 _21179_23496, struct_image_5494 _21180_23497) {
     __shared__ double ds_img[134][7];
+    __shared__ double ds_filter[49];
     int  _23500;
     int p_23500;
     int  _23503;
@@ -391,7 +407,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21173(struct_filter_5490 
         union { double* dst; char* src; } u_23549;
         u_23549.src = _23548;
         _23549 = u_23549.dst;
-        #line 100 "shared_memory_copy"
+        #line 100 "shared_memory_image_copy"
         for(int i = 0; i < blockDim.x + 6; i += blockDim.x) {
             for(int j = 0; j < blockDim.y + 6; j += blockDim.y) {
                 if(threadIdx.x + i < blockDim.x + 6 && 
@@ -461,6 +477,19 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21173(struct_filter_5490 
         union { double* dst; char* src; } u_23543;
         u_23543.src = _23542;
         _23543 = u_23543.dst;
+        #line 200 "shared_memory_filter_copy"
+        for(int i = 0; i < 7; i += blockDim.x) {
+            for(int j = 0; j < 7; j += blockDim.y) {
+                if(threadIdx.x + i < 7 && 
+                   threadIdx.y + j < 7) {
+                    ds_filter[(threadIdx.y + j) * 7 + threadIdx.x + i] = \
+                      _23543[(threadIdx.y + j) * 7 + threadIdx.x + i];
+                }
+            }
+        }
+        
+        __syncthreads();
+        
         #line 19 "gpu_device.impala"
         p_23534 = _23567;
         psum_23536 = 0.000000e+00;
@@ -491,8 +520,9 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21173(struct_filter_5490 
         int _23551;
         _23551 = _23550 * _23518;
         #line 69 "gpu_device.impala"
+        #line 100 "shared_memory_access"
         double* i_23545;
-        i_23545 = _23543 + _23544;
+        i_23545 = &ds_filter[_23544];
         #line 65 "gpu_device.impala"
         int _23552;
         _23552 = _23551 + gid_x_23517;
