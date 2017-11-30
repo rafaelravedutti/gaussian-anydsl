@@ -41,21 +41,21 @@ DATASET_PATH=/home/rafael/repositories/tcc/anydsl/canny/dataset
 
 all: gaussian
 
-main.ll: ${PLATFORM_FILE} gaussian.impala opencv_image.impala main.impala
+main.ll: impala/${PLATFORM_FILE} impala/gaussian.impala impala/opencv_image.impala impala/main.impala
 
 ifeq ($(USE_MODIFIED_CODEGEN), yes)
-	cp c.cpp ${THORIN_BACKEND_SRC}/
+	cp thorin/c.cpp ${THORIN_BACKEND_SRC}/
 	cd ${THORIN_BUILD} && make && cd -
 endif
 
 	${IMPALA_BIN}/impala -emit-llvm -g -O3 ${IMPALA_LINK_FILES} $^
 
 ifeq ($(USE_MODIFIED_CODEGEN), yes)
-	cp c.cpp.original ${THORIN_BACKEND_SRC}/c.cpp
+	cp thorin/c.cpp.original ${THORIN_BACKEND_SRC}/c.cpp
 	cd ${THORIN_BUILD} && make && cd -
 endif
 
-opencv_runtime.ll: opencv_runtime.cpp
+opencv_runtime.ll: runtime/opencv_runtime.cpp
 	${LLVM_BIN}/clang++ -S -emit-llvm ${OPENCV_RUNTIME_FLAGS} $^
 
 gaussian: main.ll opencv_runtime.ll ${ANYDSL_PATH}/runtime/build/lib/libruntime.so
@@ -65,5 +65,5 @@ clean:
 	rm -f main.ll opencv_runtime.ll gaussian
 
 report:
-	pdflatex --shell-escape report.tex
-	evince report.pdf &
+	pdflatex --shell-escape report/report.tex
+	evince report/report.pdf &
