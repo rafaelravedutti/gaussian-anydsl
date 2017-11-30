@@ -62,7 +62,7 @@ gaussian: main.ll opencv_runtime.ll ${ANYDSL_PATH}/runtime/build/lib/libruntime.
 	${LLVM_BIN}/clang++ -lm ${OPENCV_LIBS} -lpthread $^ -o $@
 
 clean:
-	rm -f main.ll opencv_runtime.ll gaussian
+	rm -f main.ll opencv_runtime.ll gaussian result.png main.cu
 
 report:
 	pdflatex --shell-escape report/report.tex
