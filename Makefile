@@ -39,6 +39,9 @@ USE_MODIFIED_CODEGEN=yes
 # Dataset path
 DATASET_PATH=/home/rafael/repositories/tcc/anydsl/canny/dataset
 
+.PHONY: clean
+.PHONY: report
+
 all: gaussian
 
 main.ll: impala/${PLATFORM_FILE} impala/gaussian.impala impala/opencv_image.impala impala/main.impala
