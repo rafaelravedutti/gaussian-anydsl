@@ -64,6 +64,6 @@ gaussian: main.ll opencv_runtime.ll ${ANYDSL_PATH}/runtime/build/lib/libruntime.
 clean:
 	rm -f main.ll opencv_runtime.ll gaussian result.png main.cu
 
-report:
+report: report/report.tex
 	pdflatex --shell-escape report/report.tex
 	evince report/report.pdf &
