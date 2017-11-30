@@ -1,0 +1,27 @@
+/* Main function */
+fn main(argc : i32, argv : &[&mut [u8]]) -> () {
+  /* If there isn't an input image defined, just prints an error message */
+  if argc < 2 {
+    print_string("You must specify the input image filename!");
+  /* Otherwise, program runs normally */
+  } else {
+    /* Load image specified in the first argument */
+    let input_image = load_image(argv(1));
+    /* Create output image matrix buffer based in the input image dimensions */
+    let output_image = create_image(input_image.width, input_image.height);
+
+    /* Operations will occur in the input_image and output_image buffers specified, at the end
+       the result must be in the output image */
+    for images(input_image, output_image) {
+      /* Apply the Gaussian Blur filter */
+      gaussian_blur(input_image, output_image, true);
+    }
+
+    /* Write the result in the output image to a file */
+    write_image(output_image, "result.png");
+
+    /* Release memory for both input and output image buffers */
+    release_image(input_image);
+    release_image(output_image);
+  }
+}
