@@ -13,8 +13,8 @@
 #include <sstream>
 #include <map>
 
-#define FILTER_WIDTH        7
-#define FILTER_HEIGHT       7
+#define SEP_FILTER
+#define FILTER_SIZE         7
 
 #ifndef list_contains
 #  define list_contains(a,b)  (std::find(a.begin(), a.end(), b) != a.end())
@@ -289,8 +289,8 @@ std::ostream& CCodeGen::emit_aggop_decl(const Type* type) {
 }
 
 std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
-  int extend_width = FILTER_WIDTH / 2;
-  int extend_height = FILTER_HEIGHT / 2;
+  int extend_width = FILTER_SIZE / 2;
+  int extend_height = FILTER_SIZE / 2;
 
   std::string idxx_string = "((blockIdx.x * blockDim.x + threadIdx.x) - " + std::to_string(extend_width) + " + i)";
   std::string idxy_string = "((blockIdx.y * blockDim.y + threadIdx.y) - " + std::to_string(extend_height) + " + j)";
@@ -320,8 +320,8 @@ std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const st
 }
 
 std::ostream& CCodeGen::emit_shm_image_access(const std::string shm_name, std::string x, std::string y) {
-  int extend_width = FILTER_WIDTH / 2;
-  int extend_height = FILTER_HEIGHT / 2;
+  int extend_width = FILTER_SIZE / 2;
+  int extend_height = FILTER_SIZE / 2;
 
   func_impl_ << "&" << shm_name << "[" << x << " + " << extend_width << " - blockIdx.x * blockDim.x][" \
                                        << y << " + " << extend_height << " - blockIdx.y * blockDim.y]";
@@ -330,15 +330,32 @@ std::ostream& CCodeGen::emit_shm_image_access(const std::string shm_name, std::s
 }
 
 std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer) {
-  std::string idx_string = "(threadIdx.y + j) * " + std::to_string(FILTER_WIDTH) + " + threadIdx.x + i";
+  std::string idx_string;
 
   func_impl_ << endl;
 
   func_impl_ << "#line 200 \"shared_memory_filter_copy\"" << endl;
-  func_impl_ << "for(int i = 0; i < " << FILTER_HEIGHT << "; i += blockDim.x) {" << up << endl;
-  func_impl_ << "for(int j = 0; j < " << FILTER_WIDTH << "; j += blockDim.y) {" << up << endl;
-  func_impl_ << "if(threadIdx.x + i < " << FILTER_WIDTH << " && " << endl << \
-                "   threadIdx.y + j < " << FILTER_HEIGHT << ") {" << up << endl;
+
+#ifdef SEP_FILTER
+
+  //idx_string = "threadIdx.x + i";
+  idx_string = "i";
+
+  func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i++) {" << up << endl;
+  //func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i += blockDim.x) {" << up << endl;
+  //func_impl_ << "if(threadIdx.x + i < " << FILTER_SIZE << ") {" << up << endl;
+  func_impl_ << shm_name << "[" << idx_string << "] = " << src_buffer << "[" << idx_string << "];" << down << endl;
+  //func_impl_ << "}" << down << endl;
+  func_impl_ << "}" << endl;
+
+#else
+
+  idx_string = "(threadIdx.y + j) * " + std::to_string(FILTER_SIZE) + " + threadIdx.x + i";
+
+  func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i += blockDim.x) {" << up << endl;
+  func_impl_ << "for(int j = 0; j < " << FILTER_SIZE << "; j += blockDim.y) {" << up << endl;
+  func_impl_ << "if(threadIdx.x + i < " << FILTER_SIZE << " && " << endl << \
+                "   threadIdx.y + j < " << FILTER_SIZE << ") {" << up << endl;
 
   func_impl_ << shm_name << "[" << idx_string << "] = \\" << endl << \
                 "  " << src_buffer << "[" << idx_string << "];" << down << endl;
@@ -346,6 +363,8 @@ std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const s
   func_impl_ << "}" << down << endl;
   func_impl_ << "}" << down << endl;
   func_impl_ << "}" << endl;
+
+#endif
 
   func_impl_ << endl << "__syncthreads();" << endl;
 
@@ -507,8 +526,13 @@ void CCodeGen::emit() {
         func_impl_  << ") {" << up;
 
         if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
-          func_impl_ << endl << "__shared__ double ds_img[" << (bdimx + (FILTER_WIDTH / 2) * 2) << "][" << (bdimy + (FILTER_HEIGHT / 2) * 2) << "];";
-          func_impl_ << endl << "__shared__ double ds_filter[" << (FILTER_WIDTH * FILTER_HEIGHT) << "];";
+          func_impl_ << endl << "__shared__ double ds_img[" << (bdimx + (FILTER_SIZE / 2) * 2) << "][" << (bdimy + (FILTER_SIZE / 2) * 2) << "];";
+
+          #ifdef SEP_FILTER
+            func_impl_ << endl << "__shared__ double ds_filter[" << FILTER_SIZE << "];";
+          #else
+            func_impl_ << endl << "__shared__ double ds_filter[" << (FILTER_SIZE * FILTER_SIZE) << "];";
+          #endif
         }
 
         // OpenCL: load struct from buffer

@@ -32,7 +32,7 @@ __global__ void lambda_21173(struct_filter_5490, struct_Buffer_5491, double*, st
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 _21044_23380, struct_Buffer_5491 _21045_23381, struct_image_5494 _21046_23382) {
     __shared__ double ds_img[134][7];
-    __shared__ double ds_filter[49];
+    __shared__ double ds_filter[7];
     int  _23388;
     int p_23388;
     int  _23394;
@@ -219,14 +219,8 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 
         u_23452.src = _23451;
         _23452 = u_23452.dst;
         #line 200 "shared_memory_filter_copy"
-        for(int i = 0; i < 7; i += blockDim.x) {
-            for(int j = 0; j < 7; j += blockDim.y) {
-                if(threadIdx.x + i < 7 && 
-                   threadIdx.y + j < 7) {
-                    ds_filter[(threadIdx.y + j) * 7 + threadIdx.x + i] = \
-                      _23452[(threadIdx.y + j) * 7 + threadIdx.x + i];
-                }
-            }
+        for(int i = 0; i < 7; i++) {
+            ds_filter[i] = _23452[i];
         }
         
         __syncthreads();
@@ -294,7 +288,7 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21041(struct_filter_5490 
 
 __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21173(struct_filter_5490 _21176_23493, struct_Buffer_5491 _21177_23494, double* _21178_23495, struct_Buffer_5491 _21179_23496, struct_image_5494 _21180_23497) {
     __shared__ double ds_img[134][7];
-    __shared__ double ds_filter[49];
+    __shared__ double ds_filter[7];
     int  _23500;
     int p_23500;
     int  _23503;
@@ -478,14 +472,8 @@ __global__ __launch_bounds__ (128 * 1 * 1) void lambda_21173(struct_filter_5490 
         u_23543.src = _23542;
         _23543 = u_23543.dst;
         #line 200 "shared_memory_filter_copy"
-        for(int i = 0; i < 7; i += blockDim.x) {
-            for(int j = 0; j < 7; j += blockDim.y) {
-                if(threadIdx.x + i < 7 && 
-                   threadIdx.y + j < 7) {
-                    ds_filter[(threadIdx.y + j) * 7 + threadIdx.x + i] = \
-                      _23543[(threadIdx.y + j) * 7 + threadIdx.x + i];
-                }
-            }
+        for(int i = 0; i < 7; i++) {
+            ds_filter[i] = _23543[i];
         }
         
         __syncthreads();
