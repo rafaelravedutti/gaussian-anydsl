@@ -152,6 +152,21 @@ fn images(input_image : image, output_image : image, body : fn() -> ()) -> () {
   copy(output_image.device_data, output_image.buffer, image_size);
 }
 
+/* Does nothing to compile the kernel */
+fn nothing() -> () {
+  /* Use first CUDA accelerator */
+  let accelerator = cuda_accelerator(0);
+  /* CUDA kernel grid configuration */
+  let grid = (1024, 1024, 1);
+  /* CUDA kernel block configuration */
+  let block = (128, 1, 1);
+
+  /* Execute the following code in the GPU */
+  with accelerator.exec(grid, block) @{
+    /* Do nothing */
+  }
+}
+
 /* Iterates over an image in GPU */
 fn iterate(input_image : image, body : fn(i32, i32) -> ()) -> () {
   /* Use first CUDA accelerator */
