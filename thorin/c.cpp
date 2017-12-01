@@ -30,6 +30,7 @@
 
 namespace thorin {
 
+static unsigned int shm_width = 0;
 static std::list<std::string> shm_buffers;
 static std::list<std::string> shm_blacklist;
 static std::list<std::string> kernel_images;
@@ -37,8 +38,6 @@ static std::list<std::string> kernel_filters;
 static std::list<std::string> image_pointers;
 static std::list<std::string> filter_pointers;
 static std::map<std::string, std::string> conv_map;
-static std::string image_width_name;
-static std::string image_height_name;
 
 class CCodeGen {
 public:
@@ -61,7 +60,7 @@ private:
     std::ostream& emit_addr_space(std::ostream&, const Type*);
     std::ostream& emit_type(std::ostream&, const Type*);
     std::ostream& emit(const Def*);
-    std::ostream& emit_shm_image_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height);
+    std::ostream& emit_shm_image_copy(const std::string shm_name, const std::string src_buffer);
     std::ostream& emit_shm_image_access(const std::string shm_name, std::string x, std::string y);
     std::ostream& emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer);
     std::ostream& emit_shm_filter_access(const std::string shm_name, std::string index);
@@ -288,27 +287,29 @@ std::ostream& CCodeGen::emit_aggop_decl(const Type* type) {
     return type_decls_;
 }
 
-std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const std::string src_buffer, const std::string width, const std::string height) {
+std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const std::string src_buffer) {
   int extend_width = FILTER_SIZE / 2;
   int extend_height = FILTER_SIZE / 2;
 
-  std::string idxx_string = "((blockIdx.x * blockDim.x + threadIdx.x) - " + std::to_string(extend_width) + " + i)";
-  std::string idxy_string = "((blockIdx.y * blockDim.y + threadIdx.y) - " + std::to_string(extend_height) + " + j)";
+  std::string idxx_string = "gidx - " + std::to_string(extend_width) + " + i";
+  std::string idxy_string = "gidy - " + std::to_string(extend_height) + " + j";
 
   func_impl_ << endl;
 
   func_impl_ << "#line 100 \"shared_memory_image_copy\"" << endl;
-  func_impl_ << "for(int i = 0; i < blockDim.x + " << extend_width * 2 << "; i += blockDim.x) {" << up << endl;
-  func_impl_ << "for(int j = 0; j < blockDim.y + " << extend_height * 2 << "; j += blockDim.y) {" << up << endl;
-  func_impl_ << "if(threadIdx.x + i < blockDim.x + " << extend_width * 2 << " && " << endl << \
-                "   threadIdx.y + j < blockDim.y + " << extend_height * 2 << " && " << endl << \
-                // "   " << idxx_string << " >= 0 && " << endl <<
-                "   " << idxx_string << " < " << width << " && " << endl << \
-                // "   " << idxy_string << " >= 0 && " << endl <<
-                "   " << idxy_string << " < " << height << ") {" << up << endl;
+  func_impl_ << "int gidx = blockIdx.x * blockDim.x + threadIdx.x;" << endl;
+  func_impl_ << "int gidy = blockIdx.y * blockDim.y + threadIdx.y;" << endl;
 
-  func_impl_ << shm_name << "[threadIdx.x + i][threadIdx.y + j] = \\" << endl << \
-                "  " << src_buffer << "[" << idxy_string << " * " << width << " + " << idxx_string << "];" << down << endl;
+  func_impl_ << "for(int i = 0; threadIdx.x + i < blockDim.x + " << extend_width * 2 << "; i += blockDim.x) {" << up << endl;
+  func_impl_ << "int idxx = " << idxx_string << ";" << endl;
+
+  func_impl_ << "for(int j = 0; threadIdx.y + j < blockDim.y + " << extend_height * 2 << "; j += blockDim.y) {" << up << endl;
+  func_impl_ << "int idxy = " << idxy_string << ";" << endl;
+
+  func_impl_ << "if(idxx < image_width_reg && idxy < image_height_reg) {" << up << endl;
+
+  func_impl_ << shm_name << "[(threadIdx.y + j) * " << shm_width << " + threadIdx.x + i] = " << \
+                src_buffer << "[idxy * image_width_reg + idxx];" << down << endl;
 
   func_impl_ << "}" << down << endl;
   func_impl_ << "}" << down << endl;
@@ -316,15 +317,15 @@ std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const st
 
   func_impl_ << endl << "__syncthreads();" << endl;
 
+  func_impl_ << endl << "double *adjusted_" << shm_name << " = &" << shm_name << \
+                        "[(" << extend_height << " - blockIdx.y * blockDim.y) * " << shm_width << \
+                        " + " << extend_width << " - blockIdx.x * blockDim.x];" << endl;
+
   return func_impl_;
 }
 
 std::ostream& CCodeGen::emit_shm_image_access(const std::string shm_name, std::string x, std::string y) {
-  int extend_width = FILTER_SIZE / 2;
-  int extend_height = FILTER_SIZE / 2;
-
-  func_impl_ << "&" << shm_name << "[" << x << " + " << extend_width << " - blockIdx.x * blockDim.x][" \
-                                       << y << " + " << extend_height << " - blockIdx.y * blockDim.y]";
+  func_impl_ << "&" << "adjusted_" << shm_name << "[(" << y  << ") * " << shm_width << " + (" << x << ")]";
 
   return func_impl_;
 }
@@ -338,14 +339,14 @@ std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const s
 
 #ifdef SEP_FILTER
 
-  //idx_string = "threadIdx.x + i";
-  idx_string = "i";
+  idx_string = "threadIdx.x + i";
+  //idx_string = "i";
 
-  func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i++) {" << up << endl;
-  //func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i += blockDim.x) {" << up << endl;
-  //func_impl_ << "if(threadIdx.x + i < " << FILTER_SIZE << ") {" << up << endl;
+  func_impl_ << "for(int i = 0; threadIdx.x + i < " << FILTER_SIZE << "; i += blockDim.x) {" << up << endl;
   func_impl_ << shm_name << "[" << idx_string << "] = " << src_buffer << "[" << idx_string << "];" << down << endl;
-  //func_impl_ << "}" << down << endl;
+
+  //func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i++) {" << up << endl;
+  //func_impl_ << shm_name << "[" << idx_string << "] = " << src_buffer << "[" << idx_string << "];" << down << endl;
   func_impl_ << "}" << endl;
 
 #else
@@ -402,6 +403,8 @@ void CCodeGen::emit() {
     }
 
     Scope::for_each(world(), [&] (const Scope& scope) {
+        std::string image_width_name = "0";
+        std::string image_height_name = "0";
         int bdimx = 0, bdimy = 0, bdimz = 0;
 
         if (scope.entry() == world().branch())
@@ -526,7 +529,8 @@ void CCodeGen::emit() {
         func_impl_  << ") {" << up;
 
         if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
-          func_impl_ << endl << "__shared__ double ds_img[" << (bdimx + (FILTER_SIZE / 2) * 2) << "][" << (bdimy + (FILTER_SIZE / 2) * 2) << "];";
+          shm_width = bdimy + (FILTER_SIZE / 2) * 2;
+          func_impl_ << endl << "__shared__ double ds_img[" << ((bdimx + (FILTER_SIZE / 2) * 2) * shm_width) << "];";
 
           #ifdef SEP_FILTER
             func_impl_ << endl << "__shared__ double ds_filter[" << FILTER_SIZE << "];";
@@ -642,6 +646,10 @@ void CCodeGen::emit() {
                 }
             }
         }
+
+        func_impl_ << endl;
+        func_impl_ << "int image_width_reg = " << image_width_name << ";" << endl;
+        func_impl_ << "int image_height_reg = " << image_height_name << ";" << endl;
 
         for (const auto& block : schedule) {
             auto continuation = block.continuation();
@@ -996,7 +1004,7 @@ std::ostream& CCodeGen::emit(const Def* def) {
 
               if((i = conv_map.find(def_name)) != conv_map.end()) {
                 if(list_contains(shm_buffers, i->second)) {
-                  emit_shm_image_copy("ds_img", def_name, image_width_name, image_height_name);
+                  emit_shm_image_copy("ds_img", def_name);
                 }
               }
             }
@@ -1234,8 +1242,8 @@ std::ostream& CCodeGen::emit(const Def* def) {
                     if(!is_filter) {
                       emit_shm_image_access(
                         "ds_img",
-                        lea->index()->unique_name() + " % " + image_width_name,
-                        lea->index()->unique_name() + " / " + image_width_name
+                        lea->index()->unique_name() + " % image_width_reg",
+                        lea->index()->unique_name() + " / image_width_reg"
                       );
                     } else {
                       emit_shm_filter_access("ds_filter", lea->index()->unique_name());
