@@ -340,13 +340,17 @@ std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const s
 #ifdef SEP_FILTER
 
   idx_string = "threadIdx.x + i";
-  //idx_string = "i";
 
   func_impl_ << "for(int i = 0; threadIdx.x + i < " << FILTER_SIZE << "; i += blockDim.x) {" << up << endl;
   func_impl_ << shm_name << "[" << idx_string << "] = " << src_buffer << "[" << idx_string << "];" << down << endl;
 
-  //func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i++) {" << up << endl;
-  //func_impl_ << shm_name << "[" << idx_string << "] = " << src_buffer << "[" << idx_string << "];" << down << endl;
+  /*
+  idx_string = "i";
+
+  func_impl_ << "for(int i = 0; i < " << FILTER_SIZE << "; i++) {" << up << endl;
+  func_impl_ << shm_name << "[" << idx_string << "] = " << src_buffer << "[" << idx_string << "];" << down << endl;
+  */
+
   func_impl_ << "}" << endl;
 
 #else
