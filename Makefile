@@ -44,6 +44,9 @@ DATASET_PATH=/home/rafael/repositories/tcc/anydsl/canny/dataset
 
 all: gaussian
 
+utils.ll: runtime/utils.c
+	${LLVM_BIN}/clang -S -emit-llvm $^
+
 main.ll: impala/${PLATFORM_FILE} impala/gaussian.impala impala/opencv_image.impala impala/main.impala
 
 ifeq ($(USE_MODIFIED_CODEGEN), yes)
@@ -61,11 +64,11 @@ endif
 opencv_runtime.ll: runtime/opencv_runtime.cpp
 	${LLVM_BIN}/clang++ -S -emit-llvm ${OPENCV_RUNTIME_FLAGS} $^
 
-gaussian: main.ll opencv_runtime.ll ${ANYDSL_PATH}/runtime/build/lib/libruntime.so
+gaussian: main.ll opencv_runtime.ll utils.ll ${ANYDSL_PATH}/runtime/build/lib/libruntime.so
 	${LLVM_BIN}/clang++ -lm ${OPENCV_LIBS} -lpthread $^ -o $@
 
 clean:
-	rm -f main.ll opencv_runtime.ll gaussian result.png main.cu
+	rm -f main.ll opencv_runtime.ll utils.ll gaussian result.png main.cu
 
 report: report/report.tex
 	pdflatex --shell-escape report/report.tex
