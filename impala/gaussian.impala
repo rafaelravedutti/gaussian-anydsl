@@ -1,3 +1,8 @@
+extern "C" {
+  /* Time */
+  fn impala_time() -> f64;
+}
+
 /* Apply 2D filter convolution with separable kernels (tiling) */
 fn apply_separable_convolution(input_image : image, output_image : image, h_mask : filter, v_mask : filter) -> () {
   /* Horizontal anchor based in the horizontal mask size */
@@ -136,21 +141,35 @@ fn gaussian_blur(input_image : image, output_image : image, use_tiled : bool) ->
     mask_y(i) *= sum_y;
   }
 
+  /* Time calculation variables */
+  let mut start_time : f64;
+  let mut elapsed_time : f64;
+
   /* Applies the separable kernel in rows and columns */
   if use_tiled {
     let column_filter = filter_Nx1(bmask_x, false);
     let row_filter = filter_Nx1(bmask_y, true);
 
+    start_time = impala_time();
     apply_separable_convolution(input_image, output_image, column_filter, row_filter);
+    elapsed_time = impala_time() - start_time;
 
     release_filter(column_filter);
     release_filter(row_filter);
   /* Applies the not separable kernel in blocks */
   } else {
     let block_filter = filter_NxN(bmask_xy);
+
+    start_time = impala_time();
     apply_block_convolution(input_image, output_image, block_filter);
+    elapsed_time = impala_time() - start_time;
+
     release_filter(block_filter);
   }
+
+  print_string("Time elapsed: ");
+  print_f64(elapsed_time);
+  print_string("s\n");
 
   /* Release memory for the mask buffers */
   release(bmask_xy);
