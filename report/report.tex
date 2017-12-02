@@ -19,7 +19,7 @@
 \clearpage
 
 \section{Introduction}
-AnyDSL is a framework designed for the development of domain specific libraries, it allows developers to split their work in application developer, DSL designer and machine expert by using higher-order functions to abstract the lower levels of code. In the end, all the parts of the program are linked to build the program for the specified hardware.
+AnyDSL \cite{anydsl} is a framework designed for the development of domain specific libraries, it allows developers to split their work in application developer, DSL designer and machine expert by using higher-order functions to abstract the lower levels of code. In the end, all the parts of the program are linked to build the program for the specified hardware.
 
 The approximation above has a drawback, higher-order functions requires a language that supports functions as parameters of other functions, this may lead to a considerable overhead in the final application. For this purpose, the Thorin graph-based intermediate representation is used to reduce any overhead that this approach may cause.
 
@@ -371,7 +371,7 @@ if (auto lea = def->isa<LEA>()) {
 
 \section{Experimental Results}
 
-To perform the experiments and validate our generated code version performance, we use the Berkeley Segmentation Dataset [Martin et al., 2001] available at [Arbelaez et al., 2007], which contains 100 images with 321x481 and 481x321 dimensions. As these dimensions are too small for performance comparison, we use the same procedure as [Lourenço, 2011] to generate the variations with higher dimensions.
+To perform the experiments and validate our generated code version performance, we use the Berkeley Segmentation Dataset \cite{dataset} available at \cite{dataseturl}, which contains 100 images with 321x481 and 481x321 dimensions. As these dimensions are too small for performance comparison, we use the same procedure as \cite{luislourenco} to generate the variations with higher dimensions.
 
 Considering the original dataset images as the B1 dataset, we generate the B2 dataset with the doubled dimensions by repeating the original images vertically, horizontally and diagonally. So, we repeat the same procedure on B2 to generate the B3 dataset, and the same on B3 to generate the B4 dataset. After all we have the following dimensions: 321x481 and 481x321 for B1 dataset, 642x962 and 962x642 for B2 dataset, 1284x1924 and 1924x1284 for B3 dataset and 2568x3848 and 3848x2568 for B4 dataset, all of them containing 100 images each.
 
@@ -403,15 +403,46 @@ The Figure \ref{fig:results} shows the result in seconds for each dataset and th
 
 The results shows that our version that only uses shared memory for filter is better than the original, while the version with both filter and image performed worse than the others. According to our analysis, this happened because of the emitted accesses for the image using the module and division functions with the image width to remap the original image index to the shared memory index.
 
+To achieve a better result for the \textbf{shm\_both} version, a more sophisticated analysis would be required to identify the loops that originally traverse the global memory and change their range so we can directly access the shared memory without previous calculation of the index. We performed basic tests by generating constant values in the shared memory accesses for the image that got better performance results than the original version without shared memory, but these aren't considered valid results for this work as they change the output result, instead they may present an evidence that the performance problem of the \textbf{shm\_both} is actually in the shared memory index access.
+
 \section{Future Work}
 Future work may include a better way to remap the accesses from the global memory to the shared memory (by identifying the loops in the code and changing their range), as well as perform other kinds of optimizations during the code generation.
 
-Another interesting work would be to perform the same optimizations for other GPU framework like OpenCL for example, then an analysis of performance using the modified version for a different architecture could be achieved.
+Another interesting work would be to perform the same optimizations for other GPU frameworks like OpenCL for example, then an analysis of performance using the modified version for a different architecture could be achieved.
 
 \section{Conclusion}
 The work in this report changes the Thorin generated code for the CUDA backends to include shared memory usage in the final version. We show better results for performance on inserting the filter into the shared memory and identified problems on remapping the image accesses to the shared memory (in relation to performance).
 
-\section{References}
+\begin{thebibliography}{4}
+
+\bibitem{anydsl}
+  https://anydsl.github.io/
+
+\bibitem{dataseturl}
+   Arbelaez, P. and Fowlkes, C. and Martin, D.,
+   \textit{The Berkeley Segmentation Dataset and Benchmark 2007},
+   http://www.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/,
+   2007,
+   Acessado em 04/05/2017.
+
+\bibitem{dataset}
+  D. Martin and C. Fowlkes and D. Tal and J. Malik,
+  \textit{A Database of Human Segmented Natural Images and its 
+           Application to Evaluating Segmentation Algorithms and 
+           Measuring Ecological Statistics},
+  Proc. 8th Int'l Conf. Computer Vision,
+  2001,
+  July,
+  2,
+  416--423.
+
+\bibitem{luislourenco}
+   Luis Henrique Alves Lourenço,
+   \textit{Paralelização do Detector de Bordas Canny para a biblioteca ITK utilizando CUDA},
+   Pós-Graduação em Informática - Universidade Federal do Paraná, 
+   2011.
+
+\end{thebibliography}
 
 \end{document}
 
