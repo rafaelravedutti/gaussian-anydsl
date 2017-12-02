@@ -1,0 +1,10 @@
+set xtics ("B1 Dataset" 0.1, "B2 Dataset" 1.1, "B3 Dataset" 2.1, "B4 Dataset" 3.1)
+set style data histograms cluster gap 1
+set boxwidth 0.7 relative
+set style fill solid 1.0 border -1
+set yrange [0:70.0]
+set ylabel "Time (seconds)"
+set datafile separator " "
+set key noenhanced
+set key left top
+plot "results.dat" using 1 t "no_shm", '' using 2 t "shm_filteronly", '' using 3 t "shm_both"
