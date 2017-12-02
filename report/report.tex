@@ -1,9 +1,10 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{minted}
+\usepackage{graphicx}
 \setminted{fontsize=\footnotesize,baselinestretch=1}
 
-\title{Thorin Report - Shared Memory Code Generation}
+\title{Shared Memory Code Generation with Thorin}
 \author{Rafael Ravedutti Lucio Machado }
 \date{November 2017}
 
@@ -11,26 +12,41 @@
 
 \maketitle
 
+\clearpage
+
+\tableofcontents
+
+\clearpage
+
 \section{Introduction}
-This report shows the methods used for allowing Thorin code generator to emit the optimized version of the Gaussian Filter (and other simple filters) using shared memory and texture memory. The first part explains the idea used for generating the shared memory and texture memory code and the second shows the modifications included in the Thorin backend code generator.
+AnyDSL is a framework designed for the development of domain specific libraries, it allows developers to split their work in application developer, DSL designer and machine expert by using higher-order functions to abstract the lower levels of code. In the end, all the parts of the program are linked to build the program for the specified hardware.
 
-\section{Idea}
-Thorin is a CPS graph based higher-order intermediate representation, this means that its code generator will iterate over the graph generating its continuations, parameters and primops. For each vertex in the graph, Thorin must generate a unique name to avoid conflicts, our idea is to trace some of these vertex by the name to identify the input image and the filter in the kernels.
+The approximation above has a drawback, higher-order functions requires a language that supports functions as parameters of other functions, this may lead to a considerable overhead in the final application. For this purpose, the Thorin graph-based intermediate representation is used to reduce any overhead that this approach may cause.
 
-In the first part, we defined a macro with the filter dimensions (for now), then at each kernel declaration, we get the kernel block dimensions to emit the shared memory buffer declaration. We also retrieve all the structures and pointers in the kernel parameters for further evaluation of which will be input buffers to store in the faster memories.
+For this work, we write a simple Gaussian filter using the AnyDSL front-end language Impala, this version uses a machine code to run in CUDA GPUs, but no references for shared memory are written in the original Impala code, instead, we modify the Thorin backend code generator for CUDA so it can generate the shared memory parts in the final code.
 
-Following the analysis, we go through the kernel primops to check the parameters behavior, if an extraction, a bitcast or a LEA operation is performed, we keep inserting the targets in the list so they also are evaluated.
+This report shows the methods used for allowing Thorin code generator to emit the optimized version of the Gaussian Filter (and other simple filters) using the GPU shared memory (CUDA to be more precisely). The first part explains the methodology used for generating the shared memory code for both image and filter and the second shows the modifications included in the Thorin backend code generator.
 
-When we find a load operation in one of our targets, we insert them in the shared memory candidates list if they weren't blacklisted. A target is blacklisted when a store operation is performed in it (we don't want to store writable kernel buffers in the shared memory).
+\section{Methodology}
+Thorin is a CPS graph based higher-order intermediate representation, this means that its code generator will iterate over the graph generating its continuations, parameters and primops. For each vertex in the graph, Thorin must generate a unique name to avoid conflicts, our idea is to trace some of these vertex by the name to identify the filters and images in the kernel parameters (we also use the names of the structures in our experimental DSL in Impala for this).
 
-After the analysis, for each bitcasting operation with the targets we emit the shared memory copy of the original buffer in the slow global memory to the faster memory by splitting the buffer in blocks of the kernel block dimension. Then we iterate over each buffer blocks with each thread transferring one element (per iteration) from the global memory to the faster memory. Finally, for each LEA operation with a target, we change the target reference to the shared memory with the offsets (x and y axis) included in the indexes.
+After knowing the images and filters in the kernel, we trace their buffers so we know if they are read-only buffers or if at some point in the code they will be written. In the second case, we ignore them as we don't want to store writable buffers in the shared memory.
+
+In the first step of the code generation we define a macro with the filter size used, then at each kernel declaration, we get the kernel block dimensions and emit the shared memory buffer declarations for both image and filter.
+
+Before the next code generation we go through the Thorin graph to perform an initial analysis, going through the kernel primops to check the parameters behavior, if an extraction, a bitcast or a LEA operation is performed on a buffer that comes from an image or filter of the kernel, we keep saving the sources. This step are used for the read-only buffers tracing technique mentioned above. When we find a load operation in one of our targets, we insert them in the shared memory candidates list if they weren't blacklisted yet. A target is blacklisted when a store operation is performed in it (we don't want to store writable kernel buffers in the shared memory).
+
+After the analysis, we go generating the code and for each bitcasting operation with the targets we emit the shared memory copy of the original buffer in the slow global memory to the faster memory by splitting the buffer in blocks of the kernel block dimension. Then we iterate over each buffer blocks with each thread transferring one element (per iteration) from the global memory to the faster memory. Finally, for each LEA operation with a target, we change the target reference to the shared memory with the offsets (x and y axis) included in the indexes.
+
+This methodology of listing the candidates, tracing their path to know which ones are read-only and then during the code generation generating the copy and replacing the accesses for the candidates is used on this work to perform the shared memory code generation. The next section shows the code changed in the Thorin code generator for a practical guide through this work's idea.
 
 \section{Modifications}
 
-We use four lists to perform the analysis, the kernel\_references will have all the references to the kernel parameters (doesn't matter which type they are), the kernel\_pointers list will contain all the pointers (directly defined or inside a struct) that come from the kernel parameters. The shm\_buffers list will contain all the selected buffers that must go to the shared memory and the shm\_blacklist will contain all the blacklisted buffers.
+We use lists (C++ \textbf{std::list}) to perform the analysis, the \textbf{kernel\_images} and \textbf{kernel\_filters} lists will contain all the image and filter references from the kernel, respectively. The \textbf{image\_pointers} and \textbf{filter\_pointers} lists will have all the direct and indirect references to the image and filter buffers, respectively (doesn't matter which type these references have). The \textbf{shm\_buffers} list will contain all the selected buffers that must go to the shared memory and the \textbf{shm\_blacklist} will contain all the blacklisted buffers. The \textbf{std::map} object \textbf{conv\_map} contains the association between \textbf{image\_pointers} and \textbf{filter\_pointers} objects and their \textbf{shm\_buffers} object.
+
+\subsection{Data structures}
 
 \begin{minted}{cpp}
-static unsigned int shm_width = 0;
 static std::list<std::string> shm_buffers;
 static std::list<std::string> shm_blacklist;
 static std::list<std::string> kernel_images;
@@ -40,14 +56,16 @@ static std::list<std::string> filter_pointers;
 static std::map<std::string, std::string> conv_map;
 \end{minted}
 
-The following code shows the functions that emits the copy from the global memory to the shared memory and the access in the shared memory, respectively.
+The following code shows the functions that emits the copy from the global memory to the shared memory for an image giving the shared memory name \textbf{shm\_name} and the source buffer pointer \textbf{src\_buffer} name to be copied. The \textbf{adjusted\_(shm\_name)} definition in the end of the code is used for further accesses into the shared memory. \textbf{FILTER\_SIZE} holds the filter size.
+
+\pagebreak
+
+\subsection{Image shared memory functions}
 
 \begin{minted}{cpp}
 std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const std::string src_buffer) {
   int extend_width = FILTER_SIZE / 2;
   int extend_height = FILTER_SIZE / 2;
-
-
 
   std::string idxx_string = "gidx - " + std::to_string(extend_width) + " + i";
   std::string idxy_string = "gidy - " + std::to_string(extend_height) + " + j";
@@ -83,6 +101,8 @@ std::ostream& CCodeGen::emit_shm_image_copy(const std::string shm_name, const st
 }
 \end{minted}
 
+The following code shows the function that emits the shared memory access for an image giving its name in \textbf{shm\_name} and its \textbf{x} and \textbf{y} positions.
+
 \begin{minted}{cpp}
 std::ostream& CCodeGen::emit_shm_image_access(const std::string shm_name, std::string x, std::string y) {
   func_impl_ << "&" << "adjusted_" << shm_name << "[(" << y  << ") * " << shm_width << " + (" << x << ")]";
@@ -90,6 +110,12 @@ std::ostream& CCodeGen::emit_shm_image_access(const std::string shm_name, std::s
   return func_impl_;
 }
 \end{minted}
+
+\subsection{Filter shared memory functions}
+
+The following code shows the functions that emits the copy from the global memory to the shared memory for a filter giving the shared memory name \textbf{shm\_name} and the source buffer pointer \textbf{src\_buffer} name to be copied. The \textbf{SEP\_FILTER} macro defines if it's an unidimensional separable filter or it's a bidimensional block filter. \textbf{FILTER\_SIZE} contains the filter size.
+
+\pagebreak
 
 \begin{minted}{cpp}
 std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const std::string src_buffer) {
@@ -128,6 +154,8 @@ std::ostream& CCodeGen::emit_shm_filter_copy(const std::string shm_name, const s
 }
 \end{minted}
 
+The following code shows the function that emits the shared memory access for a filter giving its name in \textbf{shm\_name} and the index \textbf{index} to be accessed.
+
 \begin{minted}{cpp}
 std::ostream& CCodeGen::emit_shm_filter_access(const std::string shm_name, std::string index) {
   func_impl_ << "&" << shm_name << "[" << index << "]";
@@ -136,7 +164,9 @@ std::ostream& CCodeGen::emit_shm_filter_access(const std::string shm_name, std::
 }
 \end{minted}
 
-To avoid the filter data to be used for shared memory, we still ignore all the parameters with type filter from the kernel parameters. This must be changed in next work.
+\subsection{Kernel image and filter identification}
+
+The following code will use our experimental DSL structure names \textbf{image} and \textbf{filter} to select the kernel parameters that are images or filters. We also include the AnyDSL structure \textbf{Buffer} to be considered as images because of the second kernel in the separable convolution that receives the image as \textbf{Buffer} instead of \textbf{image}.
 
 \begin{minted}{cpp}
 std::stringstream type_stream;
@@ -156,13 +186,13 @@ if(type_stream.str().compare("image") == 0 && !list_contains(kernel_images, para
 if(type_stream.str().compare("Buffer") == 0 && !list_contains(kernel_images, param->unique_name())) {
   kernel_images.push_back(param->unique_name());
 }
-
-if(param->type()->isa<PtrType>() && !list_contains(image_pointers, param->unique_name())) {
-  image_pointers.push_back(param->unique_name());
-}
 \end{minted}
 
-The following code emits the shared memory declaration in the kernel using the filter dimension macros.
+The \textbf{e2} and \textbf{e3} elements in the image strucuture holds the image width and height, respectively.
+
+\subsection{Shared memory declarations}
+
+The following code emits the shared memory declaration in the kernel using the \textbf{FILTER\_SIZE} macro.
 
 \begin{minted}{cpp}
 if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
@@ -176,6 +206,8 @@ if(bdimx != 0 && bdimy != 0 && bdimz != 0) {
   #endif
 }
 \end{minted}
+
+\subsection{Read-only buffers tracing}
 
 The following code is executed before the code generation, it perform our analysis of possible candidates to be optimized using the shared memory.
 
@@ -249,25 +281,23 @@ for(const auto& block : schedule) {
 }
 \end{minted}
 
+\subsection{Dimension registers}
+
+The next code generation is used to generate the registers \textbf{image\_width\_reg} and \textbf{image\_height\_reg} with the image dimensions. This is used so we have a known name for these values and also to avoid structure element access each time we use them.
+
 \begin{minted}{cpp}
 func_impl_ << endl;
 func_impl_ << "int image_width_reg = " << image_width_name << ";" << endl;
 func_impl_ << "int image_height_reg = " << image_height_name << ";" << endl;
 \end{minted}
 
-Finally, the next code emits the shared memory access when necessary (it's still necessary to fix the indexes).
+\subsection{Shared memory copy generation}
+
+The code below shows the shared memory copy code generation after the bitcast operation (irrelevant parts of the code were omitted for legibility purposes).
 
 \begin{minted}{cpp}
 if (conv->isa<Bitcast>()) {
-    func_impl_ << "union { ";
-    emit_addr_space(func_impl_, dst_type);
-    emit_type(func_impl_, dst_type) << " dst; ";
-    emit_addr_space(func_impl_, src_type);
-    emit_type(func_impl_, src_type) << " src; ";
-    func_impl_ << "} u" << def_name << ";" << endl;
-    func_impl_ << "u" << def_name << ".src = ";
-    emit(conv->from()) << ";" << endl;
-    func_impl_ << def_name << " = u" << def_name << ".dst;";
+    ...
 
     if(list_contains(image_pointers, def_name)) {
       std::map<std::string, std::string>::iterator i;
@@ -291,24 +321,19 @@ if (conv->isa<Bitcast>()) {
 }
 \end{minted}
 
+\subsection{Shared memory access generation}
+
+Finally, the next code emits the shared memory access when necessary in the LEA operations (irrelevant parts of the code were omitted for legibility purposes).
+
 \begin{minted}{cpp}
 if (auto lea = def->isa<LEA>()) {
     if (is_texture_type(lea->type())) { // handle texture fetches
-        emit_type(func_impl_, lea->ptr_pointee()) << " " << def_name << ";" << endl;
-        func_impl_ << def_name << " = tex1Dfetch(";
-        emit(lea->ptr()) << ", ";
-        emit(lea->index()) << ");";
+      ...
     } else {
         if (lea->ptr_pointee()->isa<TupleType>() || lea->ptr_pointee()->isa<StructType>()) {
-            emit_type(func_impl_, lea->type()) << " " << def_name << ";" << endl;
-            func_impl_ << def_name << " = &";
-            emit(lea->ptr()) << "->e";
-            emit(lea->index()) << ";"; 
+          ...
         } else if (lea->ptr_pointee()->isa<DefiniteArrayType>()) {
-            emit_type(func_impl_, lea->type()) << " " << def_name << ";" << endl;
-            func_impl_ << def_name << " = &";
-            emit(lea->ptr()) << "->e[";
-            emit(lea->index()) << "];";
+          ...
         } else {
             if(list_contains(shm_buffers, def_name)) {
               func_impl_ << "#line 100 \"shared_memory_access\"" << endl;
@@ -321,14 +346,6 @@ if (auto lea = def->isa<LEA>()) {
             if(list_contains(shm_buffers, def_name)) {
                 std::map<std::string, std::string>::iterator i;
                 auto is_filter = list_contains(filter_pointers, def_name);
-
-                /*
-                for(i = conv_map.begin(); i != conv_map.end(); ++i) {
-                  if(i->second.compare(def_name) && list_contains(filter_pointers, i->first)) {
-                    is_filter = true;
-                  }
-                }
-                */
 
                 if(!is_filter) {
                   emit_shm_image_access(
@@ -348,18 +365,53 @@ if (auto lea = def->isa<LEA>()) {
         }
     }
 
-    insert(def, def_name);
-    return func_impl_;
+    ...
 }
 \end{minted}
 
-\section{Things to do}
-\begin{itemize}
-\item Perform analysis of the image dimensions by identifying the computing of gid\_x and gid\_y and then finding the "less than" comparison with the image dimensions
-\item Adjust the index in the shared memory access
-\item Emit the shared memory copy after the bitcast of the target pointer
-\item Use the filter saving its data into texture memory, the challenge is to identify which read-only (in relation to the analysis) buffer is the filter and which one is the image
-\end{itemize}
+\section{Experimental Results}
+
+To perform the experiments and validate our generated code version performance, we use the Berkeley Segmentation Dataset [Martin et al., 2001] available at [Arbelaez et al., 2007], which contains 100 images with 321x481 and 481x321 dimensions. As these dimensions are too small for performance comparison, we use the same procedure as [Lourenço, 2011] to generate the variations with higher dimensions.
+
+Considering the original dataset images as the B1 dataset, we generate the B2 dataset with the doubled dimensions by repeating the original images vertically, horizontally and diagonally. So, we repeat the same procedure on B2 to generate the B3 dataset, and the same on B3 to generate the B4 dataset. After all we have the following dimensions: 321x481 and 481x321 for B1 dataset, 642x962 and 962x642 for B2 dataset, 1284x1924 and 1924x1284 for B3 dataset and 2568x3848 and 3848x2568 for B4 dataset, all of them containing 100 images each.
+
+The performance tests were performed using a GeForce GT 710B graphic board with 192 CUDA cores, 954MHz base clock, 2GB of memory with 1.8 Gbps of speed and a 64-bit DDR3 memory interface. We execute three different versions for all the images on each dataset and considered the summation of the times as the final result for our tests. The mentioned versions are named \textbf{no\_shm} for the original AnyDSL version that doesn't use shared memory, \textbf{shm\_filteronly} version that only uses shared memory for filter and \textbf{shm\_both} version that uses shared memory for both image and filter.
+
+The Figure \ref{fig:results} shows the result in seconds for each dataset and the Table \ref{table:speedups} shows the speedups for \textbf{shm\_filteronly} and \textbf{shm\_both} versions.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=13cm]{results.png}
+\caption{Results for B1, B2, B3 and B4 datasets.}
+\label{fig:results}
+\end{figure}
+
+\begin{table}
+\centering
+\begin{tabular}{ | c | c | c | c | c | }
+  \hline
+  & B1 & B2 & B3 & B4 \\
+  \hline
+  \textbf{shm\_filteronly} & 1.01144963524 & 1.01751663664 & 1.06079745639 & 1.10045501174 \\
+  \hline
+  \textbf{shm\_both} & 0.80856073526 & 0.92615324824 & 0.93869369236 & 0.93835056282 \\
+  \hline
+\end{tabular}
+\caption{Speedups for \textbf{shm\_filteronly} and \textbf{shm\_both} versions}
+\label{table:speedups}
+\end{table}
+
+The results shows that our version that only uses shared memory for filter is better than the original, while the version with both filter and image performed worse than the others. According to our analysis, this happened because of the emitted accesses for the image using the module and division functions with the image width to remap the original image index to the shared memory index.
+
+\section{Future Work}
+Future work may include a better way to remap the accesses from the global memory to the shared memory (by identifying the loops in the code and changing their range), as well as perform other kinds of optimizations during the code generation.
+
+Another interesting work would be to perform the same optimizations for other GPU framework like OpenCL for example, then an analysis of performance using the modified version for a different architecture could be achieved.
+
+\section{Conclusion}
+The work in this report changes the Thorin generated code for the CUDA backends to include shared memory usage in the final version. We show better results for performance on inserting the filter into the shared memory and identified problems on remapping the image accesses to the shared memory (in relation to performance).
+
+\section{References}
 
 \end{document}
 
