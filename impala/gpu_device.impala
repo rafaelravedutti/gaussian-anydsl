@@ -26,7 +26,7 @@ fn range(mut min : i32, max : i32, body : fn(i32) -> ()) -> () {
 
 /* Return kernel block configuration for device */
 fn get_block_config() -> (i32, i32, i32) {
-  (16, 16, 1)
+  (128, 1, 1)
 }
 
 /* Return kernel grid configuration for device based on the image dimensions and block configuration */
