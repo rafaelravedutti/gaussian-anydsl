@@ -1,8 +1,10 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{minted}
+\usepackage{amsmath}
 \usepackage{graphicx}
-\setminted{fontsize=\footnotesize,baselinestretch=1}
+\usepackage{minted}
+\usepackage{subfigure}
+\setminted{fontsize=\scriptsize,baselinestretch=1}
 
 \title{Shared Memory Code Generation with Thorin}
 \author{Rafael Ravedutti Lucio Machado }
@@ -25,7 +27,265 @@ The approximation above has a drawback, higher-order functions requires a langua
 
 For this work, we write a simple Gaussian filter using the AnyDSL front-end language Impala, this version uses a machine code to run in CUDA GPUs, but no references for shared memory are written in the original Impala code, instead, we modify the Thorin backend code generator for CUDA so it can generate the shared memory parts in the final code.
 
-This report shows the methods used for allowing Thorin code generator to emit the optimized version of the Gaussian Filter (and other simple filters) using the GPU shared memory (CUDA to be more precisely). The first part explains the methodology used for generating the shared memory code for both image and filter and the second shows the modifications included in the Thorin backend code generator.
+This report shows the methods used for allowing Thorin code generator to emit the optimized version of the Gaussian Filter (and other simple filters) using the GPU shared memory (CUDA to be more precisely). The first part explains the AnyDSL framework and its steps until the generation of the final executable file, the second part shows our Impala implementation of the Gaussian Blur and the third part explains the methodology used for generating the shared memory code for both image and filter. Finally, the fourth part shows the modifications included in the Thorin backend code generator and the fifth part shows the results of our experiments.
+
+\section{AnyDSL}
+AnyDSL \cite{anydsl} is a framework used for the development of domain specific libraries (DSLs). An AnyDSL program is written using the Impala language, and then the Impala code is compiled into a Thorin representation of the input program. After this, the Thorin code generator is responsible for the generation of the different supported backend codes. The Figure \ref{fig:anydsl_architecture} shows a diagram of the AnyDSL architecture.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=13cm]{anydsl_architecture.png}
+\caption{AnyDSL architecture, the DSL code is written using the Impala front-end language, then compiled into the Thorin representation to be finally compiled to the specified backend.}
+\label{fig:anydsl_architecture}
+\end{figure}
+
+For our work, we compiled our input program with the Impala compiler emitting LLVM IR code, when we link the sources with the GPU backend, the compiler generates a C/C++ CUDA source containing the kernels specificiations, as well as the file containing the LLVM IR of the code to be executed in the host. Our work focus on changing the code generation of the C/C++ CUDA source.
+
+After generating the sources mentioned above, we use the Clang compiler to generate our final executable file by compiling the LLVM IR of the host program and compiling and linking extra C/C++ code into LLVM IR, these extra codes have the OpenCV \cite{opencv} functions to read and write images from PNG files.
+
+Finally, the executable generated may be executed and it will perform Just-In-Time (JIT) compilation of the CUDA C/C++ code during its execution.
+
+\section{Gaussian blur}
+The Gaussian blur operator is used for blurring the image removing its noise. To transform the image using the Gaussian operator it's necessary to convolve each pixel of the image with the Gaussian function defined as follows:
+
+\begin{equation*}
+    G(x,y) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{x^2 + y^2}{2\sigma^2}}
+\end{equation*}
+
+An example of kernel that may be used to apply the Gaussian smooth is shown below:
+
+\begin{equation*}
+K = \frac{1}{159}
+\begin{bmatrix}
+2 & 4 & 5 & 4 & 2\\
+4 & 9 & 12 & 9 & 4\\
+5 & 12 & 15 & 12 & 5\\
+2 & 4 & 5 & 4 & 2\\
+4 & 9 & 12 & 9 & 4\\
+\end{bmatrix}
+\end{equation*}
+
+The Figure \ref{fig:gaussian_example} shows an example of the Gaussian blur filter. It's also noticeable that our version generates output images in grayscale for simplicity purposes.
+
+\begin{figure*}[t!]
+    \centering
+    \begin{subfigure}
+        \centering
+        \includegraphics[height=1.2in]{lenna.png}
+    \end{subfigure}%
+    ~ 
+    \begin{subfigure}
+        \centering
+        \includegraphics[height=1.2in]{lenna_gaussianblur.jpg}
+    \end{subfigure}
+    \caption{Gaussian filter example, left figure shows the original image and right figure shows the result after the Gaussian blur.}
+
+\label{fig:gaussian_example}
+\end{figure*}
+
+\pagebreak
+
+The code below shows our implementation of the Gaussian blur, in the \textbf{gaussian\_blur} function, the filter coeffiecients are calculated for both unidimensional and bidimensional filters and then the functions for applying the convolution (for separable and block filters) are called with the generated filter.
+
+\begin{minted}{rust}
+/* Gaussian filter */
+fn gaussian_blur(input_image : image, output_image : image, use_tiled : bool) -> () {
+  /* Generates the separable or non-separable Gaussian kernel based on the
+     OpenCV source code */
+  let filter_size = 7;
+  let filter_Nx1 = filter_7x1;
+  let filter_NxN = filter_7x7;
+
+  /* Allocate CPU memory for the mask buffers (block, row and column) */
+  let bmask_xy = alloc_cpu(filter_size * filter_size * sizeof[f64]());
+  let bmask_x = alloc_cpu(filter_size * sizeof[f64]());
+  let bmask_y = alloc_cpu(filter_size * sizeof[f64]());
+
+  /* Pointers to the buffers in f64 data type */
+  let mask_xy = bmask_xy.data as &mut[f64];
+  let mask_x = bmask_x.data as &mut[f64];
+  let mask_y = bmask_y.data as &mut[f64];
+
+  /* The next steps generate the gaussian filter for both block as well as horizontal
+     and vertical kernels */
+  let mut sum_x = 0.0;
+  let mut sum_y = 0.0;
+  let anchor = 2.0;
+  let pi = 3.14159;
+  let sigma = 1.1;
+  let prod = 1.0 / (2.0 * pi * sigma * sigma);
+  let denom = 2.0 * sigma * sigma;
+
+  for i in range(0, filter_size) {
+    let x = (i as f64) - anchor;
+
+    for j in range(0, filter_size) {
+      let y = (j as f64) - anchor;
+
+      mask_xy(j * filter_size + i) = prod * exp(-((x * x + y * y) / denom));
+    }
+
+    mask_x(i) = exp(-((x * x) / denom));
+    mask_y(i) = exp(-((x * x) / denom));
+    sum_x += mask_x(i);
+    sum_y += mask_y(i);
+  }
+
+  sum_x = 1.0 / sum_x;
+  sum_y = 1.0 / sum_y;
+
+  for i in range(0, filter_size) {
+    mask_x(i) *= sum_x;
+    mask_y(i) *= sum_y;
+  }
+
+  /* Time calculation variables */
+  let mut start_time : f64;
+  let mut elapsed_time : f64;
+
+  /* Applies the separable kernel in rows and columns */
+  if use_tiled {
+    let column_filter = filter_Nx1(bmask_x, false);
+    let row_filter = filter_Nx1(bmask_y, true);
+
+    start_time = impala_time();
+    apply_separable_convolution(input_image, output_image, column_filter, row_filter);
+    elapsed_time = impala_time() - start_time;
+
+    release_filter(column_filter);
+    release_filter(row_filter);
+  /* Applies the not separable kernel in blocks */
+  } else {
+    let block_filter = filter_NxN(bmask_xy);
+
+    start_time = impala_time();
+    apply_block_convolution(input_image, output_image, block_filter);
+    elapsed_time = impala_time() - start_time;
+
+    release_filter(block_filter);
+  }
+
+  print_string("Time elapsed: ");
+  print_f64(elapsed_time);
+  print_string("s\n");
+
+  /* Release memory for the mask buffers */
+  release(bmask_xy);
+  release(bmask_x);
+  release(bmask_y);
+}
+\end{minted}
+
+\pagebreak
+
+The code below shows the implementation of the \textbf{apply\_separable\_convolution} function for applying the separable unidimensional Gaussian filters. We limit our experiments to the separable kernel application so we only show it in this report.
+
+\begin{minted}{rust}
+/* Apply 2D filter convolution with separable kernels (tiling) */
+fn apply_separable_convolution(input_image : image, output_image : image, h_mask : filter, v_mask : filter) -> () {
+  /* Horizontal anchor based in the horizontal mask size */
+  let h_anchor = h_mask.width / 2;
+  /* Vertical anchor based in the vertical mask size */
+  let v_anchor = v_mask.height / 2;
+
+  /* Allocate temporary data in the target device for holding the row convolution result */
+  let tmp_image = create_temporary_image(input_image.width, input_image.height);
+
+  /* Applies the filter in columns */
+  for x, y, input, filt in @iterate_stencil(input_image, h_mask) {
+    /* Sum is 0.0 by default */
+    let mut sum = 0.0;
+
+    /* Check image boundaries to avoid invalid memory region access */
+    if x >= h_anchor && x < input_image.width - h_anchor {
+      /* Go through the horizontal mask coefficients using the specified anchor */
+      for i in range(-h_anchor, h_anchor + 1) {
+        /* Increase the current coefficient and input product in the summation */
+        sum += get_1d_filter_coeff(filt, i + h_anchor) * get_pixel(input, x + i, y);
+      }
+
+      /* Write the summation result in the temporary buffer */
+      set_pixel(tmp_image, x, y, sum);
+    /* If this is an invalid region, just copy the input pixel value to the temporary buffer */
+    } else {
+      /* Use original input value */
+      set_pixel(tmp_image, x, y, get_pixel(input, x, y));
+    }
+  }
+
+  /* Applies the filter in rows */
+  for x, y, input, filt in @iterate_stencil(tmp_image, v_mask) {
+    /* Sum is 0.0 by default */
+    let mut sum = 0.0;
+
+    /* Check image boundaries to avoid invalid memory region access */
+    if y >= v_anchor && y < input_image.height - v_anchor {
+      /* Go through the vertical mask coefficients using the specified anchor */
+      for i in range(-v_anchor, v_anchor + 1) {
+        /* Increase the current coefficient and input product in the summation */
+        sum += get_1d_filter_coeff(filt, i + v_anchor) * get_pixel(input, x, y + i);
+      }
+
+      /* Write the summation result in the output buffer */
+      set_pixel(output_image, x, y, sum);
+    /* If this is an invalid region, just copy the temporary pixel value to the output buffer */
+    } else {
+      /* Use original input value */
+      set_pixel(output_image, x, y, get_pixel(input, x, y));
+    }
+  }
+
+  /* Release memory for temporary buffer */
+  release_image(tmp_image);
+}
+\end{minted}
+
+In the first part, the horizontal filter is applied in the image and its result is stored in a temporary image. After, the vertical filter is applied in the temporary image and its result is stored in the output image. The \textbf{iterate\_stencil}, \textbf{get\_1d\_filter\_coeff}, \textbf{get\_pixel} and \textbf{set\_pixel} functions are used to abstract the architecture and they are implemented in the device-specific Impala files that must be linked during the Gaussian blur compilation.
+
+The following code show these functions implementation for the CUDA GPU devices:
+
+\begin{minted}{rust}
+/* Sets image pixel at (x, y) coordinates */
+fn set_pixel(img : image, x : i32, y : i32, value : f64) -> () {
+  bitcast[&mut[1][f64]](img.device_data.data)(y * img.width + x) = value
+}
+
+/* Gets image pixel at (x, y) coordinates */
+fn get_pixel(img : image, x : i32, y : i32) -> f64 {
+  bitcast[&[1][f64]](img.device_data.data)(y * img.width + x)
+}
+
+/* Gets 1D filter coefficient at i index */
+fn get_1d_filter_coeff(filt : filter, i : i32) -> f64 {
+  bitcast[&[1][f64]](filt.buffer.data)(i)
+}
+...
+/* Iterates over an image in GPU based on a stencil */
+fn iterate_stencil(input_image : image, stencil : filter, body: fn(i32, i32, image, filter) -> ()) -> () {
+  /* Use first CUDA accelerator */
+  let accelerator = cuda_accelerator(0);
+  /* CUDA kernel grid configuration */
+  let grid = get_grid_config(input_image);
+  /* CUDA kernel block configuration */
+  let block = get_block_config();
+
+  /* Execute the following code in the GPU */
+  with accelerator.exec(grid, block) @{
+    /* Image x coordinate in the grid */
+    let gid_x = accelerator.bidx() * accelerator.bdimx() + accelerator.tidx();
+    /* Image y coordinate in the grid */
+    let gid_y = accelerator.bidy() * accelerator.bdimy() + accelerator.tidy();
+
+    /* Check for image boundaries to avoid invalid memory region access */
+    if gid_x < input_image.width && gid_y < input_image.height {
+      /* Call the body function with the obtained indexes */
+      body(gid_x, gid_y, input_image, stencil);
+    }
+  }
+}
+\end{minted}
+
+Our optimizations work in the kernel generated by the \textbf{accelerator.exec(grid, block)} function that triggers the Thorin code generation for CUDA backend. We emit the copy of the \textbf{input\_image} to the shared memory and replace the accesses to the \textbf{input\_image} for accesses to the shared memory, the procedure is analogous for the \textbf{stencil}.
 
 \section{Methodology}
 Thorin is a CPS graph based higher-order intermediate representation, this means that its code generator will iterate over the graph generating its continuations, parameters and primops. For each vertex in the graph, Thorin must generate a unique name to avoid conflicts, our idea is to trace some of these vertex by the name to identify the filters and images in the kernel parameters (we also use the names of the structures in our experimental DSL in Impala for this).
@@ -40,7 +300,7 @@ After the analysis, we go generating the code and for each bitcasting operation 
 
 This methodology of listing the candidates, tracing their path to know which ones are read-only and then during the code generation generating the copy and replacing the accesses for the candidates is used on this work to perform the shared memory code generation. The next section shows the code changed in the Thorin code generator for a practical guide through this work's idea.
 
-\section{Modifications}
+\section{Changes in the code generator}
 
 We use lists (C++ \textbf{std::list}) to perform the analysis, the \textbf{kernel\_images} and \textbf{kernel\_filters} lists will contain all the image and filter references from the kernel, respectively. The \textbf{image\_pointers} and \textbf{filter\_pointers} lists will have all the direct and indirect references to the image and filter buffers, respectively (doesn't matter which type these references have). The \textbf{shm\_buffers} list will contain all the selected buffers that must go to the shared memory and the \textbf{shm\_blacklist} will contain all the blacklisted buffers. The \textbf{std::map} object \textbf{conv\_map} contains the association between \textbf{image\_pointers} and \textbf{filter\_pointers} objects and their \textbf{shm\_buffers} object.
 
@@ -375,7 +635,7 @@ To perform the experiments and validate our generated code version performance, 
 
 Considering the original dataset images as the B1 dataset, we generate the B2 dataset with the doubled dimensions by repeating the original images vertically, horizontally and diagonally. So, we repeat the same procedure on B2 to generate the B3 dataset, and the same on B3 to generate the B4 dataset. After all we have the following dimensions: 321x481 and 481x321 for B1 dataset, 642x962 and 962x642 for B2 dataset, 1284x1924 and 1924x1284 for B3 dataset and 2568x3848 and 3848x2568 for B4 dataset, all of them containing 100 images each.
 
-The performance tests were performed using a GeForce GT 710B graphic board with 192 CUDA cores, 954MHz base clock, 2GB of memory with 1.8 Gbps of speed and a 64-bit DDR3 memory interface. We execute three different versions for all the images on each dataset and considered the summation of the times as the final result for our tests. The mentioned versions are named \textbf{no\_shm} for the original AnyDSL version that doesn't use shared memory, \textbf{shm\_filteronly} version that only uses shared memory for filter and \textbf{shm\_both} version that uses shared memory for both image and filter.
+The performance tests were performed using a GeForce GT 710 graphic board with 192 CUDA cores, 954MHz base clock, 2GB of memory with 1.8 Gbps of speed and a 64-bit DDR3 memory interface. We execute three different versions for all the images on each dataset and considered the summation of the times as the final result for our tests. The mentioned versions are named \textbf{no\_shm} for the original AnyDSL version that doesn't use shared memory, \textbf{shm\_filteronly} version that only uses shared memory for filter and \textbf{shm\_both} version that uses shared memory for both image and filter.
 
 The Figure \ref{fig:results} shows the result in seconds for each dataset and the Table \ref{table:speedups} shows the speedups for \textbf{shm\_filteronly} and \textbf{shm\_both} versions.
 
@@ -410,13 +670,18 @@ Future work may include a better way to remap the accesses from the global memor
 
 Another interesting work would be to perform the same optimizations for other GPU frameworks like OpenCL for example, then an analysis of performance using the modified version for a different architecture could be achieved.
 
+Also, it's interesting to perform the experiments using a GPU with more Streaming Multiprocessors (SMs) since the used GPU only has one, this is import for testing and compare the scalability of the optimized program in relation to the base.
+
 \section{Conclusion}
-The work in this report changes the Thorin generated code for the CUDA backends to include shared memory usage in the final version. We show better results for performance on inserting the filter into the shared memory and identified problems on remapping the image accesses to the shared memory (in relation to performance).
+The work in this report changes the Thorin generated code for the CUDA backends to include shared memory usage in the final version. We show better results for performance on inserting the filter into the shared memory (about 10\% of speedup for the tested cases) and identified problems on remapping the image accesses to the shared memory (in relation to performance).
 
 \begin{thebibliography}{4}
 
 \bibitem{anydsl}
   https://anydsl.github.io/
+
+\bibitem{opencv}
+  https://opencv.org/
 
 \bibitem{dataseturl}
    Arbelaez, P. and Fowlkes, C. and Martin, D.,
